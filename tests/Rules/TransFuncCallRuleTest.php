@@ -33,11 +33,11 @@ class TransFuncCallRuleTest extends RuleTestCase
             __DIR__ . '/data/trans-function.php',
         ], [
             [
-                'Missing translation string "double underscore" for locales: zh, en, ja',
+                'Missing translation string "double underscore" for locales: zh, ja',
                 3,
             ],
             [
-                'Missing translation string "trans function" for locales: zh, en, ja',
+                'Missing translation string "trans function" for locales: zh, ja',
                 4,
             ],
         ]);

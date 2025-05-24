@@ -59,15 +59,15 @@ class BladestanBladeRuleTest extends RuleTestCase
             __DIR__ . '/data/sample.php',
         ], [
             [
-                'Missing translation string "blade at directive" for locales: zh, en, ja',
+                'Missing translation string "blade at directive" for locales: zh, ja',
                 3,
             ],
             [
-                'Missing translation string "blade double underscore" for locales: zh, en, ja',
+                'Missing translation string "blade double underscore" for locales: zh, ja',
                 3,
             ],
             [
-                'Missing translation string "only in ja" for locales: zh, en',
+                'Missing translation string "only in ja" for locales: zh',
                 3,
             ],
         ]);

@@ -15,3 +15,5 @@ $translator->get($multi);
 
 /** @var "foo"|"bar"|\Exception $craycray */
 $translator->get($craycray);
+
+$translator->get('messages.in_ja_and_zh');

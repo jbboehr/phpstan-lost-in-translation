@@ -2,6 +2,7 @@
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use Illuminate\Foundation\Application;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\VariadicPlaceholder;
@@ -16,12 +17,22 @@ final class LostInTranslationHelper
 {
     private readonly PrettyPrinterAbstract $printer;
 
+    private readonly ?string $baseLocale;
+
     public function __construct(
         private readonly TranslationLoader $translationLoader,
         ?PrettyPrinterAbstract $printer = null,
-        private readonly bool $allowDynamicTranslationStrings = true
+        private readonly bool $allowDynamicTranslationStrings = true,
+        ?string $baseLocale = null,
+        private readonly bool $reportLikelyUntranslatedInBaseLocale = true,
     ) {
         $this->printer = $printer ?? new Standard();
+
+        if (null === $baseLocale && class_exists(Application::class, false)) {
+            $baseLocale = Application::getInstance()->currentLocale();
+        }
+
+        $this->baseLocale = $baseLocale;
     }
 
     /**
@@ -127,6 +138,21 @@ final class LostInTranslationHelper
                 }
             }
 
+            if (null !== $this->baseLocale) {
+                $missingInLocales = array_diff($missingInLocales, [$this->baseLocale]);
+
+                if ($this->reportLikelyUntranslatedInBaseLocale && $this->isLikelyUntranslated($keyConstantString->getValue())) {
+                    $errors[] = RuleErrorBuilder::message(sprintf(
+                        'Likely missing translation string %s for base locale: %s',
+                        json_encode($keyConstantString->getValue(), JSON_THROW_ON_ERROR),
+                        $this->baseLocale
+                    ))
+                        ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
+                        ->line($keyExpr->getLine())
+                        ->build();
+                }
+            }
+
             if (count($missingInLocales) > 0) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Missing translation string %s for locales: %s',
@@ -140,5 +166,20 @@ final class LostInTranslationHelper
         }
 
         return $errors;
+    }
+
+    /**
+     * @note currently the logic is just if it has a group, proboably could be better
+     */
+    private function isLikelyUntranslated(string $key): bool
+    {
+        [$namespace, $group, $item] = $this->translationLoader->parseKey($key);
+
+        if ($item === null) {
+            $item = $group;
+            $group = '*';
+        }
+
+        return $group !== '*';
     }
 }

@@ -33,7 +33,7 @@ class LangFacadeStaticCallRuleTest extends RuleTestCase
             __DIR__ . '/data/lang-facade.php',
         ], [
             [
-                'Missing translation string "lang facade" for locales: zh, en, ja',
+                'Missing translation string "lang facade" for locales: zh, ja',
                 3,
             ],
         ]);

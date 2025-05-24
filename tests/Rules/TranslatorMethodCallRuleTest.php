@@ -33,16 +33,16 @@ class TranslatorMethodCallRuleTest extends RuleTestCase
             __DIR__ . '/data/translator.php',
         ], [
             [
-                'Missing translation string "contract basic" for locales: zh, en, ja',
+                'Missing translation string "contract basic" for locales: zh, ja',
                 4,
             ],
 
             [
-                'Missing translation string "translator basic" for locales: zh, en, ja',
+                'Missing translation string "translator basic" for locales: zh, ja',
                 7,
             ],
             [
-                'Missing translation string "translator basic" for locales: zh, en, ja',
+                'Missing translation string "translator basic" for locales: zh, ja',
                 8,
             ],
             [
@@ -50,16 +50,20 @@ class TranslatorMethodCallRuleTest extends RuleTestCase
                 11,
             ],
             [
-                'Missing translation string "foo" for locales: zh, en, ja',
+                'Missing translation string "foo" for locales: zh, ja',
                 14,
             ],
             [
-                'Missing translation string "bar" for locales: zh, en, ja',
+                'Missing translation string "bar" for locales: zh, ja',
                 14,
             ],
             [
                 "Disallowed dynamic translation string \"\$craycray\" of type 'bar'|'foo'|Exception",
                 17,
+            ],
+            [
+                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
+                19
             ],
         ]);
     }

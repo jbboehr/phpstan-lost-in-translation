@@ -13,10 +13,14 @@ services:
 parametersSchema:
     lostInTranslation: structure([
         allowDynamicTranslationStrings: bool(),
-        langPath: schema(string(), nullable())
+        baseLocale: schema(string(), nullable()),
+        langPath: schema(string(), nullable()),
+        reportLikelyUntranslatedInBaseLocale: bool()
     ])
 
 parameters:
     lostInTranslation:
         allowDynamicTranslationStrings: true
+        baseLocale: null
         langPath: null
+        reportLikelyUntranslatedInBaseLocale: true

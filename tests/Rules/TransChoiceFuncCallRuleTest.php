@@ -33,7 +33,7 @@ class TransChoiceFuncCallRuleTest extends RuleTestCase
             __DIR__ . '/data/trans-choice-function.php',
         ], [
             [
-                'Missing translation string "trans choice function" for locales: zh, en, ja',
+                'Missing translation string "trans choice function" for locales: zh, ja',
                 3,
             ],
         ]);

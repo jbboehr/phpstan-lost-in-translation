@@ -5,6 +5,7 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Rules;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rules\TranslatorMethodCallRule;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader;
+use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 use PHPStan\Node\Printer\Printer;
 use PHPStan\Rules\Rule;
@@ -20,7 +21,7 @@ class TranslatorMethodCallRuleTest extends RuleTestCase
         return new TranslatorMethodCallRule(
             new LostInTranslationHelper(
                 new TranslationLoader(__DIR__ . '/../lang'),
-                $this->getContainer()->getByType(PrettyPrinterAbstract::class),
+                new Standard(),
                 false,
             )
         );

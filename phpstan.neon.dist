@@ -10,4 +10,5 @@ parameters:
         - src
         - tests
     excludePaths:
+        - tests/Blade/*BladeRuleTest.php
         - tests/**/data/**

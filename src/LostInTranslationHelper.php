@@ -5,6 +5,7 @@ namespace jbboehr\PHPStanLostInTranslation;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Expr;
 use PhpParser\Node\VariadicPlaceholder;
+use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
@@ -13,15 +14,18 @@ use PHPStan\Type\VerbosityLevel;
 
 final class LostInTranslationHelper
 {
+    private readonly PrettyPrinterAbstract $printer;
+
     public function __construct(
         private readonly TranslationLoader $translationLoader,
-        private readonly PrettyPrinterAbstract $printer,
+        ?PrettyPrinterAbstract $printer = null,
         private readonly bool $allowDynamicTranslationStrings = true
     ) {
+        $this->printer = $printer ?? new Standard();
     }
 
     /**
-     * @param array<int, Arg|VariadicPlaceholder> $args
+     * @param array<Arg|VariadicPlaceholder> $args
      * @return list<IdentifierRuleError>
      */
     public function processArgs3(array $args, Scope $scope): array
@@ -51,7 +55,7 @@ final class LostInTranslationHelper
     }
 
     /**
-     * @param array<int, Arg|VariadicPlaceholder> $args
+     * @param array<Arg|VariadicPlaceholder> $args
      * @return list<IdentifierRuleError>
      */
     public function processArgs4(array $args, Scope $scope): array

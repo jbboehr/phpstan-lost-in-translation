@@ -13,7 +13,7 @@
     <arg name="tab-width" value="4"/>
     <arg name="extensions" value="php" />
 
-    <exclude-pattern>*/tests/fixtures/*</exclude-pattern>
+    <exclude-pattern>*/*.blade.php</exclude-pattern>
 
     <rule ref="PSR12">
         <exclude name="PSR12.Files.FileHeader" />

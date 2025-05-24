@@ -2,6 +2,9 @@
 
 namespace jbboehr\PHPStanLostInTranslation\Tests\Blade;
 
+use Illuminate\Foundation\Bootstrap\HandleExceptions;
+use Illuminate\Support\Composer;
+use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
@@ -10,8 +13,33 @@ use TomasVotruba\Bladestan\Rules\BladeRule;
 /**
  * @extends RuleTestCase<BladeRule>
  */
-class BladeRuleTest extends RuleTestCase
+class TomasVotrubaBladeRuleTest extends RuleTestCase
 {
+    public function setUp(): void
+    {
+        if (!\Composer\InstalledVersions::isInstalled('tomasvotruba/bladestan')) {
+            self::markTestSkipped('This test requires Bladestan');
+        }
+
+        if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '>=')) {
+            self::markTestSkipped('This test requires Bladestan <0.7');
+        }
+
+        parent::setUp();
+    }
+
+    /**
+     * @see https://github.com/laravel/framework/issues/49502#issuecomment-2222592953
+     */
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        if (class_exists(HandleExceptions::class, false) && method_exists(HandleExceptions::class, 'flushState')) {
+            HandleExceptions::flushState();
+        }
+    }
+
     protected function getRule(): Rule
     {
         return $this->getContainer()->getByType(BladeRule::class);
@@ -19,10 +47,6 @@ class BladeRuleTest extends RuleTestCase
 
     public function testMethods(): void
     {
-        if (!\Composer\InstalledVersions::isInstalled('tomasvotruba/bladestan')) {
-            self::markTestSkipped('This test requires Bladestan');
-        }
-
         $this->getContainer()->getByType(FileViewFinder::class)
             ->addLocation(__DIR__ . '/resources/views');
 

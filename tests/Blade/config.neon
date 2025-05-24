@@ -4,5 +4,8 @@ includes:
     - ../../extension.neon
 
 parameters:
+    viewDirectories:
+        # this path is relative to the CWD?
+        - ./tests/Blade/resources
     lostInTranslation:
         langPath: tests/lang

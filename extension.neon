@@ -1,0 +1,22 @@
+services:
+  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
+    arguments:
+        allowDynamicTranslationStrings: %lostInTranslation.allowDynamicTranslationStrings%
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
+    arguments:
+        langPath: %lostInTranslation.langPath%
+  - class: jbboehr\PHPStanLostInTranslation\Rules\LangFacadeStaticCallRule
+  - class: jbboehr\PHPStanLostInTranslation\Rules\TransChoiceFuncCallRule
+  - class: jbboehr\PHPStanLostInTranslation\Rules\TransFuncCallRule
+  - class: jbboehr\PHPStanLostInTranslation\Rules\TranslatorMethodCallRule
+
+parametersSchema:
+    lostInTranslation: structure([
+        allowDynamicTranslationStrings: bool(),
+        langPath: schema(string(), nullable())
+    ])
+
+parameters:
+    lostInTranslation:
+        allowDynamicTranslationStrings: true
+        langPath: null

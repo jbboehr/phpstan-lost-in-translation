@@ -1,0 +1,51 @@
+{
+    "name": "jbboehr/phpstan-lost-in-translation",
+    "description": "Helps find missing translation strings in Laravel applications",
+    "type": "phpstan-extension",
+    "license": "AGPL-3.0+",
+    "authors": [
+        {
+            "name": "John Boehr",
+            "email": "jbboehr@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^9 || ^10 || ^11 || ^12",
+        "nikic/php-parser": "^4.19 || ^5.4",
+        "phpstan/phpstan": "^1.12 || ^2.0",
+        "symfony/filesystem": "^6 || ^7",
+        "symfony/finder": "^6 || ^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "jbboehr\\PHPStanLostInTranslation\\": "src/"
+        }
+    },
+    "require-dev": {
+        "composer-runtime-api": "*",
+        "larastan/larastan": "^2.11 || ^3.4",
+        "laravel/framework": "^9 || ^10 || ^11 || ^12",
+        "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3",
+        "phpstan/phpstan-phpunit": "^1.4.2 || ^2.0.6",
+        "phpstan/phpstan-strict-rules": "^1.6.2 || ^2.0.4",
+        "phpunit/phpunit": "^9.6 || ^10.5",
+        "squizlabs/php_codesniffer": "^3.13",
+        "tomasvotruba/bladestan": ">=0.6"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "jbboehr\\PHPStanLostInTranslation\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "phpstan": {
+            "includes": [
+                "extension.neon"
+            ]
+        }
+    }
+}

@@ -1,0 +1,169 @@
+name: ci
+
+on:
+    push:
+        branches:
+            - master
+            - develop
+            - ci
+    pull_request:
+        branches:
+            - master
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        name: "Lint | PHP ${{ matrix.php-version }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                php-version:
+                    - "8.1"
+                    - "8.2"
+                    - "8.3"
+                    - "8.4"
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "${{ matrix.php-version }}"
+                  tools: composer:v2
+
+            - name: Validate composer.json and composer.lock
+              run: composer validate --strict
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress --ignore-platform-req=php+
+
+            - name: phpcs
+              run: php vendor/bin/phpcs
+
+            - name: phpstan
+              run: php vendor/bin/phpstan analyze
+
+    test:
+        runs-on: ubuntu-latest
+        name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }}"
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - php-version: "8.1"
+                      laravel-version: "9"
+                    - php-version: "8.2"
+                      laravel-version: "9"
+                    - php-version: "8.1"
+                      laravel-version: "10"
+                    - php-version: "8.2"
+                      laravel-version: "10"
+                    - php-version: "8.3"
+                      laravel-version: "10"
+                    - php-version: "8.2"
+                      laravel-version: "11"
+                    - php-version: "8.3"
+                      laravel-version: "11"
+                    - php-version: "8.4"
+                      laravel-version: "11"
+                    - php-version: "8.2"
+                      laravel-version: "12"
+                    - php-version: "8.3"
+                      laravel-version: "12"
+                    - php-version: "8.4"
+                      laravel-version: "12"
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "${{ matrix.php-version }}"
+                  tools: composer:v2
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}-laravel${{ matrix.laravel-version }}- }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-
+
+            - name: Install laravel
+              run: composer require --no-update --dev --no-progress --no-interaction --prefer-dist laravel/framework:^${{ matrix.laravel-version }}
+
+            - name: Install dependencies
+              run: composer update --no-progress --no-interaction --prefer-dist
+
+            - name: Run test suite
+              run: php vendor/bin/phpunit --no-coverage
+
+    coverage:
+        runs-on: ubuntu-latest
+        name: "Coverage | PHP ${{ matrix.php-version }}"
+        strategy:
+            matrix:
+                php-version:
+                    - "8.3"
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: pcov
+                  php-version: "${{ matrix.php-version }}"
+                  tools: composer:v2
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress
+
+            - name: Run test suite with coverage
+              run: php vendor/bin/phpunit --coverage-text
+
+            - name: Upload code coverage
+              # https://github.com/paambaati/codeclimate-action/issues/638#issuecomment-1363476627
+              uses: paambaati/codeclimate-action@v3.2.0
+              env:
+                  CC_TEST_REPORTER_ID: 3f8f6d064fc0b063230c71511f07aec326a2eb84f3c5653161b5f087aae315f9
+              with:
+                  coverageCommand: "true"
+                  coverageLocations: |
+                      clover.xml:clover
+
+    nix:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: cachix/install-nix-action@v27
+              with:
+                  nix_path: nixpkgs=channel:nixos-23.11
+
+#            - run: nix build -L
+
+            - run: nix flake check -L

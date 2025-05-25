@@ -3,10 +3,13 @@
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Str;
+use Illuminate\Translation\Translator;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\VerbosityLevel;
 
@@ -99,7 +102,7 @@ final class LostInTranslationHelper
             return null;
         }
 
-        $key = $number = $locale = null;
+        $key = $number = $locale = $replace = null;
 
         if ($isChoice) {
             switch (count($args)) {
@@ -109,6 +112,9 @@ final class LostInTranslationHelper
                     }
                     // fallthrough
                 case 3:
+                    if ($args[2] instanceof Node\Arg) {
+                        $replace = $args[2]->value;
+                    }
                     // fallthrough
                 case 2:
                     if ($args[1] instanceof Node\Arg) {
@@ -129,6 +135,9 @@ final class LostInTranslationHelper
                     }
                     // fallthrough
                 case 2:
+                    if ($args[1] instanceof Node\Arg) {
+                        $replace = $args[1]->value;
+                    }
                     // fallthrough
                 case 1:
                     if ($args[0] instanceof Node\Arg) {
@@ -148,7 +157,9 @@ final class LostInTranslationHelper
             file: $scope->getFile(), // @TODO this might be getting the compiled blade path...
             line: $node->getLine(),
             keyType: $scope->getType($key),
+            replaceType: $replace !== null ? $scope->getType($replace) : null,
             localeType: $locale !== null ? $scope->getType($locale) : null,
+            numberType: $number !== null ? $scope->getType($number) : null,
             isChoice: $isChoice,
         );
     }
@@ -156,15 +167,21 @@ final class LostInTranslationHelper
     /**
      * @return list<IdentifierRuleError>
      */
-    public function process(TranslationCall $result): array
+    public function process(TranslationCall $call): array
     {
-        $keyType = $result->keyType;
-        $localeType = $result->localeType;
-        $line = $result->line;
-        $file = $result->file;
+        $keyType = $call->keyType;
+        $localeType = $call->localeType;
+        $line = $call->line;
+        $file = $call->file;
+        $metadata = Utils::callToMetadata($call);
         $errors = [];
 
-        $keyConstantStrings = $keyType->getConstantStrings();
+        $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {
+            return $constantStringType->getValue();
+        }, $keyType->getConstantStrings());
+
+        // Make sure they are stable
+        sort($keyConstantStrings, SORT_NATURAL);
 
         if (count($keyConstantStrings) <= 0) {
             if (!$this->allowDynamicTranslationStrings) {
@@ -173,6 +190,7 @@ final class LostInTranslationHelper
                     $keyType->describe(VerbosityLevel::precise())
                 ))
                     ->identifier('lostInTranslation.dynamicTranslationString')
+                    ->metadata($metadata)
                     ->line($line)
                     ->file($file)
                     ->build();
@@ -184,22 +202,45 @@ final class LostInTranslationHelper
         foreach ($keyConstantStrings as $keyConstantString) {
             $missingInLocales = [];
 
-            foreach ($this->translationLoader->getFoundLocales() as $locale) {
-                if (!$this->translationLoader->has($locale, $keyConstantString->getValue())) {
+            if (null !== $localeType && count($localeType->getConstantStrings()) > 0) {
+                $lookInLocales = [];
+                foreach ($localeType->getConstantStrings() as $localeTypeConstantString) {
+                    $lookInLocales[] = $localeTypeConstantString->getValue();
+
+                    if (!$this->translationLoader->hasLocale($localeTypeConstantString->getValue())) {
+                        // @TODO
+                    }
+                }
+            } else {
+                $lookInLocales = $this->translationLoader->getFoundLocales();
+            }
+
+            foreach ($lookInLocales as $locale) {
+                $value = $this->translationLoader->get($locale, $keyConstantString);
+
+                if (null === $value) {
                     $missingInLocales[] = $locale;
+                }
+
+                if ($call->replaceType !== null) {
+                    $errors = array_merge(
+                        $errors,
+                        $this->analyzeReplacements($call, $locale, $keyConstantString, $value ?? $keyConstantString),
+                    );
                 }
             }
 
             if (null !== $this->baseLocale) {
                 $missingInLocales = array_diff($missingInLocales, [$this->baseLocale]);
 
-                if ($this->reportLikelyUntranslatedInBaseLocale && $this->isLikelyUntranslated($keyConstantString->getValue())) {
+                if ($this->reportLikelyUntranslatedInBaseLocale && $this->isLikelyUntranslated($keyConstantString)) {
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Likely missing translation string %s for base locale: %s',
-                        json_encode($keyConstantString->getValue(), JSON_THROW_ON_ERROR),
+                        json_encode($keyConstantString, JSON_THROW_ON_ERROR),
                         $this->baseLocale
                     ))
                         ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
+                        ->metadata($metadata)
                         ->line($line)
                         ->file($file)
                         ->build();
@@ -209,10 +250,11 @@ final class LostInTranslationHelper
             if (count($missingInLocales) > 0) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Missing translation string %s for locales: %s',
-                    json_encode($keyConstantString->getValue(), JSON_THROW_ON_ERROR),
+                    json_encode($keyConstantString, JSON_THROW_ON_ERROR),
                     join(', ', $missingInLocales)
                 ))
                     ->identifier('lostInTranslation.missingTranslationString')
+                    ->metadata($metadata)
                     ->line($line)
                     ->file($file)
                     ->build();
@@ -243,6 +285,55 @@ final class LostInTranslationHelper
     public function diffUsed(): array
     {
         return $this->translationLoader->diffUsed();
+    }
+
+    /**
+     * @return list<IdentifierRuleError>
+     */
+    private function analyzeReplacements(TranslationCall $call, string $locale, string $key, string $value): array
+    {
+        if (null === $call->replaceType) {
+            return [];
+        }
+
+        /** @see Translator::makeReplacements() */
+        $errors = [];
+
+        $replaceKeys = [];
+        foreach ($call->replaceType->getConstantArrays() as $constantArray) {
+            foreach ($constantArray->getKeyType()->getConstantStrings() as $constantString) {
+                $replaceKeys[] = $constantString->getValue();
+            }
+        }
+
+        // Make sure they are stably sorted
+        sort($replaceKeys, SORT_NATURAL);
+
+        foreach ($replaceKeys as $search) {
+            $replaceVariantCount = (int) str_contains($value, ':' . Str::ucfirst($search))
+                + (int) str_contains($value, ':' . Str::upper($search))
+                + (int) str_contains($value, ':' . $search);
+
+            if ($replaceVariantCount === 0) {
+                $errors[] = RuleErrorBuilder::message(sprintf('Unused translation replacement: %s', Utils::e($search)))
+                    ->identifier('lostInTranslation.unusedReplacement')
+                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                    ->line($call->line)
+                    ->file($call->file)
+                    ->build();
+            } elseif ($replaceVariantCount > 1) {
+                $errors[] = RuleErrorBuilder::message(sprintf('Replacement string matches multiple variants: %s', Utils::e($search)))
+                    ->identifier('lostInTranslation.multipleReplaceVariants')
+                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                    ->line($call->line)
+                    ->file($call->file)
+                    ->build();
+            }
+        }
+
+        return $errors;
     }
 
     /**

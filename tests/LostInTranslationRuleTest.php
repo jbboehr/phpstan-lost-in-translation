@@ -6,6 +6,7 @@ use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationCollector;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
 /**
@@ -77,17 +78,40 @@ class LostInTranslationRuleTest extends RuleTestCase
                 8,
             ],
             [
-                'Missing translation string "foo" for locales: zh, ja',
+                'Missing translation string "bar" for locales: zh, ja',
                 14,
             ],
             [
-                'Missing translation string "bar" for locales: zh, ja',
+                'Missing translation string "foo" for locales: zh, ja',
                 14,
             ],
             [
                 "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
                 19
             ],
+        ]);
+    }
+
+    public function testMalformedReplacement(): void
+    {
+        $this->analyse([
+            __DIR__ . '/data/malformed-replacement.php',
+        ], [
+            [
+                'Unused translation replacement: "bar"',
+                4,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
+            ],
+            [
+                'Unused translation replacement: "foo"',
+                4,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
+            ],
+            [
+                'Replacement string matches multiple variants: "foo"',
+                7,
+                Utils::formatTipForKeyValue('en', ':foo :FOO', ':foo :FOO'),
+            ]
         ]);
     }
 }

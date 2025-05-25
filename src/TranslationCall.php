@@ -12,7 +12,9 @@ final class TranslationCall
         public readonly string $file,
         public readonly int $line,
         public readonly Type $keyType,
-        public readonly ?Type $localeType,
+        public readonly ?Type $replaceType = null,
+        public readonly ?Type $localeType = null,
+        public readonly ?Type $numberType = null,
         public readonly bool $isChoice = false,
     ) {
     }

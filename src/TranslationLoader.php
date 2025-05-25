@@ -52,9 +52,19 @@ final class TranslationLoader
 
     public function has(string $locale, string $key): bool
     {
+        return $this->get($locale, $key) !== null;
+    }
+
+    public function hasLocale(string $locale): bool
+    {
+        return isset($this->data[$locale]);
+    }
+
+    public function get(string $locale, string $key): ?string
+    {
         [$namespace, $group, $item] = $this->parseKey($key);
 
-        return isset($this->data[$locale][$namespace][$group][$item]);
+        return $this->data[$locale][$namespace][$group][$item] ?? null;
     }
 
     public function markUsed(string $locale, string $key): void

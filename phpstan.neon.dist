@@ -11,6 +11,6 @@ parameters:
         - tests
     excludePaths:
         - tests/*BladeRuleTest.php
-        - tests/**/data/**
+        - tests/data/*
     lostInTranslation:
         langPath: tests/lang

@@ -309,7 +309,7 @@ final class LostInTranslationHelper
     }
 
     /**
-     * @return list<array{string, string}>
+     * @return list<array{string, string, string}>
      */
     public function diffUsed(): array
     {

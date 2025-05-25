@@ -10,7 +10,7 @@
 final class PHPStanResultsChecker
 {
     private const IDENTIFIER_PREFIX = 'phpExtensionLibrary.';
-    private const FILE_PATH_TO_REMOVE = 'e2e/src/';
+    private const FILE_PATH_TO_REMOVE = 'e2e/';
 
     /**
      * @param array<int,string> $expectedResults see `test-runner` script for format

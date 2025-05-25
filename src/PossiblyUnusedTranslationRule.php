@@ -49,13 +49,18 @@ final class PossiblyUnusedTranslationRule implements Rule
                 return [];
             }
 
-            /** @var array<string, list<TranslationCall>> $data */
+            /** @var array<string, list<string>> $data */
             $data = $node->get(LostInTranslationCollector::class);
 
             $errors = [];
 
             foreach ($data as $results) {
                 foreach ($results as $result) {
+                    // @TODO apparently we can only pass (unserialized) objects in debug mode... probably should revisit this
+                    $result = unserialize($result);
+
+                    assert($result instanceof TranslationCall);
+
                     $this->helper->markUsed($result);
                 }
             }
@@ -63,7 +68,7 @@ final class PossiblyUnusedTranslationRule implements Rule
             $possiblyUnused = $this->helper->diffUsed();
 
             foreach ($possiblyUnused as $item) {
-                [$locale, $key] = $item;
+                [$locale, $key, $file] = $item;
 
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Possibly unused translation string %s for locale: %s',
@@ -71,6 +76,8 @@ final class PossiblyUnusedTranslationRule implements Rule
                     join(', ', [$locale])
                 ))
                     ->identifier('lostInTranslation.possiblyUnusedTranslationString')
+                    ->file($file)
+                    ->line(-1)
                     ->build();
             }
 

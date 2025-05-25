@@ -19,30 +19,38 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// 'sample:3:lostInTranslation.missingTranslationString',
+$expectedErrors = [
+    'lang/ja.json:-1:lostInTranslation.possiblyUnusedTranslationString',
+    'src/choice:3:lostInTranslation.choiceMissingCase',
+    'src/dynamic:5:lostInTranslation.dynamicTranslationString',
+    'src/dynamic:8:lostInTranslation.dynamicTranslationString',
+    'src/malformed-replacements:4:lostInTranslation.unusedReplacement',
+    'src/malformed-replacements:4:lostInTranslation.unusedReplacement',
+    'src/malformed-replacements:7:lostInTranslation.multipleReplaceVariants',
+    'src/missing-translation-string:3:lostInTranslation.missingTranslationString',
+    'src/possibly-untranslated-base-locale:3:lostInTranslation.missingBaseLocaleTranslationString',
+];
+
 if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '<')) {
-    $expectedErrors = [
-        // messed up
-        0 => 'sample:3:',
-        1 => 'sample:3:',
-        2 => 'sample:3:',
-        3 => 'sample:3:',
-        4 => 'sample:3:',
-        5 => 'sample:3:',
-        6 => 'sample:3:',
-        7 => 'sample:7:lostInTranslation.missingTranslationString',
-    ];
+    $expectedErrors = array_merge($expectedErrors, [
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+    ]);
 } else {
-    $expectedErrors = [
-        0 => 'sample:3:lostInTranslation.missingTranslationString',
-        1 => 'sample:3:lostInTranslation.missingTranslationString',
-        2 => 'sample:3:lostInTranslation.missingTranslationString',
-        3 => 'sample:3:lostInTranslation.missingTranslationString',
-        4 => 'sample:3:lostInTranslation.missingTranslationString',
-        5 => 'sample:3:lostInTranslation.missingTranslationString',
-        6 => 'sample:3:lostInTranslation.missingTranslationString',
-        7 => 'sample:7:lostInTranslation.missingTranslationString',
-    ];
+    $expectedErrors = array_merge($expectedErrors, [
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+    ]);
 }
 
 /**

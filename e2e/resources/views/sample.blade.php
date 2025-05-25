@@ -4,7 +4,7 @@
 {{ __('only in ja') }}
 
 @php
-    // these require larastan to work
+    // these may require larastan to work
     app('translator')->get('via app function');
     \Illuminate\Support\Facades\App::make('translator')->get('via app facade');
     app(\Illuminate\Translation\Translator::class)->get('via app function with class');

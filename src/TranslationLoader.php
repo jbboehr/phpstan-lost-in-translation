@@ -42,6 +42,9 @@ final class TranslationLoader
     /** @var list<string> */
     private array $foundLocales = [];
 
+    /** @var array<string, string> */
+    private array $locations = [];
+
     public function __construct(
         ?string $langPath = null,
     ) {
@@ -100,7 +103,7 @@ final class TranslationLoader
     }
 
     /**
-     * @return list<array{string, string}>
+     * @return list<array{string, string, string}>
      */
     public function diffUsed(): array
     {
@@ -124,7 +127,9 @@ final class TranslationLoader
                                 $buf = $namespace . '::' . $buf;
                             }
 
-                            $possiblyUnused[] = [$locale, $buf];
+                            $location = $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $item] ?? 'unknown';
+
+                            $possiblyUnused[] = [$locale, $buf, $location];
                         }
                     }
                 }
@@ -216,6 +221,7 @@ final class TranslationLoader
                 }
 
                 $this->data[$locale][$namespace][$group][$k] = $v;
+                $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $k] = $file->getPathname();
             }
         }
 

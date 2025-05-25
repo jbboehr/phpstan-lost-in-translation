@@ -48,13 +48,18 @@ final class LostInTranslationRule implements Rule
     {
         try {
             if ($node instanceof CollectedDataNode) {
-                /** @var array<string, list<TranslationCall>> $data */
+                /** @var array<string, list<string>> $data */
                 $data = $node->get(LostInTranslationCollector::class);
 
                 $errors = [];
 
                 foreach ($data as $results) {
                     foreach ($results as $result) {
+                        // @TODO apparently we can only pass (unserialized) objects in debug mode... probably should revisit this
+                        $result = unserialize($result);
+
+                        assert($result instanceof TranslationCall);
+
                         $errors = array_merge(
                             $errors,
                             $this->helper->process($result)

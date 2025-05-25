@@ -33,30 +33,34 @@ final class LostInTranslationRule implements Rule
 
     public function processNode(Node $node, Scope $scope): array
     {
-        if ($node instanceof CollectedDataNode) {
-            /** @var array<string, list<TranslationCall>> $data */
-            $data = $node->get(LostInTranslationCollector::class);
+        try {
+            if ($node instanceof CollectedDataNode) {
+                /** @var array<string, list<TranslationCall>> $data */
+                $data = $node->get(LostInTranslationCollector::class);
 
-            $errors = [];
+                $errors = [];
 
-            foreach ($data as $results) {
-                foreach ($results as $result) {
-                    $errors = array_merge(
-                        $errors,
-                        $this->helper->process($result)
-                    );
+                foreach ($data as $results) {
+                    foreach ($results as $result) {
+                        $errors = array_merge(
+                            $errors,
+                            $this->helper->process($result)
+                        );
+                    }
                 }
+
+                return $errors;
+            } else {
+                $result = $this->helper->parseCallLike($node, $scope);
+
+                if (null === $result) {
+                    return [];
+                }
+
+                return $this->helper->process($result);
             }
-
-            return $errors;
-        } else {
-            $result = $this->helper->parseCallLike($node, $scope);
-
-            if (null === $result) {
-                return [];
-            }
-
-            return $this->helper->process($result);
+        } catch (\Throwable $e) {
+            ShouldNotHappenException::rethrow($e);
         }
     }
 }

@@ -26,11 +26,15 @@ final class LostInTranslationCollector implements Collector
 
     public function processNode(Node $node, Scope $scope): ?TranslationCall
     {
-        /** @TODO we could probably do this by unregistered in the phpstan config */
-        if (!$this->reportPossiblyUnusedTranslations) {
-            return null;
-        }
+        try {
+            /** @TODO we could probably do this by unregistered in the phpstan config */
+            if (!$this->reportPossiblyUnusedTranslations) {
+                return null;
+            }
 
-        return $this->helper->parseCallLike($node, $scope);
+            return $this->helper->parseCallLike($node, $scope);
+        } catch (\Throwable $e) {
+            ShouldNotHappenException::rethrow($e);
+        }
     }
 }

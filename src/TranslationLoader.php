@@ -26,11 +26,11 @@ final class TranslationLoader
         ?string $langPath = null,
     ) {
         if ($langPath === null) {
-            if (function_exists('lang_path')) {
-                $langPath = lang_path();
-            } else {
+//            if (function_exists('lang_path')) {
+//                $langPath = lang_path();
+//            } else {
                 $langPath = 'lang';
-            }
+//            }
         }
 
         $this->langPath = $langPath;

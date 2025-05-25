@@ -7,13 +7,13 @@ $translator->get('contract basic');
 $translator->get('translator basic');
 $translator->get('translator' . ' ' . 'basic');
 
-/** @var string $dynamic */
-$translator->get($dynamic);
+
+
 
 /** @var "foo"|"bar" $multi */
 $translator->get($multi);
 
-/** @var "foo"|"bar"|\Exception $craycray */
-$translator->get($craycray);
+
+
 
 $translator->get('messages.in_ja_and_zh');

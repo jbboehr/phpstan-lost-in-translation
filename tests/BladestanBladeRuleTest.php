@@ -1,19 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Blade;
+namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use Bladestan\Rules\BladeRule;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
-use Illuminate\Support\Composer;
-use Illuminate\View\Factory;
-use Illuminate\View\FileViewFinder;
 use PHPStan\Rules\Rule;
-use PHPStan\Testing\RuleTestCase;
-use TomasVotruba\Bladestan\Rules\BladeRule;
 
 /**
  * @extends RuleTestCase<BladeRule>
  */
-class TomasVotrubaBladeRuleTest extends RuleTestCase
+class BladestanBladeRuleTest extends RuleTestCase
 {
     public function setUp(): void
     {
@@ -21,8 +18,8 @@ class TomasVotrubaBladeRuleTest extends RuleTestCase
             self::markTestSkipped('This test requires Bladestan');
         }
 
-        if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '>=')) {
-            self::markTestSkipped('This test requires Bladestan <0.7');
+        if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '<')) {
+            self::markTestSkipped('This test requires Bladestan >=0.7');
         }
 
         parent::setUp();
@@ -47,11 +44,15 @@ class TomasVotrubaBladeRuleTest extends RuleTestCase
 
     public function testMethods(): void
     {
-        $this->getContainer()->getByType(FileViewFinder::class)
+        // :skull:
+        $this->getContainer()->getByType(BladeRule::class);
+
+        resolve(ViewFactory::class)
+            ->getFinder()
             ->addLocation(__DIR__ . '/resources/views');
 
         $this->analyse([
-            __DIR__ . '/data/sample.php',
+            __DIR__ . '/data/blade.php',
         ], [
             [
                 'Missing translation string "blade at directive" for locales: zh, ja',
@@ -65,13 +66,25 @@ class TomasVotrubaBladeRuleTest extends RuleTestCase
                 'Missing translation string "only in ja" for locales: zh',
                 3,
             ],
+            [
+                'Missing translation string "via app function" for locales: zh, ja',
+                3,
+            ],
+            [
+                'Missing translation string "via app facade" for locales: zh, ja',
+                3,
+            ],
+            [
+                'Missing translation string "via app function with class" for locales: zh, ja',
+                3,
+            ],
         ]);
     }
 
     public static function getAdditionalConfigFiles(): array
     {
          return array_merge(parent::getAdditionalConfigFiles(), [
-             __DIR__ . '/config.neon',
+             __DIR__ . '/blade.neon',
          ]);
     }
 }

@@ -1,0 +1,17 @@
+parameters:
+    level: max
+    paths:
+    - src
+    viewDirectories:
+        # relative to CWD?
+        - ./e2e/resources
+    bootstrapFiles:
+    - phpstan-bootstrap.php
+    lostInTranslation:
+        # relative to CWD?
+        langPath: ./e2e/lang
+
+includes:
+    - ../vendor/larastan/larastan/extension.neon
+    - ../vendor/tomasvotruba/bladestan/config/extension.neon
+    - ../extension.neon

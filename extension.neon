@@ -2,13 +2,15 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
     arguments:
         allowDynamicTranslationStrings: %lostInTranslation.allowDynamicTranslationStrings%
+        baseLocale: %lostInTranslation.baseLocale%
+        reportLikelyUntranslatedInBaseLocale: %lostInTranslation.reportLikelyUntranslatedInBaseLocale%
+  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationRule
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
     arguments:
         langPath: %lostInTranslation.langPath%
-  - class: jbboehr\PHPStanLostInTranslation\Rules\LangFacadeStaticCallRule
-  - class: jbboehr\PHPStanLostInTranslation\Rules\TransChoiceFuncCallRule
-  - class: jbboehr\PHPStanLostInTranslation\Rules\TransFuncCallRule
-  - class: jbboehr\PHPStanLostInTranslation\Rules\TranslatorMethodCallRule
+  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationCollector
+    tags:
+      - phpstan.collector
 
 parametersSchema:
     lostInTranslation: structure([

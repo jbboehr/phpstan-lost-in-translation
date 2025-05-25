@@ -3,113 +3,165 @@
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
-use PhpParser\Node\Arg;
-use PhpParser\Node\Expr;
-use PhpParser\Node\VariadicPlaceholder;
-use PhpParser\PrettyPrinter\Standard;
-use PhpParser\PrettyPrinterAbstract;
+use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Type\ObjectType;
 use PHPStan\Type\VerbosityLevel;
 
 final class LostInTranslationHelper
 {
-    private readonly PrettyPrinterAbstract $printer;
-
     private readonly ?string $baseLocale;
+
+    private ObjectType $translatorType;
 
     public function __construct(
         private readonly TranslationLoader $translationLoader,
-        ?PrettyPrinterAbstract $printer = null,
         private readonly bool $allowDynamicTranslationStrings = true,
         ?string $baseLocale = null,
         private readonly bool $reportLikelyUntranslatedInBaseLocale = true,
     ) {
-        $this->printer = $printer ?? new Standard();
-
         if (null === $baseLocale && class_exists(Application::class, false)) {
             $baseLocale = Application::getInstance()->currentLocale();
         }
 
         $this->baseLocale = $baseLocale;
+        $this->translatorType = new ObjectType(\Illuminate\Contracts\Translation\Translator::class);
     }
 
-    /**
-     * @param array<Arg|VariadicPlaceholder> $args
-     * @return list<IdentifierRuleError>
-     */
-    public function processArgs3(array $args, Scope $scope): array
+    public function parseCallLike(Node $node, Scope $scope): ?TranslationCall
     {
-        $key = $locale = null;
+        if ($node instanceof Node\Expr\MethodCall) {
+            if (!($node->name instanceof Node\Identifier)) {
+                return null;
+            }
 
-        switch (count($args)) {
-            case 3:
-                if ($args[2] instanceof Arg) {
-                    $locale = $args[2]->value;
-                }
-                // fallthrough
-            case 2:
-                // fallthrough
-            case 1:
-                if ($args[0] instanceof Arg) {
-                    $key = $args[0]->value;
-                }
-                // fallthrough
+            $varType = $scope->getType($node->var);
+
+            if (!$this->translatorType->isSuperTypeOf($varType)->yes()) {
+                return null;
+            }
+
+            $className = $varType->getObjectClassNames()[0] ?? null; // meh
+            $name = $node->name->toLowerString();
+
+            if ($name === 'choice') {
+                $isChoice = true;
+            } elseif ($name === 'get') {
+                $isChoice = false;
+            } else {
+                return null;
+            }
+
+            $args = $node->args;
+        } elseif ($node instanceof Node\Expr\StaticCall) {
+            if (!($node->name instanceof Node\Identifier) || !($node->class instanceof Node\Name\FullyQualified)) {
+                return null;
+            }
+
+            $className = $node->class->toString();
+
+            /** @phpstan-ignore-next-line class.notFound */
+            if ($className !== \Illuminate\Support\Facades\Lang::class && $className !== \Lang::class) {
+                return null;
+            }
+
+            $name = $node->name->toLowerString();
+
+            if ($name === 'choice') {
+                $isChoice = true;
+            } elseif ($name === 'get') {
+                $isChoice = false;
+            } else {
+                return null;
+            }
+
+            $args = $node->args;
+        } elseif ($node instanceof Node\Expr\FuncCall) {
+            if (!$node->name instanceof Node\Name\FullyQualified) {
+                return null;
+            }
+
+            $className = null;
+            $name = $node->name->toLowerString();
+
+            if ($name === '__' || $name === 'trans') {
+                $isChoice = false;
+            } elseif ($name === 'trans_choice') {
+                $isChoice = true;
+            } else {
+                return null;
+            }
+
+            $args = $node->args;
+        } else {
+            return null;
         }
 
-        if (null === $key) {
-            return [];
-        }
-
-        return $this->process($key, $locale, $scope);
-    }
-
-    /**
-     * @param array<Arg|VariadicPlaceholder> $args
-     * @return list<IdentifierRuleError>
-     */
-    public function processArgs4(array $args, Scope $scope): array
-    {
         $key = $number = $locale = null;
 
-        switch (count($args)) {
-            case 4:
-                if ($args[3] instanceof Arg) {
-                    $locale = $args[3]->value;
-                }
-                // fallthrough
-            case 3:
-                // fallthrough
-            case 2:
-                if ($args[1] instanceof Arg) {
-                    $number = $args[1]->value;
-                }
-                // fallthrough
-            case 1:
-                if ($args[0] instanceof Arg) {
-                    $key = $args[0]->value;
-                }
-                // fallthrough
+        if ($isChoice) {
+            switch (count($args)) {
+                case 4:
+                    if ($args[3] instanceof Node\Arg) {
+                        $locale = $args[3]->value;
+                    }
+                    // fallthrough
+                case 3:
+                    // fallthrough
+                case 2:
+                    if ($args[1] instanceof Node\Arg) {
+                        $number = $args[1]->value;
+                    }
+                    // fallthrough
+                case 1:
+                    if ($args[0] instanceof Node\Arg) {
+                        $key = $args[0]->value;
+                    }
+                    // fallthrough
+            }
+        } else {
+            switch (count($args)) {
+                case 3:
+                    if ($args[2] instanceof Node\Arg) {
+                        $locale = $args[2]->value;
+                    }
+                    // fallthrough
+                case 2:
+                    // fallthrough
+                case 1:
+                    if ($args[0] instanceof Node\Arg) {
+                        $key = $args[0]->value;
+                    }
+                    // fallthrough
+            }
         }
 
-        if (null === $key) {
-            return [];
+        if ($key === null) {
+            return null;
         }
 
-        return $this->process($key, $locale, $scope);
+        return new TranslationCall(
+            className: $className,
+            functionName: $name,
+            file: $scope->getFile(), // @TODO this might be getting the compiled blade path...
+            line: $node->getLine(),
+            keyType: $scope->getType($key),
+            localeType: $locale !== null ? $scope->getType($locale) : null,
+            isChoice: $isChoice,
+        );
     }
 
     /**
      * @return list<IdentifierRuleError>
      */
-    public function process(
-        Expr $keyExpr,
-        ?Expr $localeExpr,
-        Scope $scope,
-    ): array {
-        $keyType = $scope->getType($keyExpr);
-        $localeType = $localeExpr !== null ? $scope->getType($localeExpr) : null;
+    public function process(TranslationCall $result): array
+    {
+        $keyType = $result->keyType;
+        $localeType = $result->localeType;
+        $line = $result->line;
+        $file = $result->file;
         $errors = [];
 
         $keyConstantStrings = $keyType->getConstantStrings();
@@ -117,12 +169,12 @@ final class LostInTranslationHelper
         if (count($keyConstantStrings) <= 0) {
             if (!$this->allowDynamicTranslationStrings) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
-                    'Disallowed dynamic translation string "%s" of type %s',
-                    $this->printer->prettyPrint([$keyExpr]),
+                    'Disallowed dynamic translation string of type: %s',
                     $keyType->describe(VerbosityLevel::precise())
                 ))
                     ->identifier('lostInTranslation.dynamicTranslationString')
-                    ->line($keyExpr->getLine())
+                    ->line($line)
+                    ->file($file)
                     ->build();
             }
 
@@ -148,7 +200,8 @@ final class LostInTranslationHelper
                         $this->baseLocale
                     ))
                         ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
-                        ->line($keyExpr->getLine())
+                        ->line($line)
+                        ->file($file)
                         ->build();
                 }
             }
@@ -160,7 +213,8 @@ final class LostInTranslationHelper
                     join(', ', $missingInLocales)
                 ))
                     ->identifier('lostInTranslation.missingTranslationString')
-                    ->line($keyExpr->getLine())
+                    ->line($line)
+                    ->file($file)
                     ->build();
             }
         }

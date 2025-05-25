@@ -10,5 +10,7 @@ parameters:
         - src
         - tests
     excludePaths:
-        - tests/Blade/*BladeRuleTest.php
+        - tests/*BladeRuleTest.php
         - tests/**/data/**
+    lostInTranslation:
+        langPath: tests/lang

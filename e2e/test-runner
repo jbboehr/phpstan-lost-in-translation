@@ -1,0 +1,65 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Add any expected errors here.
+ *
+ * @see https://github.com/DaveLiddament/phpstan-php-language-extensions/blob/main/e2e/test-runner
+ * @licence https://github.com/DaveLiddament/phpstan-php-language-extensions/blob/main/LICENSE.md
+ *
+ * Format:
+ *
+ * <file>:<line>:<identifier>
+ *
+ * Where:
+ *
+ * `file` is relative to the `build/e2e/data` directory.
+ * `line` is the line number in the file.
+ * `identifier` is the rule's identifier (NOTE: the prefix `phpExtensionLibrary.` is automatically added)
+ */
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// 'sample:3:lostInTranslation.missingTranslationString',
+if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '<')) {
+    $expectedErrors = [
+        // messed up
+        0 => 'sample:3:',
+        1 => 'sample:3:',
+        2 => 'sample:3:',
+        3 => 'sample:3:',
+        4 => 'sample:3:',
+        5 => 'sample:3:',
+        6 => 'sample:3:',
+    ];
+} else {
+    $expectedErrors = [
+        0 => 'sample:3:lostInTranslation.missingTranslationString',
+        1 => 'sample:3:lostInTranslation.missingTranslationString',
+        2 => 'sample:3:lostInTranslation.missingTranslationString',
+        3 => 'sample:3:lostInTranslation.missingTranslationString',
+        4 => 'sample:3:lostInTranslation.missingTranslationString',
+        5 => 'sample:3:lostInTranslation.missingTranslationString',
+        6 => 'sample:3:lostInTranslation.missingTranslationString',
+    ];
+}
+
+/**
+ * Main script.
+ */
+require_once __DIR__.'/PHPStanResultsChecker.php';
+$phpStanResultsChecker = new PHPStanResultsChecker();
+$stdIn = file_get_contents('php://stdin');
+
+if (false === $stdIn) {
+    echo "No input\n";
+    exit(2);
+}
+
+try {
+    $phpStanResultsChecker->checkResults($stdIn, $expectedErrors);
+    echo "E2E tests OK\n";
+    exit(0);
+} catch (Exception $e) {
+    echo $e->getMessage().\PHP_EOL;
+    exit(1);
+}

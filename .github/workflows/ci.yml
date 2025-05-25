@@ -113,6 +113,9 @@ jobs:
             - name: Run test suite
               run: php vendor/bin/phpunit --no-coverage
 
+            - name: Run e2e tests
+              run: ./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner
+
     coverage:
         runs-on: ubuntu-latest
         name: "Coverage | PHP ${{ matrix.php-version }}"

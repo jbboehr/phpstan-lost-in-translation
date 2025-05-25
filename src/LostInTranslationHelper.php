@@ -222,6 +222,29 @@ final class LostInTranslationHelper
         return $errors;
     }
 
+    public function markUsed(TranslationCall $call): void
+    {
+        if (null !== $call->localeType && count($call->localeType->getConstantStrings()) > 0) {
+            $locales = array_map(fn ($t) => $t->getValue(), $call->localeType->getConstantStrings());
+        } else {
+            $locales = ['*'];
+        }
+
+        foreach ($call->keyType->getConstantStrings() as $constantString) {
+            foreach ($locales as $locale) {
+                $this->translationLoader->markUsed($locale, $constantString->getValue());
+            }
+        }
+    }
+
+    /**
+     * @return list<array{string, string}>
+     */
+    public function diffUsed(): array
+    {
+        return $this->translationLoader->diffUsed();
+    }
+
     /**
      * @note currently the logic is just if it has a group, proboably could be better
      */

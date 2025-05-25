@@ -16,6 +16,9 @@ final class TranslationLoader
     /** @var array<string, array<string, array<string, array<string, string>>>> */
     private array $data = [];
 
+    /** @var array<string, array<string, array<string, array<string, bool>>>> */
+    private array $used = [];
+
     /** @var list<string> */
     private array $warnings = [];
 
@@ -51,12 +54,57 @@ final class TranslationLoader
     {
         [$namespace, $group, $item] = $this->parseKey($key);
 
-        if ($item === null) {
-            $item = $group;
-            $group = '*';
+        return isset($this->data[$locale][$namespace][$group][$item]);
+    }
+
+    public function markUsed(string $locale, string $key): void
+    {
+        [$namespace, $group, $item] = $this->parseKey($key);
+
+        if ($locale === '*') {
+            $locales = $this->getFoundLocales();
+        } else {
+            $locales = [$locale];
         }
 
-        return isset($this->data[$locale][$namespace][$group][$item]);
+        foreach ($locales as $k_locale) {
+            $this->used[$k_locale][$namespace][$group][$item] = true;
+        }
+    }
+
+    /**
+     * @return list<array{string, string}>
+     */
+    public function diffUsed(): array
+    {
+        $possiblyUnused = [];
+
+        foreach ($this->data as $locale => $t1) {
+            foreach ($t1 as $namespace => $t2) {
+                foreach ($t2 as $group => $t3) {
+                    foreach ($t3 as $item => $flag) {
+                        if (
+                            !isset($this->used[$locale][$namespace][$group][$item]) &&
+                            !isset($this->used['*'][$namespace][$group][$item])
+                        ) {
+                            $buf = $item;
+
+                            if ($group !== '*') {
+                                $buf = $group . '.' . $buf;
+                            }
+
+                            if ($namespace !== '*') {
+                                $buf = $namespace . '::' . $buf;
+                            }
+
+                            $possiblyUnused[] = [$locale, $buf];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $possiblyUnused;
     }
 
     /**
@@ -73,11 +121,16 @@ final class TranslationLoader
      */
     public function parseKey(string $key): array
     {
-        /** @var array{?string, string, string} $segments */
+        /** @var array{?string, string, ?string} $segments */
         $segments = $this->namespacedItemResolver->parseKey($key);
 
         if (is_null($segments[0])) {
             $segments[0] = '*';
+        }
+
+        if (is_null($segments[2])) {
+            $segments[2] = $segments[1];
+            $segments[1] = '*';
         }
 
         return $segments;

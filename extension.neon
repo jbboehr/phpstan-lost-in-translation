@@ -4,20 +4,26 @@ services:
         allowDynamicTranslationStrings: %lostInTranslation.allowDynamicTranslationStrings%
         baseLocale: %lostInTranslation.baseLocale%
         reportLikelyUntranslatedInBaseLocale: %lostInTranslation.reportLikelyUntranslatedInBaseLocale%
-  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationRule
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
     arguments:
         langPath: %lostInTranslation.langPath%
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationCollector
+    arguments:
+        reportPossiblyUnusedTranslations: %lostInTranslation.reportPossiblyUnusedTranslations%
     tags:
       - phpstan.collector
+  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationRule
+  - class: jbboehr\PHPStanLostInTranslation\PossiblyUnusedTranslationRule
+    arguments:
+        reportPossiblyUnusedTranslations: %lostInTranslation.reportPossiblyUnusedTranslations%
 
 parametersSchema:
     lostInTranslation: structure([
         allowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
         langPath: schema(string(), nullable()),
-        reportLikelyUntranslatedInBaseLocale: bool()
+        reportLikelyUntranslatedInBaseLocale: bool(),
+        reportPossiblyUnusedTranslations: bool()
     ])
 
 parameters:
@@ -26,3 +32,4 @@ parameters:
         baseLocale: null
         langPath: null
         reportLikelyUntranslatedInBaseLocale: true
+        reportPossiblyUnusedTranslations: false

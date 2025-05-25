@@ -27,7 +27,7 @@ abstract class RuleTestCase extends BaseRuleTestCase
         );
     }
 
-    private function getLostInTranslationHelper(): LostInTranslationHelper
+    public function getLostInTranslationHelper(): LostInTranslationHelper
     {
         if (null === $this->lostInTranslationHelper) {
             $this->lostInTranslationHelper = $this->createLostInTranslationHelper();

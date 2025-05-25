@@ -9,7 +9,7 @@ parameters:
     bootstrapFiles:
     - phpstan-bootstrap.php
     lostInTranslation:
-        allowDynamicTranslationStrings: false
+        disallowDynamicTranslationStrings: true
         # relative to CWD?
         langPath: ./e2e/lang
         reportPossiblyUnusedTranslations: true

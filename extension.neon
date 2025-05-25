@@ -1,7 +1,7 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
     arguments:
-        allowDynamicTranslationStrings: %lostInTranslation.allowDynamicTranslationStrings%
+        disallowDynamicTranslationStrings: %lostInTranslation.disallowDynamicTranslationStrings%
         baseLocale: %lostInTranslation.baseLocale%
         reportLikelyUntranslatedInBaseLocale: %lostInTranslation.reportLikelyUntranslatedInBaseLocale%
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
@@ -23,7 +23,7 @@ services:
 
 parametersSchema:
     lostInTranslation: structure([
-        allowDynamicTranslationStrings: bool(),
+        disallowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
         langPath: schema(string(), nullable()),
         reportLikelyUntranslatedInBaseLocale: bool(),
@@ -32,7 +32,7 @@ parametersSchema:
 
 parameters:
     lostInTranslation:
-        allowDynamicTranslationStrings: true
+        disallowDynamicTranslationStrings: false
         baseLocale: null
         langPath: null
         reportLikelyUntranslatedInBaseLocale: true

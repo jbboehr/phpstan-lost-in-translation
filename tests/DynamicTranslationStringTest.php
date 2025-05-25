@@ -38,7 +38,7 @@ class DynamicTranslationStringTest extends RuleTestCase
     {
         return new LostInTranslationHelper(
             new TranslationLoader(__DIR__ . '/lang'),
-            allowDynamicTranslationStrings: false,
+            disallowDynamicTranslationStrings: true,
             baseLocale: 'en',
             reportLikelyUntranslatedInBaseLocale: true,
         );

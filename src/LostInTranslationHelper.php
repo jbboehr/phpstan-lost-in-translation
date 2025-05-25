@@ -43,7 +43,7 @@ final class LostInTranslationHelper
 
     public function __construct(
         private readonly TranslationLoader $translationLoader,
-        private readonly bool $allowDynamicTranslationStrings = true,
+        private readonly bool $disallowDynamicTranslationStrings = true,
         ?string $baseLocale = null,
         private readonly bool $reportLikelyUntranslatedInBaseLocale = true,
     ) {
@@ -206,7 +206,7 @@ final class LostInTranslationHelper
         sort($keyConstantStrings, SORT_NATURAL);
 
         if (count($keyConstantStrings) <= 0) {
-            if (!$this->allowDynamicTranslationStrings) {
+            if ($this->disallowDynamicTranslationStrings) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Disallowed dynamic translation string of type: %s',
                     $keyType->describe(VerbosityLevel::precise())

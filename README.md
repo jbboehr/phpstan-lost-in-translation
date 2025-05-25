@@ -136,7 +136,7 @@ We can disallow using translations strings that are not statically known. **Disa
 ```neon
 parameters:
     lostInTranslation:
-        allowDynamicTranslationStrings: false
+        disallowDynamicTranslationStrings: true
 ```
 
 ```php
@@ -249,7 +249,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 parameters:
     lostInTranslation:
         # should translation keys with types not statically known be allowed?
-        allowDynamicTranslationStrings: true
+        disallowDynamicTranslationStrings: false
         # strings in the base locale won't be reported as missing, unless they contain a group. May use value set in Laravel if unconfigured.
         baseLocale: null
         # the path to your language directory if not `./lang`. May use value set in Laravel if unconfigured.

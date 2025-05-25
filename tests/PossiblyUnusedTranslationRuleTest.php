@@ -35,7 +35,7 @@ class PossiblyUnusedTranslationRuleTest extends RuleTestCase
     {
         return new LostInTranslationHelper(
             new TranslationLoader(__DIR__ . '/lang-unused'),
-            allowDynamicTranslationStrings: true,
+            disallowDynamicTranslationStrings: false,
             baseLocale: 'en',
             reportLikelyUntranslatedInBaseLocale: true,
         );

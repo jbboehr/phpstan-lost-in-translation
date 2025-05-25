@@ -30,6 +30,7 @@ if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/blades
         4 => 'sample:3:',
         5 => 'sample:3:',
         6 => 'sample:3:',
+        7 => 'sample:7:lostInTranslation.missingTranslationString',
     ];
 } else {
     $expectedErrors = [
@@ -40,6 +41,7 @@ if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/blades
         4 => 'sample:3:lostInTranslation.missingTranslationString',
         5 => 'sample:3:lostInTranslation.missingTranslationString',
         6 => 'sample:3:lostInTranslation.missingTranslationString',
+        7 => 'sample:7:lostInTranslation.missingTranslationString',
     ];
 }
 

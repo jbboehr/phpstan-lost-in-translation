@@ -7,9 +7,11 @@ includes:
 parameters:
     level: max
     paths:
+        - e2e
         - src
         - tests
     excludePaths:
+        - e2e/src
         - tests/*BladeRuleTest.php
         - tests/data/*
     lostInTranslation:

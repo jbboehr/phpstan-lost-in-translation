@@ -13,7 +13,11 @@ services:
     tags:
       - phpstan.collector
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationRule
+    tags:
+    - phpstan.rules.rule
   - class: jbboehr\PHPStanLostInTranslation\PossiblyUnusedTranslationRule
+    tags:
+    - phpstan.rules.rule
     arguments:
         reportPossiblyUnusedTranslations: %lostInTranslation.reportPossiblyUnusedTranslations%
 

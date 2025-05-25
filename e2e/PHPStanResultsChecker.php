@@ -25,7 +25,7 @@ final class PHPStanResultsChecker
 
         $errorCount = $totals['errors'] ?? null;
         $this->assertInt($errorCount, 'Failed to find error count in PHPStan results');
-        if ((int) $errorCount > 0) {
+        if (intval($errorCount) > 0) {
             $errors = $asJson['errors'] ?? null;
             throw new RuntimeException('PHPStan reported errors: '.var_export($errors, true));
         }

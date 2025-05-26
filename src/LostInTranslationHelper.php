@@ -185,47 +185,55 @@ final class LostInTranslationHelper
     }
 
     /**
+     * @param TranslationCall $call
+     * @return array<string, list<array{string, ?string}>>
+     */
+    public function gatherPossibleTranslations(TranslationCall $call): array
+    {
+        if (null !== $call->localeType && count($call->localeType->getConstantStrings()) > 0) {
+            $lookInLocales = [];
+
+            foreach ($call->localeType->getConstantStrings() as $localeTypeConstantString) {
+                $lookInLocales[] = $localeTypeConstantString->getValue();
+            }
+        } else {
+            $lookInLocales = $this->translationLoader->getFoundLocales();
+        }
+
+        $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {
+            return $constantStringType->getValue();
+        }, $call->keyType->getConstantStrings());
+
+        // Make sure they are stably sorted
+        sort($keyConstantStrings, SORT_NATURAL);
+
+        $rv = [];
+
+        foreach ($keyConstantStrings as $keyConstantString) {
+            foreach ($lookInLocales as $locale) {
+                $value = $this->translationLoader->get($locale, $keyConstantString);
+
+                $rv[$keyConstantString][] = [$locale, $value];
+            }
+        }
+
+        return $rv;
+    }
+
+    /**
      * @return list<IdentifierRuleError>
      */
     public function process(TranslationCall $call): array
     {
-        $keyType = $call->keyType;
-        $localeType = $call->localeType;
         $line = $call->line;
         $file = $call->file;
         $metadata = Utils::callToMetadata($call);
         $errors = [];
 
-        $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {
-            return $constantStringType->getValue();
-        }, $keyType->getConstantStrings());
-
-        // Make sure they are stable
-        sort($keyConstantStrings, SORT_NATURAL);
-
-        if (count($keyConstantStrings) <= 0) {
-            return [];
-        }
-
-        foreach ($keyConstantStrings as $keyConstantString) {
+        foreach ($this->gatherPossibleTranslations($call) as $keyConstantString => $items) {
             $missingInLocales = [];
 
-            if (null !== $localeType && count($localeType->getConstantStrings()) > 0) {
-                $lookInLocales = [];
-                foreach ($localeType->getConstantStrings() as $localeTypeConstantString) {
-                    $lookInLocales[] = $localeTypeConstantString->getValue();
-
-                    if (!$this->translationLoader->hasLocale($localeTypeConstantString->getValue())) {
-                        // @TODO
-                    }
-                }
-            } else {
-                $lookInLocales = $this->translationLoader->getFoundLocales();
-            }
-
-            foreach ($lookInLocales as $locale) {
-                $value = $this->translationLoader->get($locale, $keyConstantString);
-
+            foreach ($items as [$locale, $value]) {
                 if (null === $value) {
                     $missingInLocales[] = $locale;
                 }

@@ -68,11 +68,11 @@ class TomasVotrubaBladeRuleTest extends RuleTestCase
             __DIR__ . '/data/blade.php',
         ], [
             [
-                'Missing translation string "blade at directive" for locales: zh, ja',
+                'Missing translation string "blade at directive" for locales: ja, zh',
                 3,
             ],
             [
-                'Missing translation string "blade double underscore" for locales: zh, ja',
+                'Missing translation string "blade double underscore" for locales: ja, zh',
                 3,
             ],
             [
@@ -80,15 +80,15 @@ class TomasVotrubaBladeRuleTest extends RuleTestCase
                 3,
             ],
             [
-                'Missing translation string "via app function" for locales: zh, ja',
+                'Missing translation string "via app function" for locales: ja, zh',
                 3,
             ],
             [
-                'Missing translation string "via app facade" for locales: zh, ja',
+                'Missing translation string "via app facade" for locales: ja, zh',
                 3,
             ],
             [
-                'Missing translation string "via app function with class" for locales: zh, ja',
+                'Missing translation string "via app function with class" for locales: ja, zh',
                 3,
             ],
         ]);

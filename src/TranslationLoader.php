@@ -230,7 +230,12 @@ final class TranslationLoader
             }
         }
 
-        $this->foundLocales = array_keys($foundLocales);
+        $foundLocales = array_keys($foundLocales);
+
+        // Make sure it is stably sorted
+        sort($foundLocales, SORT_NATURAL);
+
+        $this->foundLocales = $foundLocales;
     }
 
     private function loadPhp(SplFileInfo $file): mixed

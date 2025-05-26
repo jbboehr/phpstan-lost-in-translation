@@ -39,7 +39,7 @@ class LostInTranslationRuleTest extends RuleTestCase
             __DIR__ . '/data/lang-facade.php',
         ], [
             [
-                'Missing translation string "lang facade" for locales: zh, ja',
+                'Missing translation string "lang facade" for locales: ja, zh',
                 3,
             ],
         ]);
@@ -51,7 +51,7 @@ class LostInTranslationRuleTest extends RuleTestCase
             __DIR__ . '/data/trans-choice-function.php',
         ], [
             [
-                'Missing translation string "trans choice function" for locales: zh, ja',
+                'Missing translation string "trans choice function" for locales: ja, zh',
                 3,
             ],
         ]);
@@ -63,11 +63,11 @@ class LostInTranslationRuleTest extends RuleTestCase
             __DIR__ . '/data/trans-function.php',
         ], [
             [
-                'Missing translation string "double underscore" for locales: zh, ja',
+                'Missing translation string "double underscore" for locales: ja, zh',
                 3,
             ],
             [
-                'Missing translation string "trans function" for locales: zh, ja',
+                'Missing translation string "trans function" for locales: ja, zh',
                 4,
             ],
         ]);
@@ -79,24 +79,24 @@ class LostInTranslationRuleTest extends RuleTestCase
             __DIR__ . '/data/translator.php',
         ], [
             [
-                'Missing translation string "contract basic" for locales: zh, ja',
+                'Missing translation string "contract basic" for locales: ja, zh',
                 4,
             ],
 
             [
-                'Missing translation string "translator basic" for locales: zh, ja',
+                'Missing translation string "translator basic" for locales: ja, zh',
                 7,
             ],
             [
-                'Missing translation string "translator basic" for locales: zh, ja',
+                'Missing translation string "translator basic" for locales: ja, zh',
                 8,
             ],
             [
-                'Missing translation string "bar" for locales: zh, ja',
+                'Missing translation string "bar" for locales: ja, zh',
                 14,
             ],
             [
-                'Missing translation string "foo" for locales: zh, ja',
+                'Missing translation string "foo" for locales: ja, zh',
                 14,
             ],
             [

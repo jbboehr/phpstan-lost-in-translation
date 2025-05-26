@@ -47,24 +47,24 @@ class LarastanTest extends RuleTestCase
             __DIR__ . '/data/larastan-inference.php',
         ], [
             [
-                'Missing translation string "this inference requires larastan to work" for locales: zh, ja',
+                'Missing translation string "this inference requires larastan to work" for locales: ja, zh',
                 3,
             ],
             [
-                'Missing translation string "this inference requires larastan to work" for locales: zh, ja',
+                'Missing translation string "this inference requires larastan to work" for locales: ja, zh',
                 4,
             ],
             [
-                'Missing translation string "this inference requires larastan to work" for locales: zh, ja',
+                'Missing translation string "this inference requires larastan to work" for locales: ja, zh',
                 5,
             ],
             // this one is not working for some reason
             // [
-            //     'Missing translation string "this inference requires larastan to work" for locales: zh, ja',
+            //     'Missing translation string "this inference requires larastan to work" for locales: ja, zh',
             //     8,
             // ],
             [
-                'Missing translation string "this inference requires larastan to work" for locales: zh, ja',
+                'Missing translation string "this inference requires larastan to work" for locales: ja, zh',
                 9,
             ],
         ]);

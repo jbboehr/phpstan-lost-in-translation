@@ -4,9 +4,7 @@ services:
     arguments:
         baseLocale: %lostInTranslation.baseLocale%
         langPath: %lostInTranslation.langPath%
-  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationCollector
-    tags:
-      - phpstan.collector
+  - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
   - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidChoiceRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
@@ -15,6 +13,8 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
 conditionalTags:
+	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector:
+		phpstan.collector: %lostInTranslation.unusedTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.disallowDynamicTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\InvalidChoiceRule:

@@ -24,6 +24,10 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 
+/**
+ * @phpstan-type PossibleTranslationRecord array{string, ?string}
+ * @phpstan-type PossibleTranslationRecordCollection array<string, list<PossibleTranslationRecord>>
+ */
 final class LostInTranslationHelper
 {
     private ObjectType $translatorType;
@@ -167,7 +171,7 @@ final class LostInTranslationHelper
 
     /**
      * @param TranslationCall $call
-     * @return array<string, list<array{string, ?string}>>
+     * @phpstan-return PossibleTranslationRecordCollection
      */
     public function gatherPossibleTranslations(TranslationCall $call): array
     {
@@ -206,19 +210,9 @@ final class LostInTranslationHelper
         return $this->translationLoader->getBaseLocale();
     }
 
-    public function markUsed(TranslationCall $call): void
+    public function markUsed(string $locale, string $key): void
     {
-        if (null !== $call->localeType && count($call->localeType->getConstantStrings()) > 0) {
-            $locales = array_map(fn ($t) => $t->getValue(), $call->localeType->getConstantStrings());
-        } else {
-            $locales = ['*'];
-        }
-
-        foreach ($call->keyType->getConstantStrings() as $constantString) {
-            foreach ($locales as $locale) {
-                $this->translationLoader->markUsed($locale, $constantString->getValue());
-            }
-        }
+        $this->translationLoader->markUsed($locale, $key);
     }
 
     /**

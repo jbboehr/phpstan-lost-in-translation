@@ -26,6 +26,7 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
+ * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
  * @implements Rule<CollectedDataNode>
  */
 final class UnusedTranslationStringRule implements Rule
@@ -43,19 +44,18 @@ final class UnusedTranslationStringRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            /** @var array<string, list<string>> $data */
-            $data = $node->get(LostInTranslationCollector::class);
+            /** @var array<string, list<PossibleTranslationRecordCollection>> $data */
+            $data = $node->get(UnusedTranslationStringCollector::class);
 
             $errors = [];
 
             foreach ($data as $results) {
                 foreach ($results as $result) {
-                    // @TODO apparently we can only pass (unserialized) objects in debug mode... probably should revisit this
-                    $result = unserialize($result);
-
-                    assert($result instanceof TranslationCall);
-
-                    $this->helper->markUsed($result);
+                    foreach ($result as $key => $items) {
+                        foreach ($items as [$locale, $value]) {
+                            $this->helper->markUsed($locale, $key);
+                        }
+                    }
                 }
             }
 

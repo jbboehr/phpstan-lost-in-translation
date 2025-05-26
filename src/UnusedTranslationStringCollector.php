@@ -24,9 +24,10 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 
 /**
- * @implements Collector<Node\Expr\CallLike, string>
+ * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
+ * @implements Collector<Node\Expr\CallLike, PossibleTranslationRecordCollection>
  */
-final class LostInTranslationCollector implements Collector
+final class UnusedTranslationStringCollector implements Collector
 {
     public function __construct(
         private readonly LostInTranslationHelper $helper,
@@ -38,13 +39,16 @@ final class LostInTranslationCollector implements Collector
         return Node\Expr\CallLike::class;
     }
 
-    public function processNode(Node $node, Scope $scope): ?string
+    public function processNode(Node $node, Scope $scope): ?array
     {
         try {
-            $tmp = $this->helper->parseCallLike($node, $scope);
+            $call = $this->helper->parseCallLike($node, $scope);
 
-            // @TODO apparently we can only pass (unserialized) objects in debug mode... probably should revisit this
-            return $tmp !== null ? serialize($tmp) : null;
+            if (null === $call) {
+                return null;
+            }
+
+            return $this->helper->gatherPossibleTranslations($call);
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }

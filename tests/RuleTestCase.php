@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\LostInTranslationCollector;
+use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase as BaseRuleTestCase;
@@ -55,7 +55,7 @@ abstract class RuleTestCase extends BaseRuleTestCase
     public function getCollectors(): array
     {
         return [
-            new LostInTranslationCollector($this->getLostInTranslationHelper()),
+            new UnusedTranslationStringCollector($this->getLostInTranslationHelper()),
         ];
     }
 }

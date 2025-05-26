@@ -51,7 +51,7 @@ final class MissingTranslationStringRule implements Rule
             $errors = [];
             $baseLocale = $this->helper->getBaseLocale();
 
-            foreach ($this->helper->gatherPossibleTranslations($call) as $key => $items) {
+            foreach ($call->possibleTranslations as $key => $items) {
                 $missingInLocales = [];
 
                 foreach ($items as [$locale, $value]) {

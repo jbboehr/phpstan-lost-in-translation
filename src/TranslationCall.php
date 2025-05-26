@@ -21,13 +21,20 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use PHPStan\Type\Type;
 
+/**
+ * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
+ */
 final class TranslationCall
 {
+    /**
+     * @phpstan-param PossibleTranslationRecordCollection $possibleTranslations
+     */
     public function __construct(
         public readonly ?string $className,
         public readonly string $functionName,
         public readonly string $file,
         public readonly int $line,
+        public readonly array $possibleTranslations,
         public readonly Type $keyType,
         public readonly ?Type $replaceType = null,
         public readonly ?Type $localeType = null,

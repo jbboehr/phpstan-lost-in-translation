@@ -52,7 +52,7 @@ final class InvalidReplacementRule implements Rule
 
             $errors = [];
 
-            foreach ($this->helper->gatherPossibleTranslations($call) as $key => $items) {
+            foreach ($call->possibleTranslations as $key => $items) {
                 foreach ($items as [$locale, $value]) {
                     $errors = array_merge(
                         $errors,

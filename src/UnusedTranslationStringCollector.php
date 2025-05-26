@@ -48,7 +48,7 @@ final class UnusedTranslationStringCollector implements Collector
                 return null;
             }
 
-            return $this->helper->gatherPossibleTranslations($call);
+            return $call->possibleTranslations;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }

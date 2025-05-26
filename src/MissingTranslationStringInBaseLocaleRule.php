@@ -51,7 +51,7 @@ final class MissingTranslationStringInBaseLocaleRule implements Rule
             $errors = [];
             $baseLocale = $this->helper->getBaseLocale();
 
-            foreach ($this->helper->gatherPossibleTranslations($call) as $key => $items) {
+            foreach ($call->possibleTranslations as $key => $items) {
                 foreach ($items as [$locale, $value]) {
                     if ($locale === $baseLocale && null === $value && $this->helper->isLikelyUntranslated($key)) {
                         $errors[] = RuleErrorBuilder::message(sprintf(

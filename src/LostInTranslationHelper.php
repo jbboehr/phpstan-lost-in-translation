@@ -23,6 +23,7 @@ use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\Type;
 
 /**
  * @phpstan-type PossibleTranslationRecord array{string, ?string}
@@ -156,29 +157,32 @@ final class LostInTranslationHelper
             return null;
         }
 
+        $keyType = $scope->getType($key);
+        $localeType = $locale !== null ? $scope->getType($locale) : null;
+
         return new TranslationCall(
             className: $className,
             functionName: $name,
             file: $scope->getFile(), // @TODO this might be getting the compiled blade path...
             line: $node->getLine(),
-            keyType: $scope->getType($key),
+            possibleTranslations: $this->gatherPossibleTranslations($keyType, $localeType),
+            keyType: $keyType,
             replaceType: $replace !== null ? $scope->getType($replace) : null,
-            localeType: $locale !== null ? $scope->getType($locale) : null,
+            localeType: $localeType,
             numberType: $number !== null ? $scope->getType($number) : null,
             isChoice: $isChoice,
         );
     }
 
     /**
-     * @param TranslationCall $call
      * @phpstan-return PossibleTranslationRecordCollection
      */
-    public function gatherPossibleTranslations(TranslationCall $call): array
+    private function gatherPossibleTranslations(Type $keyType, ?Type $localeType = null): array
     {
-        if (null !== $call->localeType && count($call->localeType->getConstantStrings()) > 0) {
+        if (null !== $localeType && count($localeType->getConstantStrings()) > 0) {
             $lookInLocales = [];
 
-            foreach ($call->localeType->getConstantStrings() as $localeTypeConstantString) {
+            foreach ($localeType->getConstantStrings() as $localeTypeConstantString) {
                 $lookInLocales[] = $localeTypeConstantString->getValue();
             }
         } else {
@@ -187,7 +191,7 @@ final class LostInTranslationHelper
 
         $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {
             return $constantStringType->getValue();
-        }, $call->keyType->getConstantStrings());
+        }, $keyType->getConstantStrings());
 
         // Make sure they are stably sorted
         sort($keyConstantStrings, SORT_NATURAL);

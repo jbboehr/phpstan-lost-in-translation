@@ -266,17 +266,10 @@ final class LostInTranslationHelper
         return $this->translationLoader->diffUsed();
     }
 
-    /**
-     * @note currently the logic is just if it has a group, proboably could be better
-     */
+    private const GROUP_REGEX = '~^(.+::)?((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*)(?:\.((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*))$~';
+
     public function isLikelyUntranslated(string $key): bool
     {
-        [, $group, $item] = $this->translationLoader->parseKey($key);
-
-        if ($item === null) {
-            $group = '*';
-        }
-
-        return $group !== '*';
+        return 1 === preg_match(self::GROUP_REGEX, $key);
     }
 }

@@ -2,6 +2,7 @@
 {{ __('blade double underscore') }}
 {{ __('exists in all locales') }}
 {{ __('only in ja') }}
+{{ __('only used in blade') }}
 
 @php
     // these may require larastan to work

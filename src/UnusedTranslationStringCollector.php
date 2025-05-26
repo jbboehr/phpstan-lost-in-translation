@@ -48,6 +48,10 @@ final class UnusedTranslationStringCollector implements Collector
                 return null;
             }
 
+            if (str_contains($call->file, 'compiled')) {
+                dump($call);
+            }
+
             return $call->possibleTranslations;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);

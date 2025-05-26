@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use WeakMap;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Type\Constant\ConstantStringType;
@@ -33,13 +34,51 @@ final class LostInTranslationHelper
 {
     private ObjectType $translatorType;
 
+    /** @var WeakMap<Scope, WeakMap<Node, TranslationCall|object>> */
+    private WeakMap $cache;
+
+    private static object $nullMarker;
+
     public function __construct(
         private readonly TranslationLoader $translationLoader,
     ) {
         $this->translatorType = new ObjectType(\Illuminate\Contracts\Translation\Translator::class);
+        $this->cache = new \WeakMap();
+
+        if (!isset(self::$nullMarker)) {
+            self::$nullMarker = new class {
+            };
+        }
     }
 
     public function parseCallLike(Node $node, Scope $scope): ?TranslationCall
+    {
+        /** @var ?\WeakMap<Node, TranslationCall|object> $scopeCache */
+        $scopeCache = $this->cache[$scope] ?? null;
+        if (null === $scopeCache) {
+            $scopeCache = new \WeakMap();
+            /** @phpstan-ignore-next-line offsetAssign.valueType */
+            $this->cache[$scope] = $scopeCache;
+        } else {
+            $call = $scopeCache[$node] ?? null;
+            if (null !== $call) {
+                if ($call === self::$nullMarker) {
+                    return null;
+                } else {
+                    assert($call instanceof TranslationCall);
+                    return $call;
+                }
+            }
+        }
+
+        $call = $this->parseCallLikeUncached($node, $scope);
+
+        $scopeCache[$node] = $call ?? self::$nullMarker;
+
+        return $call;
+    }
+
+    public function parseCallLikeUncached(Node $node, Scope $scope): ?TranslationCall
     {
         if ($node instanceof Node\Expr\MethodCall) {
             if (!($node->name instanceof Node\Identifier)) {

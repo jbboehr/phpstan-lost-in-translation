@@ -136,6 +136,11 @@ final class TranslationLoader
             }
         }
 
+        usort($possiblyUnused, function ($dat) {
+            // @TODO make this faster
+            return strnatcasecmp(join(', ', $dat), join(',', $dat));
+        });
+
         return $possiblyUnused;
     }
 

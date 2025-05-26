@@ -12,7 +12,7 @@ parameters:
         disallowDynamicTranslationStrings: true
         # relative to CWD?
         langPath: ./e2e/lang
-        reportPossiblyUnusedTranslations: true
+        unusedTranslationStrings: true
 
 includes:
     - ../vendor/larastan/larastan/extension.neon

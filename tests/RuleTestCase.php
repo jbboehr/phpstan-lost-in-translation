@@ -38,7 +38,6 @@ abstract class RuleTestCase extends BaseRuleTestCase
     {
         return new LostInTranslationHelper(
             new TranslationLoader(__DIR__ . '/lang'),
-            disallowDynamicTranslationStrings: false,
             baseLocale: 'en',
             reportLikelyUntranslatedInBaseLocale: true,
         );

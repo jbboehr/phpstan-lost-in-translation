@@ -22,37 +22,33 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationCollector;
-use jbboehr\PHPStanLostInTranslation\PossiblyUnusedTranslationRule;
+use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<PossiblyUnusedTranslationRule>
+ * @extends RuleTestCase<UnusedTranslationStringRule>
  */
-class PossiblyUnusedTranslationRuleTest extends RuleTestCase
+class UnusedTranslationStringRuleTest extends RuleTestCase
 {
+    protected function getRule(): Rule
+    {
+        return new UnusedTranslationStringRule($this->getLostInTranslationHelper());
+    }
+
     public function createLostInTranslationHelper(): LostInTranslationHelper
     {
         return new LostInTranslationHelper(
             new TranslationLoader(__DIR__ . '/lang-unused'),
-            disallowDynamicTranslationStrings: false,
             baseLocale: 'en',
             reportLikelyUntranslatedInBaseLocale: true,
-        );
-    }
-
-    protected function getRule(): Rule
-    {
-        return new PossiblyUnusedTranslationRule(
-            $this->getLostInTranslationHelper(),
-            reportPossiblyUnusedTranslations: true,
         );
     }
 
     public function testPossiblyUnusedTranslations(): void
     {
         $this->analyse([
-            __DIR__ . '/data/possibly-unused.php',
+            __DIR__ . '/data/unused-translation-string.php',
         ], [
             [
                 'Possibly unused translation string "unused_in_en" for locale: en',
@@ -72,10 +68,7 @@ class PossiblyUnusedTranslationRuleTest extends RuleTestCase
     public function getCollectors(): array
     {
         return [
-            new LostInTranslationCollector(
-                $this->getLostInTranslationHelper(),
-                reportPossiblyUnusedTranslations: true,
-            ),
+            new LostInTranslationCollector($this->getLostInTranslationHelper()),
         ];
     }
 }

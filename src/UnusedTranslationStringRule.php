@@ -28,11 +28,10 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * @implements Rule<CollectedDataNode>
  */
-final class PossiblyUnusedTranslationRule implements Rule
+final class UnusedTranslationStringRule implements Rule
 {
     public function __construct(
         private readonly LostInTranslationHelper $helper,
-        private readonly bool $reportPossiblyUnusedTranslations = false,
     ) {
     }
 
@@ -44,11 +43,6 @@ final class PossiblyUnusedTranslationRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            /** @TODO we could probably do this by unregistered in the phpstan config */
-            if (!$this->reportPossiblyUnusedTranslations) {
-                return [];
-            }
-
             /** @var array<string, list<string>> $data */
             $data = $node->get(LostInTranslationCollector::class);
 

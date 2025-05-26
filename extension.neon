@@ -1,25 +1,25 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
     arguments:
-        disallowDynamicTranslationStrings: %lostInTranslation.disallowDynamicTranslationStrings%
         baseLocale: %lostInTranslation.baseLocale%
         reportLikelyUntranslatedInBaseLocale: %lostInTranslation.reportLikelyUntranslatedInBaseLocale%
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
     arguments:
         langPath: %lostInTranslation.langPath%
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationCollector
-    arguments:
-        reportPossiblyUnusedTranslations: %lostInTranslation.reportPossiblyUnusedTranslations%
     tags:
       - phpstan.collector
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationRule
     tags:
     - phpstan.rules.rule
-  - class: jbboehr\PHPStanLostInTranslation\PossiblyUnusedTranslationRule
-    tags:
-    - phpstan.rules.rule
-    arguments:
-        reportPossiblyUnusedTranslations: %lostInTranslation.reportPossiblyUnusedTranslations%
+  - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
+  - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
+
+conditionalTags:
+	jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule:
+		phpstan.rules.rule: %lostInTranslation.disallowDynamicTranslationStrings%
+	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
+		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 
 parametersSchema:
     lostInTranslation: structure([
@@ -27,7 +27,7 @@ parametersSchema:
         baseLocale: schema(string(), nullable()),
         langPath: schema(string(), nullable()),
         reportLikelyUntranslatedInBaseLocale: bool(),
-        reportPossiblyUnusedTranslations: bool()
+        unusedTranslationStrings: bool()
     ])
 
 parameters:
@@ -36,4 +36,4 @@ parameters:
         baseLocale: null
         langPath: null
         reportLikelyUntranslatedInBaseLocale: true
-        reportPossiblyUnusedTranslations: false
+        unusedTranslationStrings: false

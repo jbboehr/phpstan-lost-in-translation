@@ -110,7 +110,7 @@ We can attempt to detect unused translation strings. **Disabled by default.**
 ```neon
 parameters:
     lostInTranslation:
-        reportPossiblyUnusedTranslations: true
+        unusedTranslationStrings: true
 ```
 
 ```json
@@ -257,7 +257,7 @@ parameters:
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
         reportLikelyUntranslatedInBaseLocale: true
         # aggregate used translations and diff with the full locale database to detect potentially unused translations
-        reportPossiblyUnusedTranslations: false
+        unusedTranslationStrings: false
 ```
 
 ## References

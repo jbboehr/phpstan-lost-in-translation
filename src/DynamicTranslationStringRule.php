@@ -21,13 +21,14 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Type\VerbosityLevel;
 
 /**
- * @implements Rule<CollectedDataNode|Node\Expr\CallLike>
+ * @implements Rule<Node\Expr\CallLike>
  */
-final class LostInTranslationRule implements Rule
+final class DynamicTranslationStringRule implements Rule
 {
     public function __construct(
         private readonly LostInTranslationHelper $helper,
@@ -42,13 +43,27 @@ final class LostInTranslationRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            $result = $this->helper->parseCallLike($node, $scope);
+            $call = $this->helper->parseCallLike($node, $scope);
 
-            if (null === $result) {
+            if (null === $call) {
                 return [];
             }
 
-            return $this->helper->process($result);
+            if (count($call->keyType->getConstantStrings()) <= 0) {
+                return [
+                    RuleErrorBuilder::message(sprintf(
+                        'Disallowed dynamic translation string of type: %s',
+                        $call->keyType->describe(VerbosityLevel::precise())
+                    ))
+                        ->identifier('lostInTranslation.dynamicTranslationString')
+                        ->metadata(Utils::callToMetadata($call))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build()
+                ];
+            }
+
+            return [];
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }

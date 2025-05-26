@@ -30,7 +30,6 @@ use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerRangeType;
-use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\VerbosityLevel;
@@ -43,7 +42,6 @@ final class LostInTranslationHelper
 
     public function __construct(
         private readonly TranslationLoader $translationLoader,
-        private readonly bool $disallowDynamicTranslationStrings = true,
         ?string $baseLocale = null,
         private readonly bool $reportLikelyUntranslatedInBaseLocale = true,
     ) {
@@ -206,19 +204,7 @@ final class LostInTranslationHelper
         sort($keyConstantStrings, SORT_NATURAL);
 
         if (count($keyConstantStrings) <= 0) {
-            if ($this->disallowDynamicTranslationStrings) {
-                $errors[] = RuleErrorBuilder::message(sprintf(
-                    'Disallowed dynamic translation string of type: %s',
-                    $keyType->describe(VerbosityLevel::precise())
-                ))
-                    ->identifier('lostInTranslation.dynamicTranslationString')
-                    ->metadata($metadata)
-                    ->line($line)
-                    ->file($file)
-                    ->build();
-            }
-
-            return $errors;
+            return [];
         }
 
         foreach ($keyConstantStrings as $keyConstantString) {

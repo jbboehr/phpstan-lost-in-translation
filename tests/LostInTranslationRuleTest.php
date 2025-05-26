@@ -105,36 +105,4 @@ class LostInTranslationRuleTest extends RuleTestCase
             ],
         ]);
     }
-
-    public function testMalformedChoice(): void
-    {
-        $this->analyse([
-            __DIR__ . '/data/choice.php',
-        ], [
-            [
-                'Translation choice does not cover all possible cases for number of type: 3',
-                7,
-                Utils::formatTipForKeyValue(
-                    'en',
-                    '{0} There are none|{1} There is one|[2] There are :count',
-                    '{0} There are none|{1} There is one|[2] There are :count'
-                ),
-            ],
-            [
-                'Translation choice does not cover all possible cases for number of type: 2',
-                10,
-                Utils::formatTipForKeyValue('en', '{4,*} There are many|{3} There are three', '{4,*} There are many|{3} There are three'),
-            ],
-            [
-                'Translation choice does not cover all possible cases for number of type: int',
-                15,
-                Utils::formatTipForKeyValue('en', '{4,*} There are many|{3} There are three', '{4,*} There are many|{3} There are three'),
-            ],
-            [
-                'Translation choice does not cover all possible cases for number of type: int<2, 4>',
-                29,
-                Utils::formatTipForKeyValue('en', '{2} There are two|{3} There are three', '{2} There are two|{3} There are three'),
-            ]
-        ]);
-    }
 }

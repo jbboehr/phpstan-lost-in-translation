@@ -237,13 +237,6 @@ final class LostInTranslationHelper
                 if (null === $value) {
                     $missingInLocales[] = $locale;
                 }
-
-                if ($call->isChoice) {
-                    $errors = array_merge(
-                        $errors,
-                        $this->analyzeChoice($call, $locale, $keyConstantString, $value ?? $keyConstantString),
-                    );
-                }
             }
 
             if (null !== $this->baseLocale) {
@@ -301,111 +294,6 @@ final class LostInTranslationHelper
     public function diffUsed(): array
     {
         return $this->translationLoader->diffUsed();
-    }
-
-    /**
-     * @return list<IdentifierRuleError>
-     * @see MessageSelector::choose()
-     */
-    private function analyzeChoice(TranslationCall $call, string $locale, string $key, string $value): array
-    {
-        $numberType = $call->numberType;
-
-        if (null === $numberType) {
-            return [];
-        }
-
-        $segments = explode('|', $value);
-        $errors = [];
-        $unionType = null;
-
-        foreach ($segments as $segment) {
-            if (false === preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
-                $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice'))
-                    ->identifier('lostInTranslation.malformedTranslationChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
-                continue;
-            }
-
-            /** not sure why this is failing */
-            /** @phpstan-ignore-next-line smaller.alwaysFalse */
-            if (count($matches) < 2) {
-                // this is probably a normal translation string - we could raise an error but :shrug:
-                continue;
-            }
-
-            [, $condition] = $matches;
-
-            if (str_contains($condition, ',')) {
-                [$from, $to] = explode(',', $condition, 2);
-            } else {
-                $from = $to = $condition;
-            }
-
-            if (!is_numeric($from) && $from !== '*') {
-                $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($from)))
-                    ->identifier('lostInTranslation.nonNumericChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
-                continue;
-            } elseif (!is_numeric($to) && $to !== '*') {
-                $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($to)))
-                    ->identifier('lostInTranslation.nonNumericChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
-                continue;
-            }
-
-            if ($from === '*' && $to === '*') {
-                continue;
-            }
-
-            // @TODO might want to add an option to ignore negative numbers, probably will cause a lot of false? positives
-            // if ($from === '0') {
-            //     $from = '*';
-            // }
-
-            if ($from === '*') {
-                $segmentType = IntegerRangeType::fromInterval(null, (int) $to);
-            } elseif ($to === '*') {
-                $segmentType = IntegerRangeType::fromInterval((int) $from, null);
-            } elseif ($from === $to) {
-                $segmentType = new ConstantIntegerType((int) $from);
-            } else {
-                $segmentType = IntegerRangeType::fromInterval((int) $from, (int) $to);
-            }
-
-            if (null === $unionType) {
-                $unionType = $segmentType;
-            } else {
-                $unionType = TypeCombinator::union($unionType, $segmentType);
-            }
-        }
-
-        if (null !== $unionType && !$unionType->accepts($numberType, true)->yes()) {
-            $errors[] = RuleErrorBuilder::message(sprintf(
-                'Translation choice does not cover all possible cases for number of type: %s',
-                $numberType->describe(VerbosityLevel::precise())
-            ))
-                ->identifier('lostInTranslation.choiceMissingCase')
-                ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                ->line($call->line)
-                ->file($call->file)
-                ->build();
-        }
-
-        return $errors;
     }
 
     /**

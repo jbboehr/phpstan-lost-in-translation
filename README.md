@@ -192,7 +192,13 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 
 ### Analyze replacements
 
-Replacements will be analyzed for undesirable behavior:
+Replacements will be analyzed for undesirable behavior. **Enabled by default.**
+
+```neon
+parameters:
+    lostInTranslation:
+        invalidReplacements: true
+```
 
 ```php
 <?php
@@ -254,6 +260,8 @@ parameters:
         baseLocale: null
         # the path to your language directory if not `./lang`. May use value set in Laravel if unconfigured.
         langPath: null
+        # should we analyze translation replacements for invalid values?
+        invalidReplacements: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
         reportLikelyUntranslatedInBaseLocale: true
         # aggregate used translations and diff with the full locale database to detect potentially unused translations

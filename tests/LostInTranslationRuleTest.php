@@ -106,29 +106,6 @@ class LostInTranslationRuleTest extends RuleTestCase
         ]);
     }
 
-    public function testMalformedReplacement(): void
-    {
-        $this->analyse([
-            __DIR__ . '/data/malformed-replacement.php',
-        ], [
-            [
-                'Unused translation replacement: "bar"',
-                4,
-                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
-            ],
-            [
-                'Unused translation replacement: "foo"',
-                4,
-                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
-            ],
-            [
-                'Replacement string matches multiple variants: "foo"',
-                7,
-                Utils::formatTipForKeyValue('en', ':foo :FOO', ':foo :FOO'),
-            ]
-        ]);
-    }
-
     public function testMalformedChoice(): void
     {
         $this->analyse([

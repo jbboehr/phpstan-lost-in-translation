@@ -13,11 +13,14 @@ services:
     tags:
     - phpstan.rules.rule
   - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
+  - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
 conditionalTags:
 	jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.disallowDynamicTranslationStrings%
+	jbboehr\PHPStanLostInTranslation\InvalidReplacementRule:
+		phpstan.rules.rule: %lostInTranslation.invalidReplacements%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 
@@ -25,6 +28,7 @@ parametersSchema:
     lostInTranslation: structure([
         disallowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
+        invalidReplacements: bool()
         langPath: schema(string(), nullable()),
         reportLikelyUntranslatedInBaseLocale: bool(),
         unusedTranslationStrings: bool()
@@ -34,6 +38,7 @@ parameters:
     lostInTranslation:
         disallowDynamicTranslationStrings: false
         baseLocale: null
+        invalidReplacements: true
         langPath: null
         reportLikelyUntranslatedInBaseLocale: true
         unusedTranslationStrings: false

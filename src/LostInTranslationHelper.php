@@ -238,13 +238,6 @@ final class LostInTranslationHelper
                     $missingInLocales[] = $locale;
                 }
 
-                if ($call->replaceType !== null) {
-                    $errors = array_merge(
-                        $errors,
-                        $this->analyzeReplacements($call, $locale, $keyConstantString, $value ?? $keyConstantString),
-                    );
-                }
-
                 if ($call->isChoice) {
                     $errors = array_merge(
                         $errors,
@@ -308,55 +301,6 @@ final class LostInTranslationHelper
     public function diffUsed(): array
     {
         return $this->translationLoader->diffUsed();
-    }
-
-    /**
-     * @return list<IdentifierRuleError>
-     */
-    private function analyzeReplacements(TranslationCall $call, string $locale, string $key, string $value): array
-    {
-        if (null === $call->replaceType) {
-            return [];
-        }
-
-        /** @see Translator::makeReplacements() */
-        $errors = [];
-
-        $replaceKeys = [];
-        foreach ($call->replaceType->getConstantArrays() as $constantArray) {
-            foreach ($constantArray->getKeyType()->getConstantStrings() as $constantString) {
-                $replaceKeys[] = $constantString->getValue();
-            }
-        }
-
-        // Make sure they are stably sorted
-        sort($replaceKeys, SORT_NATURAL);
-
-        foreach ($replaceKeys as $search) {
-            $replaceVariantCount = (int) str_contains($value, ':' . Str::ucfirst($search))
-                + (int) str_contains($value, ':' . Str::upper($search))
-                + (int) str_contains($value, ':' . $search);
-
-            if ($replaceVariantCount === 0) {
-                $errors[] = RuleErrorBuilder::message(sprintf('Unused translation replacement: %s', Utils::e($search)))
-                    ->identifier('lostInTranslation.unusedReplacement')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
-            } elseif ($replaceVariantCount > 1) {
-                $errors[] = RuleErrorBuilder::message(sprintf('Replacement string matches multiple variants: %s', Utils::e($search)))
-                    ->identifier('lostInTranslation.multipleReplaceVariants')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
-            }
-        }
-
-        return $errors;
     }
 
     /**

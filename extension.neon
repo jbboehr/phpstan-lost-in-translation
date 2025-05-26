@@ -1,10 +1,8 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
-    arguments:
-        baseLocale: %lostInTranslation.baseLocale%
-        reportLikelyUntranslatedInBaseLocale: %lostInTranslation.reportLikelyUntranslatedInBaseLocale%
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
     arguments:
+        baseLocale: %lostInTranslation.baseLocale%
         langPath: %lostInTranslation.langPath%
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationCollector
     tags:
@@ -15,6 +13,7 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidChoiceRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
+  - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
 conditionalTags:
@@ -24,6 +23,8 @@ conditionalTags:
 		phpstan.rules.rule: %lostInTranslation.invalidChoices%
 	jbboehr\PHPStanLostInTranslation\InvalidReplacementRule:
 		phpstan.rules.rule: %lostInTranslation.invalidReplacements%
+	jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule:
+		phpstan.rules.rule: %lostInTranslation.missingTranslationStringInBaseLocale%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 
@@ -34,7 +35,7 @@ parametersSchema:
         invalidChoices: bool()
         invalidReplacements: bool()
         langPath: schema(string(), nullable()),
-        reportLikelyUntranslatedInBaseLocale: bool(),
+        missingTranslationStringInBaseLocale: bool(),
         unusedTranslationStrings: bool()
     ])
 
@@ -45,5 +46,5 @@ parameters:
         invalidChoices: true
         invalidReplacements: true
         langPath: null
-        reportLikelyUntranslatedInBaseLocale: true
+        missingTranslationStringInBaseLocale: true
         unusedTranslationStrings: false

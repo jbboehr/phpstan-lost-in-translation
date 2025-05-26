@@ -99,10 +99,6 @@ class LostInTranslationRuleTest extends RuleTestCase
                 'Missing translation string "foo" for locales: ja, zh',
                 14,
             ],
-            [
-                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
-                19
-            ],
         ]);
     }
 }

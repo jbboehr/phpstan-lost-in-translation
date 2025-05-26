@@ -37,9 +37,10 @@ abstract class RuleTestCase extends BaseRuleTestCase
     public function createLostInTranslationHelper(): LostInTranslationHelper
     {
         return new LostInTranslationHelper(
-            new TranslationLoader(__DIR__ . '/lang'),
-            baseLocale: 'en',
-            reportLikelyUntranslatedInBaseLocale: true,
+            new TranslationLoader(
+                langPath: __DIR__ . '/lang',
+                baseLocale: 'en',
+            ),
         );
     }
 

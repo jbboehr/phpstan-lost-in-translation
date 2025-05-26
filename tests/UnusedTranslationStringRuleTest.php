@@ -40,8 +40,6 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
     {
         return new LostInTranslationHelper(
             new TranslationLoader(__DIR__ . '/lang-unused'),
-            baseLocale: 'en',
-            reportLikelyUntranslatedInBaseLocale: true,
         );
     }
 

@@ -19,37 +19,20 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Str;
-use Illuminate\Translation\MessageSelector;
-use Illuminate\Translation\Translator;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
-use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\ObjectType;
-use PHPStan\Type\TypeCombinator;
-use PHPStan\Type\VerbosityLevel;
 
 final class LostInTranslationHelper
 {
-    private readonly ?string $baseLocale;
-
     private ObjectType $translatorType;
 
     public function __construct(
         private readonly TranslationLoader $translationLoader,
-        ?string $baseLocale = null,
-        private readonly bool $reportLikelyUntranslatedInBaseLocale = true,
     ) {
-        if (null === $baseLocale && class_exists(Application::class, false)) {
-            $baseLocale = Application::getInstance()->currentLocale();
-        }
-
-        $this->baseLocale = $baseLocale;
         $this->translatorType = new ObjectType(\Illuminate\Contracts\Translation\Translator::class);
     }
 
@@ -234,25 +217,8 @@ final class LostInTranslationHelper
             $missingInLocales = [];
 
             foreach ($items as [$locale, $value]) {
-                if (null === $value) {
+                if (null === $value && $locale !== $this->translationLoader->getBaseLocale()) {
                     $missingInLocales[] = $locale;
-                }
-            }
-
-            if (null !== $this->baseLocale) {
-                $missingInLocales = array_diff($missingInLocales, [$this->baseLocale]);
-
-                if ($this->reportLikelyUntranslatedInBaseLocale && $this->isLikelyUntranslated($keyConstantString)) {
-                    $errors[] = RuleErrorBuilder::message(sprintf(
-                        'Likely missing translation string %s for base locale: %s',
-                        json_encode($keyConstantString, JSON_THROW_ON_ERROR),
-                        $this->baseLocale
-                    ))
-                        ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
-                        ->metadata($metadata)
-                        ->line($line)
-                        ->file($file)
-                        ->build();
                 }
             }
 
@@ -271,6 +237,11 @@ final class LostInTranslationHelper
         }
 
         return $errors;
+    }
+
+    public function getBaseLocale(): ?string
+    {
+        return $this->translationLoader->getBaseLocale();
     }
 
     public function markUsed(TranslationCall $call): void
@@ -299,7 +270,7 @@ final class LostInTranslationHelper
     /**
      * @note currently the logic is just if it has a group, proboably could be better
      */
-    private function isLikelyUntranslated(string $key): bool
+    public function isLikelyUntranslated(string $key): bool
     {
         [, $group, $item] = $this->translationLoader->parseKey($key);
 

@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Support\NamespacedItemResolver;
 use Illuminate\Translation\Translator;
 use Symfony\Component\Finder\Finder;
@@ -45,10 +46,14 @@ final class TranslationLoader
     /** @var array<string, string> */
     private array $locations = [];
 
+    private readonly ?string $baseLocale;
+
     public function __construct(
         ?string $langPath = null,
+        ?string $baseLocale = null,
     ) {
         if ($langPath === null) {
+            // This is causing errors when the application isn't booted or something
 //            if (function_exists('lang_path')) {
 //                $langPath = lang_path();
 //            } else {
@@ -57,9 +62,21 @@ final class TranslationLoader
         }
 
         $this->langPath = $langPath;
+
+        if (null === $baseLocale && class_exists(Application::class, false)) {
+            $baseLocale = Application::getInstance()->currentLocale();
+        }
+
+        $this->baseLocale = $baseLocale;
+
         $this->namespacedItemResolver = new NamespacedItemResolver();
 
         $this->scan();
+    }
+
+    public function getBaseLocale(): ?string
+    {
+        return $this->baseLocale;
     }
 
     /**

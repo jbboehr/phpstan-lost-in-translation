@@ -12,8 +12,3 @@ $translator->get('translator' . ' ' . 'basic');
 
 /** @var "foo"|"bar" $multi */
 $translator->get($multi);
-
-
-
-
-$translator->get('messages.in_ja_and_zh');

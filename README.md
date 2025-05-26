@@ -171,7 +171,7 @@ strings in the base locale with a non-empty group.
 ```neon
 parameters:
     lostInTranslation:
-        reportLikelyUntranslatedInBaseLocale: true
+        missingTranslationStringInBaseLocale: true
 ```
 
 ```php
@@ -181,9 +181,9 @@ __('foo.bar', [], 'en');
 ```
 
 ```console
-$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/possibly-untranslated-base-locale.php
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/missing-translation-string-in-base-locale.php
  ------ -----------------------------------------------------------------
-  Line   possibly-untranslated-base-locale.php
+  Line   missing-translation-string-in-base-locale.php
  ------ -----------------------------------------------------------------
   3      Likely missing translation string "foo.bar" for base locale: en
          🪪  lostInTranslation.missingBaseLocaleTranslationString
@@ -271,7 +271,7 @@ parameters:
         # should we analyze translation replacements for invalid values?
         invalidReplacements: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
-        reportLikelyUntranslatedInBaseLocale: true
+        missingTranslationStringInBaseLocale: true
         # aggregate used translations and diff with the full locale database to detect potentially unused translations
         unusedTranslationStrings: false
 ```

@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationCollector;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader;

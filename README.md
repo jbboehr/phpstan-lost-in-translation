@@ -37,7 +37,13 @@ following extra PHPStan extensions installed:
 ### Find missing translation strings
 
 Your application's source files will be scanned for calls to the Laravel translator and checked for undefined
-translation strings.
+translation strings. **Enabled by default.**
+
+```neon
+parameters:
+    lostInTranslation:
+        missingTranslationStrings: true
+```
 
 ```php
 <?php
@@ -103,7 +109,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress --error-for
  ------ --------------------------------------------------------------------------
 ```
 
-### Find possibly unused translations
+### Find unused translations
 
 We can attempt to detect unused translation strings. **Disabled by default.**
 
@@ -151,7 +157,7 @@ $translator->get($craycray);
 ```
 
 ```console
-phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/dynamic.php
+phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/dynamic-translation-string.php
  ------ ----------------------------------------------------------------------
   Line   dynamic.php
  ------ ----------------------------------------------------------------------
@@ -162,7 +168,7 @@ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/dy
  ------ ----------------------------------------------------------------------
 ```
 
-### Find strings likely untranslated in the base locale
+### Find strings untranslated in the base locale
 
 Missing translation strings in the base locale are not reported as missing. However, some translation
 strings may still need to be specified even in the base locale. Currently, this check just reports untranslated
@@ -171,7 +177,7 @@ strings in the base locale with a non-empty group.
 ```neon
 parameters:
     lostInTranslation:
-        missingTranslationStringInBaseLocale: true
+        missingTranslationStringsInBaseLocale: true
 ```
 
 ```php
@@ -211,9 +217,9 @@ __(':foo :FOO', ['foo' => 'bar'], 'en');
 ```
 
 ```console
-$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/malformed-replacements.php
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/invalid-replacement.php
  ------ -------------------------------------------------------------------------------
-  Line   malformed-replacements.php
+  Line   invalid-replacement.php
  ------ -------------------------------------------------------------------------------
   4      Unused translation replacement: "bar"
          🪪  lostInTranslation.unusedReplacement
@@ -244,9 +250,9 @@ trans_choice('{0} There are none|{1} There is one|[2] There are :count', 3, [], 
 ```
 
 ```console
-$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/choice.php
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/invalid-choice.php
  ------ ------------------------------------------------------------------------------------------------------------------
-  Line   choice.php
+  Line   invalid-choice.php
  ------ ------------------------------------------------------------------------------------------------------------------
   3      Translation choice does not cover all possible cases for number of type: 3
          🪪  lostInTranslation.choiceMissingCase
@@ -270,8 +276,10 @@ parameters:
         invalidChoices: true
         # should we analyze translation replacements for invalid values?
         invalidReplacements: true
+        # look for missing translation strings? (main feature)
+        missingTranslationStrings: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
-        missingTranslationStringInBaseLocale: true
+        missingTranslationStringsInBaseLocale: true
         # aggregate used translations and diff with the full locale database to detect potentially unused translations
         unusedTranslationStrings: false
 ```

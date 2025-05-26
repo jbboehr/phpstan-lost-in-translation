@@ -20,10 +20,8 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
-use PhpParser\Node\Arg;
 use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
-use PHPStan\Type\ObjectType;
 
 /**
  * @implements Collector<Node\Expr\CallLike, string>

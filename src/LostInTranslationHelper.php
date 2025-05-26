@@ -21,8 +21,6 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
-use PHPStan\Rules\IdentifierRuleError;
-use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 
@@ -201,42 +199,6 @@ final class LostInTranslationHelper
         }
 
         return $rv;
-    }
-
-    /**
-     * @return list<IdentifierRuleError>
-     */
-    public function process(TranslationCall $call): array
-    {
-        $line = $call->line;
-        $file = $call->file;
-        $metadata = Utils::callToMetadata($call);
-        $errors = [];
-
-        foreach ($this->gatherPossibleTranslations($call) as $keyConstantString => $items) {
-            $missingInLocales = [];
-
-            foreach ($items as [$locale, $value]) {
-                if (null === $value && $locale !== $this->translationLoader->getBaseLocale()) {
-                    $missingInLocales[] = $locale;
-                }
-            }
-
-            if (count($missingInLocales) > 0) {
-                $errors[] = RuleErrorBuilder::message(sprintf(
-                    'Missing translation string %s for locales: %s',
-                    json_encode($keyConstantString, JSON_THROW_ON_ERROR),
-                    join(', ', $missingInLocales)
-                ))
-                    ->identifier('lostInTranslation.missingTranslationString')
-                    ->metadata($metadata)
-                    ->line($line)
-                    ->file($file)
-                    ->build();
-            }
-        }
-
-        return $errors;
     }
 
     public function getBaseLocale(): ?string

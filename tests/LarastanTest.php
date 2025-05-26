@@ -19,17 +19,17 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<LostInTranslationRule>
+ * @extends RuleTestCase<MissingTranslationStringRule>
  */
 class LarastanTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
-        return $this->createLostInTranslationRule();
+        return new MissingTranslationStringRule($this->getLostInTranslationHelper());
     }
 
     public function setUp(): void

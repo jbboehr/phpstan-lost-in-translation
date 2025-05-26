@@ -21,12 +21,12 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $expectedErrors = [
     'lang/ja.json:-1:lostInTranslation.possiblyUnusedTranslationString',
-    'src/choice:3:lostInTranslation.choiceMissingCase',
-    'src/dynamic:5:lostInTranslation.dynamicTranslationString',
-    'src/dynamic:8:lostInTranslation.dynamicTranslationString',
-    'src/malformed-replacements:4:lostInTranslation.unusedReplacement',
-    'src/malformed-replacements:4:lostInTranslation.unusedReplacement',
-    'src/malformed-replacements:7:lostInTranslation.multipleReplaceVariants',
+    'src/dynamic-translation-string:5:lostInTranslation.dynamicTranslationString',
+    'src/dynamic-translation-string:8:lostInTranslation.dynamicTranslationString',
+    'src/invalid-choice:3:lostInTranslation.choiceMissingCase',
+    'src/invalid-replacement:4:lostInTranslation.unusedReplacement',
+    'src/invalid-replacement:4:lostInTranslation.unusedReplacement',
+    'src/invalid-replacement:7:lostInTranslation.multipleReplaceVariants',
     'src/missing-translation-string:3:lostInTranslation.missingTranslationString',
     'src/missing-translation-string-in-base-locale:3:lostInTranslation.missingBaseLocaleTranslationString',
 ];

@@ -22,7 +22,6 @@ namespace jbboehr\PHPStanLostInTranslation;
 use Illuminate\Support\Str;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;

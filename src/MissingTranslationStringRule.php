@@ -21,13 +21,13 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
-use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * @implements Rule<CollectedDataNode|Node\Expr\CallLike>
+ * @implements Rule<Node\Expr\CallLike>
  */
-final class LostInTranslationRule implements Rule
+final class MissingTranslationStringRule implements Rule
 {
     public function __construct(
         private readonly LostInTranslationHelper $helper,
@@ -42,13 +42,39 @@ final class LostInTranslationRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            $result = $this->helper->parseCallLike($node, $scope);
+            $call = $this->helper->parseCallLike($node, $scope);
 
-            if (null === $result) {
+            if (null === $call) {
                 return [];
             }
 
-            return $this->helper->process($result);
+            $errors = [];
+            $baseLocale = $this->helper->getBaseLocale();
+
+            foreach ($this->helper->gatherPossibleTranslations($call) as $key => $items) {
+                $missingInLocales = [];
+
+                foreach ($items as [$locale, $value]) {
+                    if (null === $value && $locale !== $baseLocale) {
+                        $missingInLocales[] = $locale;
+                    }
+                }
+
+                if (count($missingInLocales) > 0) {
+                    $errors[] = RuleErrorBuilder::message(sprintf(
+                        'Missing translation string %s for locales: %s',
+                        json_encode($key, JSON_THROW_ON_ERROR),
+                        join(', ', $missingInLocales)
+                    ))
+                        ->identifier('lostInTranslation.missingTranslationString')
+                        ->metadata(Utils::callToMetadata($call))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
+                }
+            }
+
+            return $errors;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }

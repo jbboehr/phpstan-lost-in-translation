@@ -44,3 +44,6 @@ trans_choice('{1,3} two', 4, [], 'en');
 /** Make sure we can call this through the object */
 /** @var \Illuminate\Contracts\Translation\Translator $translator */
 $translator->choice('{0} There are none|{1} There is one|[2] There are :count', 3, [], 'en');
+
+/** Make sure we can handle the variant without numbers */
+trans_choice('Singular|Plural', 2, [], 'en');

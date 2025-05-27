@@ -88,6 +88,11 @@ final class InvalidChoiceRule implements Rule
 
         foreach ($segments as $segment) {
             if (1 !== preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
+                if (count($segments) === 2 && 1 !== preg_match('~^[\[{]~', ltrim($segment))) {
+                    // If it has exactly two segments and doesn't start with "{" or "[", it's probably the singular/plural variant
+                    continue;
+                }
+
                 $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
                     ->identifier('lostInTranslation.malformedTranslationChoice')
                     ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))

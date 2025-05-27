@@ -25,6 +25,8 @@ final class ShouldNotHappenException extends \RuntimeException
 
     private static ?string $url = null;
 
+    private static string $composerJsonPath = __DIR__ . '/../composer.json';
+
     /**
      * @throws self
      */
@@ -51,7 +53,7 @@ final class ShouldNotHappenException extends \RuntimeException
         }
 
         try {
-            $raw = file_get_contents(__DIR__ . '/../composer.json');
+            $raw = file_exists(self::$composerJsonPath) ? file_get_contents(self::$composerJsonPath) : false;
 
             if (false === $raw) {
                 return self::$url = self::URL;
@@ -75,6 +77,8 @@ final class ShouldNotHappenException extends \RuntimeException
             }
 
             return self::$url = $url;
+        } catch (\JsonException) {
+            return self::$url = self::URL;
         } catch (\Throwable $e) {
             error_log((string) $e);
 

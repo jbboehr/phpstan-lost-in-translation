@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use Illuminate\Foundation\Application;
 use PHPStan\Type\VerbosityLevel;
 
 /**
@@ -26,6 +27,8 @@ use PHPStan\Type\VerbosityLevel;
  */
 final class Utils
 {
+    private static string $applicationClass = Application::class;
+
     /**
      * @param array<string, string> $extra
      * @return array<string, string>
@@ -46,17 +49,38 @@ final class Utils
         return array_merge($metadata, $extra);
     }
 
+    public static function detectLangPath(): string
+    {
+        $applicationClass = self::$applicationClass;
+
+        if (!class_exists($applicationClass)) {
+            return 'lang';
+        }
+
+        $app = $applicationClass::getInstance();
+
+        if (!($app instanceof Application) || !$app->isBooted()) {
+            return 'lang';
+        }
+
+        return $app->langPath();
+    }
+
     public static function e(string $value): string
     {
         try {
             return json_encode($value, JSON_THROW_ON_ERROR);
-        } catch (\Throwable $exception) {
-            throw new \RuntimeException($exception->getMessage(), $exception->getCode(), $exception);
+        } catch (\JsonException $exception) {
+            throw new \RuntimeException('JsonException: ' . $exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
-    public static function formatTipForKeyValue(string $locale, string $key, string $value): string
+    public static function formatTipForKeyValue(string $locale, string $key, ?string $value = null): string
     {
-        return sprintf("Locale: %s, Key: %s, Value: %s", self::e($locale), self::e($key), self::e($value));
+        if (null === $value || $key === $value) {
+            return sprintf("Locale: %s, Key: %s", self::e($locale), self::e($key));
+        } else {
+            return sprintf("Locale: %s, Key: %s, Value: %s", self::e($locale), self::e($key), self::e($value));
+        }
     }
 }

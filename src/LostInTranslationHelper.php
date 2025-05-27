@@ -29,8 +29,9 @@ use PHPStan\Type\Type;
 /**
  * @phpstan-type PossibleTranslationRecord array{string, ?string}
  * @phpstan-type PossibleTranslationRecordCollection array<string, list<PossibleTranslationRecord>>
+ * @final
  */
-final class LostInTranslationHelper
+class LostInTranslationHelper
 {
     private ObjectType $translatorType;
 

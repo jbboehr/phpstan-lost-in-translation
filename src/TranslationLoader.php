@@ -53,12 +53,7 @@ final class TranslationLoader
         ?string $baseLocale = null,
     ) {
         if ($langPath === null) {
-            // This is causing errors when the application isn't booted or something
-//            if (function_exists('lang_path')) {
-//                $langPath = lang_path();
-//            } else {
-                $langPath = 'lang';
-//            }
+            $langPath = Utils::detectLangPath();
         }
 
         $this->langPath = $langPath;
@@ -87,16 +82,6 @@ final class TranslationLoader
         return $this->foundLocales;
     }
 
-    public function has(string $locale, string $key): bool
-    {
-        return $this->get($locale, $key) !== null;
-    }
-
-    public function hasLocale(string $locale): bool
-    {
-        return isset($this->data[$locale]);
-    }
-
     public function get(string $locale, string $key): ?string
     {
         [$namespace, $group, $item] = $this->parseKey($key);
@@ -108,15 +93,7 @@ final class TranslationLoader
     {
         [$namespace, $group, $item] = $this->parseKey($key);
 
-        if ($locale === '*') {
-            $locales = $this->getFoundLocales();
-        } else {
-            $locales = [$locale];
-        }
-
-        foreach ($locales as $k_locale) {
-            $this->used[$k_locale][$namespace][$group][$item] = true;
-        }
+        $this->used[$locale][$namespace][$group][$item] = true;
     }
 
     /**

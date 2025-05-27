@@ -87,8 +87,8 @@ final class InvalidChoiceRule implements Rule
         $unionType = null;
 
         foreach ($segments as $segment) {
-            if (false === preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
-                $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice'))
+            if (1 !== preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
+                $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
                     ->identifier('lostInTranslation.malformedTranslationChoice')
                     ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
@@ -98,12 +98,9 @@ final class InvalidChoiceRule implements Rule
                 continue;
             }
 
-            /** not sure why this is failing */
+            /** this may have been failing due to weird return value of preg_match, probably fixed */
             /** @phpstan-ignore-next-line smaller.alwaysFalse */
-            if (count($matches) < 2) {
-                // this is probably a normal translation string - we could raise an error but :shrug:
-                continue;
-            }
+            assert(count($matches) >= 2);
 
             [, $condition] = $matches;
 

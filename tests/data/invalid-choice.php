@@ -27,3 +27,20 @@ trans_choice('{2} There are two|{3} There are three', $n2, [], 'en');
 
 /** will error as range is not covered */
 trans_choice('{2} There are two|{3} There are three', $n3, [], 'en');
+
+/** non-numeric in choice */
+trans_choice('{2} two|{a} three', 2, [], 'en');
+trans_choice('{2} two|{3,a} three', 2, [], 'en');
+
+/** bad choice format */
+trans_choice('{2} two|{3 three', 2, [], 'en');
+
+/* you really gonna do this */
+trans_choice('{*}all the things', 2, [], 'en');
+
+/* check ranges that are not wildcard - does laravel support this? */
+trans_choice('{1,3} two', 4, [], 'en');
+
+/** Make sure we can call this through the object */
+/** @var \Illuminate\Contracts\Translation\Translator $translator */
+$translator->choice('{0} There are none|{1} There is one|[2] There are :count', 3, [], 'en');

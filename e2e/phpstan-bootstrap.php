@@ -6,7 +6,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 
 $bladeStanVersion = \Composer\InstalledVersions::getVersion('tomasvotruba/bladestan');
 if (null !== $bladeStanVersion) {
-    if (version_compare($bladeStanVersion, '0.7', '>=')) {
+    if (version_compare($bladeStanVersion, '0.7', '>=') || str_starts_with($bladeStanVersion, 'dev-')) {
         require __DIR__ . '/../vendor/tomasvotruba/bladestan/bootstrap.php';
         /** @var \Illuminate\Contracts\Foundation\Application $app */
         $app->langPath(__DIR__ . '/lang');

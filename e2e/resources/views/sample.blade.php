@@ -9,3 +9,5 @@
     \Illuminate\Support\Facades\App::make('translator')->get('via app facade');
     app(\Illuminate\Translation\Translator::class)->get('via app function with class');
 @endphp
+
+{{ __('only used in blade') }}

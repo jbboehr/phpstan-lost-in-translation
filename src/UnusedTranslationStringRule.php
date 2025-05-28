@@ -46,7 +46,6 @@ final class UnusedTranslationStringRule implements Rule
         try {
             /** @var array<string, list<PossibleTranslationRecordCollection>> $data */
             $data = $node->get(UnusedTranslationStringCollector::class);
-
             $errors = [];
 
             foreach ($data as $results) {

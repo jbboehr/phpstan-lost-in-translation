@@ -29,6 +29,11 @@ use PHPStan\Collectors\Collector;
  */
 final class UnusedTranslationStringCollector implements Collector
 {
+    /**
+     * @phpstan-var ?PossibleTranslationRecordCollection
+     */
+    private static ?array $deferred = null;
+
     public function __construct(
         private readonly LostInTranslationHelper $helper,
     ) {
@@ -42,13 +47,25 @@ final class UnusedTranslationStringCollector implements Collector
     public function processNode(Node $node, Scope $scope): ?array
     {
         try {
-            $call = $this->helper->parseCallLike($node, $scope);
+            $possibleTranslations = $this->helper->parseCallLike($node, $scope)?->possibleTranslations;
 
-            if (null === $call) {
+            if (str_contains($scope->getFile(), 'blade-compiled')) {
+                if (null !== $possibleTranslations) {
+                    self::$deferred = array_merge(self::$deferred ?? [], $possibleTranslations);
+                }
                 return null;
             }
 
-            return $call->possibleTranslations;
+            if (null !== self::$deferred) {
+                if (null !== $possibleTranslations) {
+                    $possibleTranslations = array_merge(self::$deferred, $possibleTranslations);
+                } else {
+                    $possibleTranslations = self::$deferred;
+                }
+                self::$deferred = null;
+            }
+
+            return $possibleTranslations;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }

@@ -31,25 +31,26 @@ $expectedErrors = [
     'src/missing-translation-string-in-base-locale:3:lostInTranslation.missingBaseLocaleTranslationString',
 ];
 
-if (version_compare(\Composer\InstalledVersions::getVersion('tomasvotruba/bladestan'), '0.7', '<')) {
+$bladestanVersion = \Composer\InstalledVersions::getVersion('tomasvotruba/bladestan');
+if (version_compare($bladestanVersion, '0.7', '>=') || str_starts_with($bladestanVersion, 'dev-')) {
     $expectedErrors = array_merge($expectedErrors, [
-        'src/blade:3:',
-        'src/blade:3:',
-        'src/blade:3:',
-        'src/blade:3:',
-        'src/blade:3:',
-        'src/blade:3:',
-        'src/blade:3:',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:lostInTranslation.missingTranslationString',
     ]);
 } else {
     $expectedErrors = array_merge($expectedErrors, [
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
-        'src/blade:3:lostInTranslation.missingTranslationString',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
+        'src/blade:3:',
     ]);
 }
 

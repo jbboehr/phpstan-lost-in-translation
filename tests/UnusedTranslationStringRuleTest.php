@@ -49,15 +49,15 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
         ], [
             [
                 'Possibly unused translation string "unused_in_en" for locale: en',
-                -1
+                3
             ],
             [
                 'Possibly unused translation string "unused_in_ja" for locale: ja',
-                -1
+                3
             ],
             [
                 'Possibly unused translation string "used_in_en" for locale: ja',
-                -1
+                4
             ],
         ]);
     }

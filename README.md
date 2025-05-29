@@ -128,11 +128,11 @@ parameters:
 ```console
 $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
  ------ --------------------------------------------------------------------------------------
-  Line   ./e2e/lang/ja.json
+  Line   lang/ja.json
  ------ --------------------------------------------------------------------------------------
-  -1     Possibly unused translation string "this string is not used anywhere" for locale: ja
+  2      Possibly unused translation string "this string is not used anywhere" for locale: ja
          🪪  lostInTranslation.possiblyUnusedTranslationString
- ------ --------------------------------------------------------------------------------------
+ ------ -------------------------------------------------------------------------------------- 
 ```
 
 ### Disallow dynamic translations strings

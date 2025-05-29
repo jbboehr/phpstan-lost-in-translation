@@ -62,7 +62,7 @@ final class UnusedTranslationStringRule implements Rule
             $possiblyUnused = $this->helper->diffUsed();
 
             foreach ($possiblyUnused as $item) {
-                [$locale, $key, $file] = $item;
+                [$locale, $key, $file, $line] = $item;
 
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Possibly unused translation string %s for locale: %s',
@@ -71,7 +71,7 @@ final class UnusedTranslationStringRule implements Rule
                 ))
                     ->identifier('lostInTranslation.possiblyUnusedTranslationString')
                     ->file($file)
-                    ->line(-1)
+                    ->line($line)
                     ->build();
             }
 

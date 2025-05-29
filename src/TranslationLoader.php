@@ -22,6 +22,8 @@ namespace jbboehr\PHPStanLostInTranslation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\NamespacedItemResolver;
 use Illuminate\Translation\Translator;
+use PhpParser\NodeTraverser;
+use PhpParser\ParserFactory;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -43,7 +45,7 @@ final class TranslationLoader
     /** @var list<string> */
     private array $foundLocales = [];
 
-    /** @var array<string, string> */
+    /** @var array<string, array{string, int}> */
     private array $locations = [];
 
     private readonly ?string $baseLocale;
@@ -51,19 +53,19 @@ final class TranslationLoader
     public function __construct(
         ?string $langPath = null,
         ?string $baseLocale = null,
+        private readonly ?ParserFactory $parserFactory = null,
     ) {
         if ($langPath === null) {
             $langPath = Utils::detectLangPath();
         }
 
-        $this->langPath = $langPath;
+        $this->langPath = realpath($langPath) ?: $langPath;
 
         if (null === $baseLocale && class_exists(Application::class, false)) {
             $baseLocale = Application::getInstance()->currentLocale();
         }
 
         $this->baseLocale = $baseLocale;
-
         $this->namespacedItemResolver = new NamespacedItemResolver();
 
         $this->scan();
@@ -97,7 +99,7 @@ final class TranslationLoader
     }
 
     /**
-     * @return list<array{string, string, string}>
+     * @return list<array{string, string, string, int}>
      */
     public function diffUsed(): array
     {
@@ -121,9 +123,9 @@ final class TranslationLoader
                                 $buf = $namespace . '::' . $buf;
                             }
 
-                            $location = $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $item] ?? 'unknown';
+                            [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $item] ?? ['unknown', -1];
 
-                            $possiblyUnused[] = [$locale, $buf, $location];
+                            $possiblyUnused[] = [$locale, $buf, $f, $l];
                         }
                     }
                 }
@@ -192,35 +194,23 @@ final class TranslationLoader
             $namespace = '*';
             $foundLocales[$locale] = true;
 
-            $raw = match ($file->getExtension()) {
+            [$raw, $lineNumbers] = match ($file->getExtension()) {
                 'php' => $this->loadPhp($file),
                 'json' => $this->loadJson($file),
-                default => null,
+                default => [null, null],
             };
 
-            if (!is_array($raw)) {
+            if (null === $raw) {
                 $this->warnings[] = sprintf("Invalid data type %s in file %s", gettype($raw), $file->getRelativePathname());
                 continue;
             }
 
             foreach ($raw as $k => $v) {
-                if (!is_string($k)) {
-                    $this->warnings[] = sprintf("Invalid key \"%s\" in file %s", print_r($k, true), $file->getRelativePathname());
-                    continue;
-                }
-                if (!is_string($v)) {
-                    $this->warnings[] = sprintf(
-                        "Invalid data type %s for key \"%s\"  in file %s",
-                        gettype($v),
-                        $k,
-                        $file->getRelativePathname()
-                    );
-
-                    continue;
-                }
-
                 $this->data[$locale][$namespace][$group][$k] = $v;
-                $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $k] = $file->getPathname();
+                $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $k] = [
+                    $file->getRealPath(),
+                    ($lineNumbers[$k] ?? -1),
+                ];
             }
         }
 
@@ -232,15 +222,100 @@ final class TranslationLoader
         $this->foundLocales = $foundLocales;
     }
 
+    /**
+     * @return array{array<string, string>, array<string, int>}|array{null, null}
+     */
     private function loadPhp(SplFileInfo $file): mixed
     {
-        return (static function (string $__): mixed {
+        try {
+            $parserFactory = $this->parserFactory ?? new ParserFactory();
+            $parser = $parserFactory->createForHostVersion();
+            $stmts = $parser->parse($file->getContents());
+            assert($stmts !== null);
+
+            $visitor = new KeyLineNumberVisitor();
+            $traverser = new NodeTraverser();
+            $traverser->addVisitor($visitor);
+            $traverser->traverse($stmts);
+            $lineNumbers = $visitor->getLineNumbers();
+        } catch (\Throwable $e) {
+            $this->warnings[] = sprintf('Failed to parse file "%s" with error %s', $file->getRelativePathname(), $e->getMessage());
+            $lineNumbers = [];
+        }
+
+        $raw = (static function (string $__): mixed {
             return require $__;
         })($file->getPathname());
+
+        if (!is_array($raw)) {
+            $this->warnings[] = sprintf('Invalid data type "%s" for file "%s"', gettype($raw), $file->getRelativePathname());
+            return [null, null];
+        }
+
+        $results = [];
+
+        foreach ($raw as $k => $v) {
+            $line = $lineNumbers[$k] ?? -1;
+
+            if (!is_string($k)) {
+                $this->warnings[] = sprintf("Invalid key \"%s\" in file %s:%d", print_r($k, true), $file->getRelativePathname(), $line);
+                continue;
+            }
+
+            if (!is_string($v)) {
+                $this->warnings[] = sprintf("Invalid value \"%s\" in file %s:%d", print_r($v, true), $file->getRelativePathname(), $line);
+                continue;
+            }
+
+            $results[$k] = $v;
+        }
+
+        return [$results, $lineNumbers];
     }
 
-    private function loadJson(SplFileInfo $file): mixed
+    /**
+     * @return array{array<string, string>, array<string, int>}|array{null, null}
+     */
+    private function loadJson(SplFileInfo $file): array
     {
-        return json_decode($file->getContents(), true, JSON_THROW_ON_ERROR);
+        $buffer = $file->getContents();
+        $raw = json_decode($buffer, true, JSON_THROW_ON_ERROR);
+        if (!is_array($raw)) {
+            $this->warnings[] = sprintf('Invalid data type "%s" for file "%s"', gettype($raw), $file->getRelativePathname());
+            return [null, null];
+        }
+
+        $results = [];
+        $lineNumbers = [];
+
+        foreach ($raw as $k => $v) {
+            // this is gross but will probably work most of the time
+            try {
+                $encoded = json_encode($k, JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                continue;
+            }
+
+            if (false !== ($pos = strpos($buffer, $encoded))) {
+                $line = 1 + substr_count($buffer, "\n", 0, $pos);
+            } else {
+                $line = -1;
+            }
+
+            if (!is_string($k)) {
+                $this->warnings[] = sprintf("Invalid key \"%s\" in file %s:%d", print_r($k, true), $file->getRelativePathname(), $line);
+                continue;
+            }
+
+            if (!is_string($v)) {
+                $this->warnings[] = sprintf("Invalid value \"%s\" in file %s:%d", print_r($v, true), $file->getRelativePathname(), $line);
+                continue;
+            }
+
+            $results[$k] = $v;
+            $lineNumbers[$k] = $line;
+        }
+
+        return [$results, $lineNumbers];
     }
 }

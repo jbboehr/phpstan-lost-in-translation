@@ -29,6 +29,9 @@ use PHPStan\Collectors\Collector;
  */
 final class UnusedTranslationStringCollector implements Collector
 {
+    /** @var ?PossibleTranslationRecordCollection */
+    private ?array $queued = null;
+
     public function __construct(
         private readonly LostInTranslationHelper $helper,
     ) {
@@ -42,15 +45,46 @@ final class UnusedTranslationStringCollector implements Collector
     public function processNode(Node $node, Scope $scope): ?array
     {
         try {
-            $call = $this->helper->parseCallLike($node, $scope);
-
-            if (null === $call) {
-                return null;
+            if (str_contains($scope->getFile(), 'blade-compiled')) {
+                return [];
             }
 
-            return $call->possibleTranslations;
+            return self::merge(
+                $this->helper->parseCallLike($node, $scope)?->possibleTranslations,
+                $this->queued,
+            );
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }
+    }
+
+    /**
+     * @phpstan-param PossibleTranslationRecordCollection $data
+     */
+    public function push(array $data): void
+    {
+        $this->queued = self::merge($this->queued, $data);
+    }
+
+    /**
+     * @param ?PossibleTranslationRecordCollection $left
+     * @param ?PossibleTranslationRecordCollection $right
+     * @return ?PossibleTranslationRecordCollection
+     */
+    private static function merge(?array $left, ?array $right): ?array
+    {
+        if ($left === null || count($left) <= 0) {
+            return $right;
+        }
+
+        if ($right === null || count($right) <= 0) {
+            return $left;
+        }
+
+        foreach ($right as $key => $items) {
+            $left[$key] = array_merge($left[$key] ?? [], $items);
+        }
+
+        return $left;
     }
 }

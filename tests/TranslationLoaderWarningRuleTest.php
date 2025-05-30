@@ -79,7 +79,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
             // lang-warn/es.json
             [
                 "Invalid key: 0",
-                -1,
+                2,
             ],
             // lang-warn/ja.json
             [

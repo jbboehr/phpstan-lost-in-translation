@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use JsonStreamingParser\Parser;
 use Symfony\Component\Finder\SplFileInfo;
 
 final class JsonLoader
@@ -26,6 +27,7 @@ final class JsonLoader
     public function load(SplFileInfo $file): LoadResult
     {
         $warnings = [];
+
         $buffer = $file->getContents();
         try {
             $raw = json_decode($buffer, true, flags: JSON_THROW_ON_ERROR);
@@ -47,22 +49,21 @@ final class JsonLoader
             return new LoadResult([], [], $warnings);
         }
 
+        try {
+            $lineNumbers = $this->buildLineNumberMap($file);
+        } catch (\Throwable $e) {
+            $warnings[] = [
+                sprintf('Failed to get line numbers for JSON file: %s', $e->getMessage()),
+                $file->getPathname(),
+                -1,
+            ];
+            $lineNumbers = [];
+        }
+
         $results = [];
-        $lineNumbers = [];
 
         foreach ($raw as $k => $v) {
-            // this is gross but will probably work most of the time
-            try {
-                $encoded = json_encode($k, JSON_THROW_ON_ERROR);
-            } catch (\JsonException) {
-                continue;
-            }
-
-            if (false !== ($pos = strpos($buffer, $encoded))) {
-                $line = 1 + substr_count($buffer, "\n", 0, $pos);
-            } else {
-                $line = -1;
-            }
+            $line = $lineNumbers[$k] ?? $lineNumbers["int\0" . $k] ?? -1;
 
             if (!is_string($k)) {
                 $warnings[] = [
@@ -83,9 +84,24 @@ final class JsonLoader
             }
 
             $results[$k] = $v;
-            $lineNumbers[$k] = $line;
         }
 
         return new LoadResult($results, $lineNumbers, $warnings);
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function buildLineNumberMap(SplFileInfo $file): array
+    {
+        $fh = fopen($file->getPathname(), 'r');
+        if (false === $fh) {
+            return [];
+        }
+
+        $listener = new StreamingJsonListener();
+        $parser = new Parser($fh, $listener);
+        $parser->parse();
+        return $listener->getLocations();
     }
 }

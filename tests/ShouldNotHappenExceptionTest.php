@@ -21,11 +21,14 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\InvalidChoiceRule;
+use jbboehr\PHPStanLostInTranslation\InvalidLocaleRule;
 use jbboehr\PHPStanLostInTranslation\InvalidReplacementRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule;
 use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
 use PhpParser\Node\Expr\FuncCall;
@@ -145,8 +148,6 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
             ->willThrowException($ex);
         $mock->method('markUsed')
             ->willThrowException($ex);
-        $obj = new $className($mock);
-        $this->assertTrue($obj instanceof Rule || $obj instanceof Collector);
 
         if ($className === UnusedTranslationStringRule::class) {
             /** @phpstan-ignore-next-line phpstanApi.constructor */
@@ -155,10 +156,20 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
                     UnusedTranslationStringCollector::class => [[['', '']]],
                 ],
             ], true);
+            $obj = new $className($mock);
+        } elseif ($className === TranslationLoaderWarningRule::class) {
+            $node = $this->createStub(FuncCall::class);
+            $loader = $this->createMock(TranslationLoader::class);
+            $loader->method('getWarnings')
+                ->willThrowException($ex);
+
+            $obj = new $className($loader);
         } else {
             $node = $this->createStub(FuncCall::class);
+            $obj = new $className($mock);
         }
 
+        $this->assertTrue($obj instanceof Rule || $obj instanceof Collector);
         $this->expectException(ShouldNotHappenException::class);
         $this->expectExceptionMessage('phpstan-lost-in-translation');
 
@@ -176,6 +187,8 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
         [MissingTranslationStringInBaseLocaleRule::class],
         [UnusedTranslationStringRule::class],
         [UnusedTranslationStringCollector::class],
+        [TranslationLoaderWarningRule::class],
+        [InvalidLocaleRule::class],
     ];
 
     /**

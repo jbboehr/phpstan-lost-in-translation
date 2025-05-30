@@ -25,7 +25,11 @@ use Illuminate\Translation\Translator;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Symfony\Component\Finder\Finder;
 
-final class TranslationLoader
+/**
+ * @final
+ * @internal
+ */
+class TranslationLoader
 {
     private readonly string $langPath;
 

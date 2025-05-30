@@ -17,5 +17,19 @@
  */
 declare(strict_types=1);
 
-// Make sure to load phpstan's phpparser before phpunit's otherwise there are weird class conflicts
-require_once 'phar://' . __DIR__ . '/../vendor/phpstan/phpstan/phpstan.phar/vendor/autoload.php';
+namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
+
+final class LoadResult
+{
+    /**
+     * @param array<string, string> $translations
+     * @param array<string, int> $locations
+     * @param list<array{string, string, int}> $warnings
+     */
+    public function __construct(
+        public readonly array $translations,
+        public readonly array $locations,
+        public readonly array $warnings,
+    ) {
+    }
+}

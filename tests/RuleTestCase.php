@@ -20,8 +20,10 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase as BaseRuleTestCase;
 
@@ -39,6 +41,8 @@ abstract class RuleTestCase extends BaseRuleTestCase
             new TranslationLoader(
                 langPath: __DIR__ . '/lang',
                 baseLocale: 'en',
+                phpLoader: new PhpLoader(),
+                jsonLoader: new JsonLoader(),
             ),
         );
     }

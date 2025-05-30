@@ -17,12 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
-class KeyLineNumberVisitor extends NodeVisitorAbstract
+final class KeyLineNumberVisitor extends NodeVisitorAbstract
 {
     /** @var array<string, int> */
     private array $lineNumbers = [];

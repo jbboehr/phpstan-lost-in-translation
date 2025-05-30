@@ -19,12 +19,13 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
-use WeakMap;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
+use WeakMap;
 
 /**
  * @phpstan-type PossibleTranslationRecord array{string, ?string}

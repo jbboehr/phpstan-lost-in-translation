@@ -1,6 +1,8 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader
     arguments:
         baseLocale: %lostInTranslation.baseLocale%
         langPath: %lostInTranslation.langPath%

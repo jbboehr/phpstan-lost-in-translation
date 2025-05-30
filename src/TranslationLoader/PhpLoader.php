@@ -1,0 +1,102 @@
+<?php
+/**
+ * Copyright (c) anno Domini nostri Jesu Christi MMXXV John Boehr & contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+declare(strict_types=1);
+
+namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
+
+use PhpParser\Error;
+use PhpParser\NodeTraverser;
+use PhpParser\ParserFactory;
+use Symfony\Component\Finder\SplFileInfo;
+
+final class PhpLoader
+{
+    public function __construct(
+        private readonly ?ParserFactory $parserFactory = null,
+    ) {
+    }
+
+    /**
+     * @return LoadResult
+     */
+    public function load(SplFileInfo $file): mixed
+    {
+        $warnings = [];
+
+        try {
+            $parserFactory = $this->parserFactory ?? new ParserFactory();
+            $parser = $parserFactory->createForHostVersion();
+            $stmts = $parser->parse($file->getContents());
+            assert($stmts !== null);
+
+            $visitor = new KeyLineNumberVisitor();
+            $traverser = new NodeTraverser();
+            $traverser->addVisitor($visitor);
+            $traverser->traverse($stmts);
+            $lineNumbers = $visitor->getLineNumbers();
+        } catch (Error $e) {
+            $warnings[] = [
+                sprintf('Failed to parse file with error: %s', $e->getMessage()),
+                $file->getPathname(),
+                -1,
+            ];
+            $lineNumbers = [];
+        }
+
+        $raw = (static function (string $__): mixed {
+            return require $__;
+        })($file->getPathname());
+
+        if (!is_array($raw)) {
+            $warnings[] = [
+                sprintf('Invalid data type "%s"', gettype($raw)),
+                $file->getPathname(),
+                -1,
+            ];
+            return new LoadResult([], [], $warnings);
+        }
+
+        $results = [];
+
+        foreach ($raw as $k => $v) {
+            $line = $lineNumbers[$k] ?? -1;
+
+            if (!is_string($k)) {
+                $warnings[] = [
+                    sprintf("Invalid key %s", json_encode($k, JSON_THROW_ON_ERROR)),
+                    $file->getPathname(),
+                    $line,
+                ];
+                continue;
+            }
+
+            if (!is_string($v)) {
+                $warnings[] = [
+                    sprintf("Invalid value %s", json_encode($v, JSON_THROW_ON_ERROR)),
+                    $file->getPathname(),
+                    $line,
+                ];
+                continue;
+            }
+
+            $results[$k] = $v;
+        }
+
+        return new LoadResult($results, $lineNumbers, $warnings);
+    }
+}

@@ -37,6 +37,11 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
             if ($v->key instanceof Node\Scalar\String_) {
                 $this->lineNumbers[$v->key->value] = $v->key->getStartLine();
             }
+
+            if ($v->key instanceof Node\Scalar\LNumber) {
+                // for error reporting only
+                $this->lineNumbers["int\0" . $v->key->value] = $v->key->getStartLine();
+            }
         }
 
         return null;

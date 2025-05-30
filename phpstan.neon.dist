@@ -14,6 +14,7 @@ parameters:
     excludePaths:
         - e2e/src
         - tests/*BladeRuleTest.php
+        - tests/lang-warn/zh/messages.php
         - tests/data/*
     lostInTranslation:
         langPath: tests/lang

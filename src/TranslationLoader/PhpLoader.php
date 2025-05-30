@@ -53,9 +53,9 @@ final class PhpLoader
             $warnings[] = [
                 sprintf('Failed to parse file with error: %s', $e->getMessage()),
                 $file->getPathname(),
-                -1,
+                $e->getStartLine(),
             ];
-            $lineNumbers = [];
+            return new LoadResult([], [], $warnings);
         }
 
         $raw = (static function (string $__): mixed {
@@ -74,11 +74,11 @@ final class PhpLoader
         $results = [];
 
         foreach ($raw as $k => $v) {
-            $line = $lineNumbers[$k] ?? -1;
+            $line = $lineNumbers[$k] ?? $lineNumbers["int\0" . $k] ?? -1;
 
             if (!is_string($k)) {
                 $warnings[] = [
-                    sprintf("Invalid key %s", json_encode($k, JSON_THROW_ON_ERROR)),
+                    sprintf("Invalid key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
                     $file->getPathname(),
                     $line,
                 ];
@@ -87,7 +87,7 @@ final class PhpLoader
 
             if (!is_string($v)) {
                 $warnings[] = [
-                    sprintf("Invalid value %s", json_encode($v, JSON_THROW_ON_ERROR)),
+                    sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)),
                     $file->getPathname(),
                     $line,
                 ];

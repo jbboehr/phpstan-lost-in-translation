@@ -170,13 +170,29 @@ final class TranslationLoader
 
     private function scan(): void
     {
-        $finder = Finder::create()
+        $files = Finder::create()
             ->in($this->langPath)
             ->name(['*.php', '*.json']);
 
+        $files = iterator_to_array($files->getIterator());
+
+        usort($files, static function ($a, $b): int {
+            $a = $a->getPathname();
+            $b = $b->getPathname();
+
+            $asc = substr_count($a, '/');
+            $bsc = substr_count($b, '/');
+
+            if ($asc !== $bsc) {
+                return $asc <=> $bsc;
+            }
+
+            return strnatcasecmp($a, $b);
+        });
+
         $foundLocales = [];
 
-        foreach ($finder as $file) {
+        foreach ($files as $file) {
             if (
                 false === preg_match(
                     '~^([\w-]{2,})(?:\.json|/([^/]+)\.php)$~',

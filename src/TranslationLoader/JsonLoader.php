@@ -27,10 +27,20 @@ final class JsonLoader
     {
         $warnings = [];
         $buffer = $file->getContents();
-        $raw = json_decode($buffer, true, JSON_THROW_ON_ERROR);
+        try {
+            $raw = json_decode($buffer, true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $warnings[] = [
+                sprintf('Failed to parse JSON file: %s', $e->getMessage()),
+                $file->getPathname(),
+                -1,
+            ];
+            return new LoadResult([], [], $warnings);
+        }
+
         if (!is_array($raw)) {
             $warnings[] = [
-                sprintf('Invalid data type "%s"', gettype($raw)),
+                sprintf('Invalid data type: "%s"', gettype($raw)),
                 $file->getPathname(),
                 -1,
             ];
@@ -56,7 +66,7 @@ final class JsonLoader
 
             if (!is_string($k)) {
                 $warnings[] = [
-                    sprintf("Invalid key %s", json_encode($k, JSON_THROW_ON_ERROR)),
+                    sprintf("Invalid key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
                     $file->getPathname(),
                     $line,
                 ];
@@ -65,7 +75,7 @@ final class JsonLoader
 
             if (!is_string($v)) {
                 $warnings[] = [
-                    sprintf("Invalid value %s", json_encode($v, JSON_THROW_ON_ERROR)),
+                    sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)),
                     $file->getPathname(),
                     $line,
                 ];

@@ -12,6 +12,7 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
@@ -28,6 +29,8 @@ conditionalTags:
 		phpstan.rules.rule: %lostInTranslation.missingTranslationStringsInBaseLocale%
 	jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.missingTranslationStrings%
+	jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule:
+		phpstan.rules.rule: %lostInTranslation.translationLoaderWarnings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
@@ -42,6 +45,7 @@ parametersSchema:
         langPath: schema(string(), nullable()),
         missingTranslationStringsInBaseLocale: bool(),
         missingTranslationStrings: bool(),
+        translationLoaderWarnings: bool(),
         unusedTranslationStrings: bool()
     ])
 
@@ -54,4 +58,5 @@ parameters:
         langPath: null
         missingTranslationStringsInBaseLocale: true
         missingTranslationStrings: true
+        translationLoaderWarnings: true
         unusedTranslationStrings: false

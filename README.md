@@ -132,7 +132,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
  ------ --------------------------------------------------------------------------------------
   2      Possibly unused translation string "this string is not used anywhere" for locale: ja
          🪪  lostInTranslation.possiblyUnusedTranslationString
- ------ -------------------------------------------------------------------------------------- 
+ ------ --------------------------------------------------------------------------------------
 ```
 
 ### Disallow dynamic translations strings
@@ -260,6 +260,45 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
          💡 Locale: "en", Key: "{0} There are none|{1} There is one|[2] There are :count", Value: "{0} There are none|{1}
             There is one|[2] There are :count"
  ------ ------------------------------------------------------------------------------------------------------------------
+```
+
+### Errors in translation files
+
+Errors in translation lines will be logged as well, including parse errors. **Enabled by default**.
+
+```neon
+parameters:
+    lostInTranslation:
+        translationLoaderWarnings: true
+```
+
+```json
+{
+  "this value is not allowed": 2
+}
+```
+
+```php
+<?php return [
+    'this_value_is_not_allowed' => 3,
+];
+```
+
+```console
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
+ ------ ------------------------------------------------
+  Line   lang/zh.json
+ ------ ------------------------------------------------
+  2      Invalid value: 2
+         🪪  lostInTranslation.translationLoaderWarning
+ ------ ------------------------------------------------
+
+ ------ ------------------------------------------------
+  Line   lang/zh/messages.php
+ ------ ------------------------------------------------
+  2      Invalid value: 3
+         🪪  lostInTranslation.translationLoaderWarning
+ ------ ------------------------------------------------
 ```
 
 ## Configuration

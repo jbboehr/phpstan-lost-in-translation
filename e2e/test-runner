@@ -22,6 +22,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $expectedErrors = [
     'lang/ja.json:2:lostInTranslation.possiblyUnusedTranslationString',
     'lang/ja/messages:2:lostInTranslation.possiblyUnusedTranslationString',
+    'lang/zh.json:2:lostInTranslation.translationLoaderWarning',
+    'lang/zh/messages:2:lostInTranslation.translationLoaderWarning',
     'src/dynamic-translation-string:5:lostInTranslation.dynamicTranslationString',
     'src/dynamic-translation-string:8:lostInTranslation.dynamicTranslationString',
     'src/invalid-choice:3:lostInTranslation.choiceMissingCase',

@@ -21,6 +21,7 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
 use PHPStan\Type\VerbosityLevel;
+use Symfony\Component\Intl\Locales;
 
 /**
  * @internal
@@ -47,6 +48,23 @@ final class Utils
         }
 
         return array_merge($metadata, $extra);
+    }
+
+    public static function checkLocaleExists(string $locale, bool $strict = false): bool
+    {
+        if (!$strict) {
+            // Allow specifying it with a dash instead of an underscore and with incorrect cases >.>
+            $locale = str_replace('-', '_', $locale);
+            if (str_contains($locale, '_')) {
+                $parts = explode('_', $locale, 2);
+                assert(count($parts) >= 2);
+                $locale = strtolower($parts[0]) . '_' . strtoupper($parts[1]);
+            } else {
+                $locale = strtolower($locale);
+            }
+        }
+
+        return Locales::exists($locale);
     }
 
     public static function detectLangPath(): string

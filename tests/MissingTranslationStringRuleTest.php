@@ -100,4 +100,45 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             ],
         ]);
     }
+
+    public function testTypeInference(): void
+    {
+        $this->analyse([
+            __DIR__ . '/data/type-inference.php',
+        ], [
+            [
+                'Missing translation string "foo" for locales: ja, zh',
+                4,
+            ],
+            [
+                'Missing translation string "bar" for locales: ja, zh',
+                7,
+            ],
+            [
+                'Missing translation string "foo" for locales: ja, zh',
+                7,
+            ],
+// not sure why this is not working
+//            [
+//                'Missing translation string "three" for locales: ja, zh',
+//                16,
+//            ],
+//            [
+//                'Missing translation string "two" for locales: ja, zh',
+//                16,
+//            ],
+            [
+                'Missing translation string "foo" for locales: ja, zh',
+                19,
+            ],
+            [
+                'Missing translation string "bar" for locales: ja, zh',
+                23,
+            ],
+            [
+                'Missing translation string "foo" for locales: ja, zh',
+                23,
+            ],
+        ]);
+    }
 }

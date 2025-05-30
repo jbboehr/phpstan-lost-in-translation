@@ -43,6 +43,9 @@ final class TranslationLoader
     /** @var list<string> */
     private array $foundLocales = [];
 
+    /** @var array<string, non-empty-list<string>> */
+    private array $localeFiles = [];
+
     /** @var array<string, array{string, int}> */
     private array $locations = [];
 
@@ -73,6 +76,19 @@ final class TranslationLoader
     public function getBaseLocale(): ?string
     {
         return $this->baseLocale;
+    }
+
+    public function hasLocale(string $locale): bool
+    {
+        return $this->baseLocale === $locale || isset($this->data[$locale]);
+    }
+
+    /**
+     * @return array<string, non-empty-list<string>>
+     */
+    public function getLocaleFiles(): array
+    {
+        return $this->localeFiles;
     }
 
     /**
@@ -208,6 +224,7 @@ final class TranslationLoader
             $group = $matches[2] ?? '*';
             $namespace = '*';
             $foundLocales[$locale] = true;
+            $this->localeFiles[$locale][] = $file->getPathname();
 
             $result = match ($file->getExtension()) {
                 'php' => $this->phpLoader->load($file),

@@ -4,15 +4,21 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader
     arguments:
-        baseLocale: %lostInTranslation.baseLocale%
-        langPath: %lostInTranslation.langPath%
+      baseLocale: %lostInTranslation.baseLocale%
+      langPath: %lostInTranslation.langPath%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
   - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidChoiceRule
+  - class: jbboehr\PHPStanLostInTranslation\InvalidLocaleRule
+    arguments:
+      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule
+    arguments:
+      invalidLocales: %lostInTranslation.invalidLocales%
+      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
@@ -23,6 +29,8 @@ conditionalTags:
 		phpstan.rules.rule: %lostInTranslation.disallowDynamicTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\InvalidChoiceRule:
 		phpstan.rules.rule: %lostInTranslation.invalidChoices%
+	jbboehr\PHPStanLostInTranslation\InvalidLocaleRule:
+		phpstan.rules.rule: %lostInTranslation.invalidLocales%
 	jbboehr\PHPStanLostInTranslation\InvalidReplacementRule:
 		phpstan.rules.rule: %lostInTranslation.invalidReplacements%
 	jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule:
@@ -40,11 +48,13 @@ parametersSchema:
     lostInTranslation: structure([
         disallowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
-        invalidChoices: bool()
-        invalidReplacements: bool()
+        invalidChoices: bool(),
+        invalidLocales: bool(),
+        invalidReplacements: bool(),
         langPath: schema(string(), nullable()),
         missingTranslationStringsInBaseLocale: bool(),
         missingTranslationStrings: bool(),
+        strictLocales: bool(),
         translationLoaderWarnings: bool(),
         unusedTranslationStrings: bool()
     ])
@@ -54,9 +64,11 @@ parameters:
         disallowDynamicTranslationStrings: false
         baseLocale: null
         invalidChoices: true
+        invalidLocales: true
         invalidReplacements: true
         langPath: null
         missingTranslationStringsInBaseLocale: true
         missingTranslationStrings: true
+        strictLocales: false
         translationLoaderWarnings: true
         unusedTranslationStrings: false

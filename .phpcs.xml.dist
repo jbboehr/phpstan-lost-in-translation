@@ -14,6 +14,7 @@
     <arg name="extensions" value="php" />
 
     <exclude-pattern>*/*.blade.php</exclude-pattern>
+    <exclude-pattern>*/tests/data/*.php</exclude-pattern>
 
     <rule ref="PSR12">
         <exclude name="PSR12.Files.FileHeader" />

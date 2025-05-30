@@ -33,6 +33,8 @@ final class TranslationLoaderWarningRule implements Rule
 {
     public function __construct(
         private readonly TranslationLoader $loader,
+        private readonly bool $invalidLocales = true,
+        private readonly bool $strictLocales = false,
     ) {
     }
 
@@ -52,6 +54,23 @@ final class TranslationLoaderWarningRule implements Rule
                     ->file($warning[1])
                     ->line($warning[2])
                     ->build();
+            }
+
+            if ($this->invalidLocales) {
+                foreach ($this->loader->getLocaleFiles() as $locale => $localeFiles) {
+                    if (!Utils::checkLocaleExists($locale, $this->strictLocales)) {
+                        $file = $localeFiles[0];
+
+                        $errors[] = RuleErrorBuilder::message(sprintf(
+                            'Unknown locale: %s',
+                            $locale,
+                        ))
+                            ->identifier('lostInTranslation.unknownLocale')
+                            ->metadata(['lit::locale' => $locale])
+                            ->file($file)
+                            ->build();
+                    }
+                }
             }
 
             return $errors;

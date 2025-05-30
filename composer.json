@@ -16,7 +16,8 @@
         "illuminate/support": "^9 || ^10 || ^11 || ^12",
         "phpstan/phpstan": "^1.12 || ^2.0",
         "salsify/json-streaming-parser": "^8.3",
-        "symfony/finder": "^6 || ^7"
+        "symfony/finder": "^6 || ^7",
+        "symfony/intl": "^6 || ^7"
     },
     "autoload": {
         "psr-4": {

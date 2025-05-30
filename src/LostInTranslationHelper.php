@@ -255,6 +255,11 @@ class LostInTranslationHelper
         return $this->translationLoader->getBaseLocale();
     }
 
+    public function hasLocale(string $locale): bool
+    {
+        return $this->translationLoader->hasLocale($locale);
+    }
+
     public function markUsed(string $locale, string $key): void
     {
         $this->translationLoader->markUsed($locale, $key);

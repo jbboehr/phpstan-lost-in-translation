@@ -34,6 +34,35 @@ following extra PHPStan extensions installed:
 
 ## Features
 
+## Type inference
+
+Note that for most of the features below, we can only analyze any potential constant strings in the type of the
+variable passed into the translation function.
+**This takes advantage of [PHPStan](https://phpstan.org/)'s type inference.**
+For example, these should all be able to be analyzed correctly:
+
+```php
+$key = 'foo';
+__($key);
+
+foreach (['foo', 'bar'] as $key) {
+    __($key);
+}
+
+// this one seems to not be working atm :shrug:
+/** @return "foo"|"bar" */
+function getKey(): string {}
+__(getKey());
+
+const KEY = 'foo';
+__(KEY);
+
+/** @var array{foo: mixed, bar: mixed} $map */
+foreach ($map as $key => $value) {
+    __($key);
+}
+```
+
 ### Find missing translation strings
 
 Your application's source files will be scanned for calls to the Laravel translator and checked for undefined
@@ -301,6 +330,45 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
  ------ ------------------------------------------------
 ```
 
+### Analyze locales
+
+If an invalid locale is given to a translation function, an error will be emitted. **Enabled by default.**
+
+If `strictLocale` is set, it must match, for example, `pt_BR`.
+Otherwise, it can also match any of `PT_br`, `pt-br`, etc. **Disabled by default.**
+
+```neon
+parameters:
+    lostInTranslation:
+        invalidLocales: true
+        strictLocales: true
+```
+
+```php
+<?php
+
+__('foobar', [], 'invalid_locale');
+```
+
+```console
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon -v --no-progress e2e/src/invalid-locale.php
+ ------ --------------------------------------------------------------------------
+  Line   e2e/lang/fake.json
+ ------ --------------------------------------------------------------------------
+  -1     Unknown locale: fake
+         🪪  lostInTranslation.unknownLocale
+ ------ --------------------------------------------------------------------------
+
+ ------ -----------------------------------------------------------------
+  Line   invalid-locale.php
+ ------ -----------------------------------------------------------------
+  3      Locale has no available translation strings: invalid_locale
+         🪪  lostInTranslation.noLocaleTranslations
+  3      Unknown locale: invalid_locale
+         🪪  lostInTranslation.unknownLocale
+ ------ -----------------------------------------------------------------
+```
+
 ## Configuration
 
 ```neon
@@ -314,12 +382,16 @@ parameters:
         langPath: null
         # should we analyze choices for invalid values?
         invalidChoices: true
+        # warn on locales that have no translation strings or are invalid locale identifiers
+        invalidLocales: true
         # should we analyze translation replacements for invalid values?
         invalidReplacements: true
         # look for missing translation strings? (main feature)
         missingTranslationStrings: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
         missingTranslationStringsInBaseLocale: true
+        # allow more flexible locale identifiers
+        strictLocales: false
         # aggregate used translations and diff with the full locale database to detect potentially unused translations
         unusedTranslationStrings: false
 ```

@@ -33,12 +33,12 @@ final class ShouldNotHappenException extends \RuntimeException
 
     public function __construct(
         string $message = 'Internal error',
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct(
             sprintf('%s, please open an issue on GitHub %s', $message, self::URL),
             0,
-            $previous
+            $previous,
         );
     }
 }

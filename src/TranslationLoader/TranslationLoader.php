@@ -19,11 +19,11 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
-use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
-use function usort;
 use Fuse\Fuse;
+use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Symfony\Component\Finder\Finder;
+use function usort;
 
 /**
  * @final
@@ -187,7 +187,7 @@ class TranslationLoader
                         'key' => $key,
                         'file' => $f,
                         'line' => $l,
-                        'candidate' => $candidate
+                        'candidate' => $candidate,
                     ];
                 }
             }
@@ -272,7 +272,7 @@ class TranslationLoader
                     '~^([\w-]{2,})(?:\.json|/([^/]+)\.php)$~',
                     $file->getRelativePathname(),
                     $matches,
-                    PREG_UNMATCHED_AS_NULL
+                    PREG_UNMATCHED_AS_NULL,
                 )
             ) {
                 continue;
@@ -360,7 +360,7 @@ class TranslationLoader
 
         $groupAndItem = array_slice(
             self::parseBasicSegments($itemSegments),
-            1
+            1,
         );
 
         return [$namespace, $groupAndItem[0], $groupAndItem[1] ?? null];

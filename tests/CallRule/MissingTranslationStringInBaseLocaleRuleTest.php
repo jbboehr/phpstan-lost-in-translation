@@ -49,7 +49,7 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
         ], [
             [
                 "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
-                3
+                3,
             ],
         ]);
     }

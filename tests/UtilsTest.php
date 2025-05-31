@@ -21,8 +21,6 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\App;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Orchestra\Testbench\TestCase;
 

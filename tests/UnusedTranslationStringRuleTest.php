@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
@@ -61,11 +60,11 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
             ],
             [
                 'Possibly unused translation string "unused_in_ja" for locale: ja',
-                3
+                3,
             ],
             [
                 'Possibly unused translation string "used_in_en" for locale: ja',
-                4
+                4,
             ],
         ]);
     }

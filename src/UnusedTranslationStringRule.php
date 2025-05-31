@@ -71,7 +71,7 @@ final class UnusedTranslationStringRule implements Rule
                 $builder =  RuleErrorBuilder::message(sprintf(
                     'Possibly unused translation string %s for locale: %s',
                     Utils::e($item['key']),
-                    join(', ', [$item['locale']])
+                    join(', ', [$item['locale']]),
                 ))
                     ->identifier('lostInTranslation.possiblyUnusedTranslationString')
                     ->file($item['file'])

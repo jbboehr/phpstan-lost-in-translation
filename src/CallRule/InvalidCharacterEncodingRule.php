@@ -20,14 +20,8 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
-use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\Constant\ConstantIntegerType;
-use PHPStan\Type\IntegerRangeType;
-use PHPStan\Type\TypeCombinator;
-use PHPStan\Type\VerbosityLevel;
 
 final class InvalidCharacterEncodingRule implements CallRuleInterface
 {
@@ -39,7 +33,7 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
             if (!mb_check_encoding($key, 'UTF-8')) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Invalid character encoding for key %s',
-                    Utils::e($key)
+                    Utils::e($key),
                 ))
                     ->identifier('lostInTranslation.invalidCharacterEncoding')
                     ->metadata(Utils::callToMetadata($call, ['lit::key' => $key]))
@@ -53,7 +47,7 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Invalid character encoding for value %s in locale %s',
                         Utils::e($key),
-                        Utils::e($locale)
+                        Utils::e($locale),
                     ))
                         ->identifier('lostInTranslation.invalidCharacterEncoding')
                         ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))

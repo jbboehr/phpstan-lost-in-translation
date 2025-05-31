@@ -16,6 +16,18 @@
     <exclude-pattern>*/*.blade.php</exclude-pattern>
     <exclude-pattern>*/tests/data/*.php</exclude-pattern>
 
+	<config name="installed_paths" value="../../slevomat/coding-standard"/>
+
+	<rule ref="SlevomatCodingStandard.Arrays.TrailingArrayComma"/>
+	<rule ref="SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses"/>
+	<rule ref="SlevomatCodingStandard.Namespaces.UnusedUses">
+        <properties>
+            <property name="searchAnnotations" value="true"/>
+        </properties>
+	</rule>
+	<rule ref="SlevomatCodingStandard.Functions.RequireTrailingCommaInCall"/>
+	<rule ref="SlevomatCodingStandard.Functions.RequireTrailingCommaInDeclaration"/>
+
     <rule ref="PSR12">
         <exclude name="PSR12.Files.FileHeader" />
         <exclude name="PSR12.Files.OpenTag" />

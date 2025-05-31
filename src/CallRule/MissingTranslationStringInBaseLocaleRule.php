@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -43,7 +42,7 @@ final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterfac
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Likely missing translation string %s for base locale: %s',
                         json_encode($key, JSON_THROW_ON_ERROR),
-                        $baseLocale
+                        $baseLocale,
                     ))
                         ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
                         ->metadata(Utils::callToMetadata($call))

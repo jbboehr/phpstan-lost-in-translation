@@ -19,9 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
-use PHPStan\Type\Constant\ConstantStringType;
 
 final class UsedTranslationRecordTest extends \PHPUnit\Framework\TestCase
 {

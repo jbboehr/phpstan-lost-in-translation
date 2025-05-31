@@ -33,7 +33,7 @@ final class DynamicTranslationStringRule implements CallRuleInterface
         if (count($call->keyType->getConstantStrings()) <= 0) {
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Disallowed dynamic translation string of type: %s',
-                $call->keyType->describe(VerbosityLevel::precise())
+                $call->keyType->describe(VerbosityLevel::precise()),
             ))
                 ->identifier('lostInTranslation.dynamicTranslationString')
                 ->metadata(Utils::callToMetadata($call))

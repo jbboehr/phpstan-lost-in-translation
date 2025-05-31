@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -141,7 +140,7 @@ final class InvalidChoiceRule implements CallRuleInterface
         if (null !== $unionType && !$unionType->accepts($numberType, true)->yes()) {
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Translation choice does not cover all possible cases for number of type: %s',
-                $numberType->describe(VerbosityLevel::precise())
+                $numberType->describe(VerbosityLevel::precise()),
             ))
                 ->identifier('lostInTranslation.choiceMissingCase')
                 ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))

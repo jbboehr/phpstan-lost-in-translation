@@ -56,7 +56,7 @@ class InvalidLocaleRuleTest extends RuleTestCase
             [
                 'Locale has no available translation strings: pt_BR',
                 7,
-            ]
+            ],
         ]);
     }
 }

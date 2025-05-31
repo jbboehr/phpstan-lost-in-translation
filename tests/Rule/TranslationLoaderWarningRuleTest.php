@@ -20,14 +20,12 @@ declare(strict_types=1);
 namespace Rule;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
@@ -89,7 +87,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
             ],
             [
                 'Invalid value: {"at least":"we should not throw"}',
-                3
+                3,
             ],
             // lang/zh/even-more-messages.php
             [
@@ -127,7 +125,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
                 {
                     return true;
                 }
-            }
+            },
         ]);
     }
 

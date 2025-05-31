@@ -60,7 +60,7 @@ class InvalidReplacementRuleTest extends RuleTestCase
                 'Replacement string matches multiple variants: "foo"',
                 7,
                 Utils::formatTipForKeyValue('en', ':foo :FOO', ':foo :FOO'),
-            ]
+            ],
         ]);
     }
 }

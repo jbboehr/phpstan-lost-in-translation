@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
-use Brick\VarExporter\VarExporter;
 use Illuminate\Foundation\Application;
 use PHPStan\Type\VerbosityLevel;
 use Symfony\Component\Intl\Locales;

@@ -105,14 +105,14 @@ class TranslationLoader
 
     public function get(string $locale, string $key): ?string
     {
-        [$namespace] = $this->parseKey($key);
+        [$namespace, $key] = $this->parseKey($key);
 
         return $this->data[$locale][$namespace][$key] ?? null;
     }
 
     public function markUsed(string $locale, string $key): void
     {
-        [$namespace] = $this->parseKey($key);
+        [$namespace, $key] = $this->parseKey($key);
 
         $this->used[$locale][$namespace][$key] = true;
     }
@@ -163,7 +163,7 @@ class TranslationLoader
 
     /**
      * @see Translator::parseKey()
-     * @return array{string, string, ?string}
+     * @return array{string, string}
      */
     public function parseKey(string $key): array
     {
@@ -175,11 +175,12 @@ class TranslationLoader
         }
 
         if (is_null($segments[2])) {
-            $segments[2] = $segments[1];
-            $segments[1] = '*';
+            $key = $segments[1];
+        } else {
+            $key = $segments[1] . '.' . $segments[2];
         }
 
-        return $segments;
+        return [$segments[0], $key];
     }
 
     private function scan(): void

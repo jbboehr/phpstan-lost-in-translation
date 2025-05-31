@@ -22,12 +22,16 @@ namespace Rule;
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule;
+use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use PhpParser\Node;
+use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
+use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
 
 /**
@@ -83,6 +87,15 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
                 "Invalid value: 1",
                 2,
             ],
+            [
+                'Invalid value: {"at least":"we should not throw"}',
+                3
+            ],
+            // lang/zh/even-more-messages.php
+            [
+                'Invalid data type "string"',
+                -1,
+            ],
             // lang-warn/zh/messages.php
             [
                 "Failed to parse file with error: Syntax error, unexpected EOF, expecting ',' or ']' or ')' on line 3",
@@ -92,6 +105,11 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
             [
                 "Invalid value: 1",
                 2,
+            ],
+            // lang/invalid_locale.json
+            [
+                'Unknown locale: invalid_locale',
+                -1,
             ],
         ]);
     }
@@ -111,5 +129,30 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
                 }
             }
         ]);
+    }
+
+    public function testExceptionConversion(): void
+    {
+        if (!class_exists(FuncCall::class)) {
+            $this->markTestIncomplete('This seems to fail when you filter, probably PHPStan autoload does not get initialized');
+        }
+
+        $ex = new \RuntimeException(self::class);
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([], false);
+
+        $loader = $this->createMock(TranslationLoader::class);
+        $loader->method('getWarnings')
+            ->willThrowException($ex);
+
+        $obj = new TranslationLoaderWarningRule($loader);
+
+        $this->expectException(ShouldNotHappenException::class);
+        $this->expectExceptionMessage('phpstan-lost-in-translation');
+
+        $obj->processNode(
+            $node,
+            $this->createStub(Scope::class),
+        );
     }
 }

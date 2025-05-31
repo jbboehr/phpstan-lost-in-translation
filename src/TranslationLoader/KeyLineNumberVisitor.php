@@ -28,7 +28,7 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /** @var array<string, int> */
     private array $lineNumbers = [];
 
-    /** @var list<Node\Expr> */
+    /** @var list<Scalar\LNumber|Scalar\String_|"unknown"> */
     private array $stack = [];
 
     /**
@@ -37,11 +37,12 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node)
     {
         if ($node instanceof Node\Expr\ArrayItem) {
-            if ($node->key === null) {
-                return null;
+            if ($node->key instanceof Scalar\LNumber || $node->key instanceof Scalar\String_) {
+                $this->stack[] = $node->key;
+            } else {
+                // Can't really handle lists here unfortunately
+                $this->stack[] = 'unknown';
             }
-
-            $this->stack[] = $node->key;
         }
 
         return null;
@@ -53,17 +54,13 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Expr\ArrayItem) {
-            if ($node->key === null) {
-                return null;
-            }
-
-            $path = join('.', array_map(static function (Node $stackItem) {
+            $path = join('.', array_map(static function (Scalar\LNumber|Scalar\String_|string $stackItem): string {
                 if ($stackItem instanceof Scalar\LNumber) {
                     return sprintf("%d", $stackItem->value); // #yolo
                 } elseif ($stackItem instanceof Scalar\String_) {
                     return $stackItem->value;
                 } else {
-                    throw new \DomainException('Unexpected type: ' . get_class($stackItem));
+                    return $stackItem;
                 }
             }, $this->stack));
             $this->lineNumbers[$path] = $node->getStartLine();

@@ -106,9 +106,11 @@ class StreamingJsonListener implements ListenerInterface, PositionAwareInterface
         }
     }
 
+    // @codeCoverageIgnoreStart
     public function whitespace(string $whitespace): void
     {
     }
+    // @codeCoverageIgnoreEnd
 
     public function setFilePosition(int $lineNumber, int $charNumber): void
     {

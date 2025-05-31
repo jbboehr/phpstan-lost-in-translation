@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace CallRule;
+namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;

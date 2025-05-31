@@ -19,22 +19,13 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
-/**
- * @implements Rule<Node\Expr\CallLike>
- */
-final class MissingTranslationStringInBaseLocaleRule implements Rule, CallRuleInterface
+final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterface
 {
-    use CallRuleTrait;
-
     public function __construct(
-        LostInTranslationHelper $helper,
+        private readonly LostInTranslationHelper $helper,
     ) {
-        $this->helper = $helper;
     }
 
     public function processCall(TranslationCall $call): array

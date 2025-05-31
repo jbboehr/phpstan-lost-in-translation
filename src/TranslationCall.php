@@ -24,7 +24,7 @@ use PHPStan\Type\Type;
 /**
  * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
  */
-final class TranslationCall
+final class TranslationCall implements \JsonSerializable
 {
     /**
      * @phpstan-param PossibleTranslationRecordCollection $possibleTranslations
@@ -41,5 +41,35 @@ final class TranslationCall
         public readonly ?Type $numberType = null,
         public readonly bool $isChoice = false,
     ) {
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            self::class => serialize($this),
+        ];
+    }
+
+    /**
+     * @param array<array-key, mixed> $json
+     */
+    public static function fromJsonArray(array $json): self
+    {
+        $buffer = $json[self::class] ?? null;
+
+        if (!is_string($buffer)) {
+            throw new \DomainException();
+        }
+
+        $call = unserialize($buffer);
+
+        if (!($call instanceof self)) {
+            throw new \DomainException();
+        }
+
+        return $call;
     }
 }

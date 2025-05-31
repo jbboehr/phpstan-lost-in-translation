@@ -20,25 +20,11 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Support\Str;
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
-use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
-/**
- * @implements Rule<Node\Expr\CallLike>
- */
-final class InvalidReplacementRule implements Rule, CallRuleInterface
+final class InvalidReplacementRule implements CallRuleInterface
 {
-    use CallRuleTrait;
-
-    public function __construct(
-        LostInTranslationHelper $helper,
-    ) {
-        $this->helper = $helper;
-    }
-
     public function processCall(TranslationCall $call): array
     {
         $errors = [];

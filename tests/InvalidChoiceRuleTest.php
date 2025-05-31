@@ -19,18 +19,25 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\InvalidChoiceRule;
+use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<InvalidChoiceRule>
+ * @extends RuleTestCase<LostInTranslationRule>
  */
 class InvalidChoiceRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
-        return new InvalidChoiceRule($this->getLostInTranslationHelper());
+        return new LostInTranslationRule(
+            $this->getLostInTranslationHelper(),
+            CallRuleCollection::createFromArray([
+                new InvalidChoiceRule(),
+            ]),
+        );
     }
 
     public function testInvalidChoices(): void

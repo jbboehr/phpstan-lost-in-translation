@@ -19,17 +19,24 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
+use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<MissingTranslationStringRule>
+ * @extends RuleTestCase<LostInTranslationRule>
  */
 class MissingTranslationStringRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
-        return new MissingTranslationStringRule($this->getLostInTranslationHelper());
+        return new LostInTranslationRule(
+            $this->getLostInTranslationHelper(),
+            CallRuleCollection::createFromArray([
+                new MissingTranslationStringRule($this->getLostInTranslationHelper()),
+            ]),
+        );
     }
 
     public function testLanguageFacade(): void

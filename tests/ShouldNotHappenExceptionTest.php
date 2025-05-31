@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\InvalidChoiceRule;
 use jbboehr\PHPStanLostInTranslation\InvalidLocaleRule;
@@ -26,6 +27,7 @@ use jbboehr\PHPStanLostInTranslation\InvalidReplacementRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule;
 use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
+use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule;
@@ -133,10 +135,7 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * @dataProvider classNameProvider
-     */
-    public function testExceptionConversion(string $className): void
+    public function testExceptionConversion(): void
     {
         if (!class_exists(FuncCall::class)) {
             $this->markTestIncomplete('This seems to fail when you filter, probably PHPStan autoload does not get initialized');
@@ -149,27 +148,10 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
         $mock->method('markUsed')
             ->willThrowException($ex);
 
-        if ($className === UnusedTranslationStringRule::class) {
-            /** @phpstan-ignore-next-line phpstanApi.constructor */
-            $node = new CollectedDataNode([
-                __FILE__ => [
-                    UnusedTranslationStringCollector::class => [[['', '']]],
-                ],
-            ], true);
-            $obj = new $className($mock);
-        } elseif ($className === TranslationLoaderWarningRule::class) {
-            $node = $this->createStub(FuncCall::class);
-            $loader = $this->createMock(TranslationLoader::class);
-            $loader->method('getWarnings')
-                ->willThrowException($ex);
+        $node = $this->createStub(FuncCall::class);
 
-            $obj = new $className($loader);
-        } else {
-            $node = $this->createStub(FuncCall::class);
-            $obj = new $className($mock);
-        }
+        $obj = new LostInTranslationRule($mock, CallRuleCollection::createFromArray([]));
 
-        $this->assertTrue($obj instanceof Rule || $obj instanceof Collector);
         $this->expectException(ShouldNotHappenException::class);
         $this->expectExceptionMessage('phpstan-lost-in-translation');
 
@@ -177,25 +159,5 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
             $node,
             $this->createStub(Scope::class),
         );
-    }
-
-    private const DATA_SET = [
-        [DynamicTranslationStringRule::class],
-        [InvalidChoiceRule::class],
-        [InvalidReplacementRule::class],
-        [MissingTranslationStringRule::class],
-        [MissingTranslationStringInBaseLocaleRule::class],
-        [UnusedTranslationStringRule::class],
-        [UnusedTranslationStringCollector::class],
-        [TranslationLoaderWarningRule::class],
-        [InvalidLocaleRule::class],
-    ];
-
-    /**
-     * @return self::DATA_SET
-     */
-    public static function classNameProvider(): array
-    {
-        return self::DATA_SET;
     }
 }

@@ -19,28 +19,14 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
-use PHPStan\Rules\IdentifierRuleError;
-use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\Constant\ConstantIntegerType;
-use PHPStan\Type\IntegerRangeType;
-use PHPStan\Type\TypeCombinator;
-use PHPStan\Type\VerbosityLevel;
 
-/**
- * @implements Rule<Node\Expr\CallLike>
- */
-final class InvalidLocaleRule implements Rule, CallRuleInterface
+final class InvalidLocaleRule implements CallRuleInterface
 {
-    use CallRuleTrait;
-
     public function __construct(
-        LostInTranslationHelper $helper,
+        private readonly LostInTranslationHelper $helper,
         private readonly bool $strictLocales = false,
     ) {
-        $this->helper = $helper;
     }
 
     public function processCall(TranslationCall $call): array

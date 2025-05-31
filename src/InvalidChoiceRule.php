@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
-use PHPStan\Analyser\Scope;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -29,19 +28,8 @@ use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\VerbosityLevel;
 
-/**
- * @implements Rule<Node\Expr\CallLike>
- */
-final class InvalidChoiceRule implements Rule, CallRuleInterface
+final class InvalidChoiceRule implements CallRuleInterface
 {
-    use CallRuleTrait;
-
-    public function __construct(
-        LostInTranslationHelper $helper,
-    ) {
-        $this->helper = $helper;
-    }
-
     public function processCall(TranslationCall $call): array
     {
         $errors = [];

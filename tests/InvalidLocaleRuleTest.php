@@ -19,17 +19,24 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\InvalidLocaleRule;
+use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<InvalidLocaleRule>
+ * @extends RuleTestCase<LostInTranslationRule>
  */
 class InvalidLocaleRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
-        return new InvalidLocaleRule($this->getLostInTranslationHelper());
+        return new LostInTranslationRule(
+            $this->getLostInTranslationHelper(),
+            CallRuleCollection::createFromArray([
+                new InvalidLocaleRule($this->getLostInTranslationHelper()),
+            ]),
+        );
     }
 
     public function testInvalidChoices(): void

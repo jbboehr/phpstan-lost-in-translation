@@ -17,28 +17,39 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\Rule;
 
+use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRuleInterface;
+use jbboehr\PHPStanLostInTranslation\CallRuleTrait;
+use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PhpParser\Node;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\VerbosityLevel;
+use PHPStan\Rules\Rule;
 
-final class DynamicTranslationStringRule implements CallRuleInterface
+/**
+ * @implements Rule<Node\Expr\CallLike>
+ */
+final class LostInTranslationRule implements Rule, CallRuleInterface
 {
+    use CallRuleTrait;
+
+    public function __construct(
+        LostInTranslationHelper $helper,
+        private readonly CallRuleCollection $rules,
+    ) {
+        $this->helper = $helper;
+    }
+
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
 
-        if (count($call->keyType->getConstantStrings()) <= 0) {
-            $errors[] = RuleErrorBuilder::message(sprintf(
-                'Disallowed dynamic translation string of type: %s',
-                $call->keyType->describe(VerbosityLevel::precise())
-            ))
-                ->identifier('lostInTranslation.dynamicTranslationString')
-                ->metadata(Utils::callToMetadata($call))
-                ->line($call->line)
-                ->file($call->file)
-                ->build();
+        foreach ($this->rules as $rule) {
+            $errors = array_merge(
+                $errors,
+                $rule->processCall($call),
+            );
         }
 
         return $errors;

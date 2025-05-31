@@ -23,10 +23,6 @@ final class ShouldNotHappenException extends \RuntimeException
 {
     private const URL = 'https://github.com/jbboehr/phpstan-lost-in-translation/issues';
 
-    private static ?string $url = null;
-
-    private static string $composerJsonPath = __DIR__ . '/../composer.json';
-
     /**
      * @throws self
      */
@@ -40,49 +36,9 @@ final class ShouldNotHappenException extends \RuntimeException
         ?\Throwable $previous = null
     ) {
         parent::__construct(
-            sprintf('%s, please open an issue on GitHub %s', $message, self::getUrl()),
+            sprintf('%s, please open an issue on GitHub %s', $message, self::URL),
             0,
             $previous
         );
-    }
-
-    private static function getUrl(): string
-    {
-        if (null !== self::$url) {
-            return self::$url;
-        }
-
-        try {
-            $raw = file_exists(self::$composerJsonPath) ? file_get_contents(self::$composerJsonPath) : false;
-
-            if (false === $raw) {
-                return self::$url = self::URL;
-            }
-
-            $raw = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
-
-            if (!is_array($raw)) {
-                return self::$url = self::URL;
-            }
-
-            $name = $raw['name'] ?? '';
-            $url = $raw['homepage'] ?? self::URL;
-
-            if (!is_string($name) || !is_string($url)) {
-                return self::$url = self::URL;
-            }
-
-            if (!str_contains($name, 'lost-in-translation')) {
-                error_log("Auto-detecting root package name produced unusual name: " . $name);
-            }
-
-            return self::$url = $url;
-        } catch (\JsonException) {
-            return self::$url = self::URL;
-        } catch (\Throwable $e) {
-            error_log((string) $e);
-
-            return self::$url = self::URL;
-        }
     }
 }

@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Container\Container;
+use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Orchestra\Testbench\TestCase;
 

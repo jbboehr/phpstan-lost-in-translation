@@ -28,98 +28,12 @@ use PHPStan\Analyser\Scope;
 
 final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        $r = new \ReflectionProperty(ShouldNotHappenException::class, 'url');
-        $r->setValue(null, null);
-    }
-
-    public function testMissingComposerJson(): void
-    {
-        $propertyReflection = new \ReflectionProperty(ShouldNotHappenException::class, 'composerJsonPath');
-        $originalValue = $propertyReflection->getValue();
-
-        $constReflection = new \ReflectionClassConstant(ShouldNotHappenException::class, 'URL');
-
-        try {
-            $propertyReflection->setValue(null, __DIR__ . '/does-not-exist');
-            $exception = new ShouldNotHappenException();
-
-            $this->assertIsString($constReflection->getValue());
-            $this->assertStringContainsString($constReflection->getValue(), $exception->getMessage());
-        } finally {
-            $propertyReflection->setValue(null, $originalValue);
-        }
-    }
-
-    public function testInvalidComposerJson(): void
-    {
-        $propertyReflection = new \ReflectionProperty(ShouldNotHappenException::class, 'composerJsonPath');
-        $originalValue = $propertyReflection->getValue();
-
-        $constReflection = new \ReflectionClassConstant(ShouldNotHappenException::class, 'URL');
-
-        $tmpFile = tempnam(sys_get_temp_dir(), '') ?: throw new \RuntimeException();
-        file_put_contents($tmpFile, '{"foo') ?: throw new \RuntimeException();
-
-        try {
-            $propertyReflection->setValue(null, $tmpFile);
-            $exception = new ShouldNotHappenException();
-
-            $this->assertIsString($constReflection->getValue());
-            $this->assertStringContainsString($constReflection->getValue(), $exception->getMessage());
-        } finally {
-            $propertyReflection->setValue(null, $originalValue);
-
-            unlink($tmpFile);
-        }
-    }
-
-    public function testDetectsPackageHomepage(): void
-    {
-        $propertyReflection = new \ReflectionProperty(ShouldNotHappenException::class, 'composerJsonPath');
-        $originalValue = $propertyReflection->getValue();
-
-        $tmpFile = tempnam(sys_get_temp_dir(), '') ?: throw new \RuntimeException();
-        file_put_contents($tmpFile, json_encode([
-            'name' => 'foobar/lost-in-translation',
-            'homepage' => 'google',
-        ], flags: JSON_THROW_ON_ERROR)) ?: throw new \RuntimeException();
-
-        try {
-            $propertyReflection->setValue(null, $tmpFile);
-            $exception = new ShouldNotHappenException();
-
-            $this->assertStringContainsString('google', $exception->getMessage());
-        } finally {
-            $propertyReflection->setValue(null, $originalValue);
-
-            unlink($tmpFile);
-        }
-    }
-
     public function testRethrow(): void
     {
         $exception = new \Exception('msg');
         $this->expectExceptionMessage('msg');
         $this->expectException(ShouldNotHappenException::class);
         SHouldNotHappenException::rethrow($exception);
-    }
-
-    public function testCachesUrl(): void
-    {
-        $r = new \ReflectionProperty(ShouldNotHappenException::class, 'url');
-        $originalValue = $r->getValue();
-
-        try {
-            $r->setValue(null, 'foobar');
-
-            $this->assertStringContainsString('foobar', (new ShouldNotHappenException())->getMessage());
-        } finally {
-            $r->setValue(null, $originalValue);
-        }
     }
 
     public function testExceptionConversion(): void

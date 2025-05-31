@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Arr;
 use PHPStan\Type\VerbosityLevel;
 use Symfony\Component\Intl\Locales;
 

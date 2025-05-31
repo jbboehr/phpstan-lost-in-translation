@@ -35,10 +35,10 @@ class TranslationLoader
 
     private readonly NamespacedItemResolver $namespacedItemResolver;
 
-    /** @var array<string, array<string, array<string, array<string, string>>>> */
+    /** @var array<string, array<string, array<string, string>>> */
     private array $data = [];
 
-    /** @var array<string, array<string, array<string, array<string, bool>>>> */
+    /** @var array<string, array<string, array<string, bool>>> */
     private array $used = [];
 
     /** @var list<array{string, string, int}> */
@@ -105,16 +105,16 @@ class TranslationLoader
 
     public function get(string $locale, string $key): ?string
     {
-        [$namespace, $group, $item] = $this->parseKey($key);
+        [$namespace] = $this->parseKey($key);
 
-        return $this->data[$locale][$namespace][$group][$item] ?? null;
+        return $this->data[$locale][$namespace][$key] ?? null;
     }
 
     public function markUsed(string $locale, string $key): void
     {
-        [$namespace, $group, $item] = $this->parseKey($key);
+        [$namespace] = $this->parseKey($key);
 
-        $this->used[$locale][$namespace][$group][$item] = true;
+        $this->used[$locale][$namespace][$key] = true;
     }
 
     /**
@@ -126,26 +126,20 @@ class TranslationLoader
 
         foreach ($this->data as $locale => $t1) {
             foreach ($t1 as $namespace => $t2) {
-                foreach ($t2 as $group => $t3) {
-                    foreach ($t3 as $item => $flag) {
-                        if (
-                            !isset($this->used[$locale][$namespace][$group][$item]) &&
-                            !isset($this->used['*'][$namespace][$group][$item])
-                        ) {
-                            $buf = $item;
+                foreach ($t2 as $item => $flag) {
+                    if (
+                        !isset($this->used[$locale][$namespace][$item]) &&
+                        !isset($this->used['*'][$namespace][$item])
+                    ) {
+                        $buf = $item;
 
-                            if ($group !== '*') {
-                                $buf = $group . '.' . $buf;
-                            }
-
-                            if ($namespace !== '*') {
-                                $buf = $namespace . '::' . $buf;
-                            }
-
-                            [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $item] ?? ['unknown', -1];
-
-                            $possiblyUnused[] = [$locale, $buf, $f, $l];
+                        if ($namespace !== '*') {
+                            $buf = $namespace . '::' . $buf;
                         }
+
+                        [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
+
+                        $possiblyUnused[] = [$locale, $buf, $f, $l];
                     }
                 }
             }
@@ -225,7 +219,7 @@ class TranslationLoader
             }
 
             $locale = $matches[1];
-            $group = $matches[2] ?? '*';
+            //$group = $matches[2] ?? null;
             $namespace = '*';
             $foundLocales[$locale] = true;
             $this->localeFiles[$locale][] = $file->getPathname();
@@ -243,11 +237,18 @@ class TranslationLoader
             $this->warnings = array_merge($this->warnings, $result->warnings);
 
             foreach ($result->translations as $k => $v) {
-                $this->data[$locale][$namespace][$group][$k] = $v;
-                $this->locations[$locale . "\0" . $namespace . "\0" . $group . "\0" . $k] = [
-                    $file->getRealPath(),
-                    ($result->locations[$k] ?? -1),
-                ];
+                $line = ($result->locations[$k] ?? -1);
+
+                if (isset($this->data[$locale][$namespace][$k])) {
+                    $this->warnings[] = [
+                        sprintf("Conflicting key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
+                        $file->getPathname(),
+                        $line,
+                    ];
+                }
+
+                $this->data[$locale][$namespace][$k] = $v;
+                $this->locations[$locale . "\0" . $namespace . "\0" . $k] = [$file->getRealPath(), $line];
             }
         }
 

@@ -74,7 +74,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
     public function testWarnings(): void
     {
         $this->analyse([
-            __DIR__ . '/data/dynamic-translation-string.php',
+            __DIR__ . '/data/translation-loader-warning.php',
         ], [
             // lang-warn/es.json
             [
@@ -101,10 +101,6 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
                 "Invalid value: 1",
                 2,
             ],
-            [
-                "Invalid key: 2",
-                3,
-            ]
         ]);
     }
 

@@ -20,6 +20,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use PhpParser\Node;
+use PhpParser\Node\Scalar;
 use PhpParser\NodeVisitorAbstract;
 
 final class KeyLineNumberVisitor extends NodeVisitorAbstract
@@ -27,21 +28,46 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /** @var array<string, int> */
     private array $lineNumbers = [];
 
+    /** @var list<Node\Expr> */
+    private array $stack = [];
+
+    /**
+     * @return null
+     */
     public function enterNode(Node $node)
     {
-        if (!($node instanceof Node\Expr\Array_)) {
-            return null;
+        if ($node instanceof Node\Expr\ArrayItem) {
+            if ($node->key === null) {
+                return null;
+            }
+
+            $this->stack[] = $node->key;
         }
 
-        foreach ($node->items as $k => $v) {
-            if ($v->key instanceof Node\Scalar\String_) {
-                $this->lineNumbers[$v->key->value] = $v->key->getStartLine();
+        return null;
+    }
+
+    /**
+     * @return null
+     */
+    public function leaveNode(Node $node)
+    {
+        if ($node instanceof Node\Expr\ArrayItem) {
+            if ($node->key === null) {
+                return null;
             }
 
-            if ($v->key instanceof Node\Scalar\LNumber) {
-                // for error reporting only
-                $this->lineNumbers["int\0" . $v->key->value] = $v->key->getStartLine();
-            }
+            $path = join('.', array_map(static function (Node $stackItem) {
+                if ($stackItem instanceof Scalar\LNumber) {
+                    return sprintf("%d", $stackItem->value); // #yolo
+                } elseif ($stackItem instanceof Scalar\String_) {
+                    return $stackItem->value;
+                } else {
+                    dd($stackItem);
+                }
+            }, $this->stack));
+            $this->lineNumbers[$path] = $node->getStartLine();
+            array_pop($this->stack);
         }
 
         return null;

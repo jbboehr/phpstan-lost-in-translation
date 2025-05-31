@@ -19,6 +19,8 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use Illuminate\Support\Arr;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
@@ -37,6 +39,7 @@ final class PhpLoader
     public function load(SplFileInfo $file): mixed
     {
         $warnings = [];
+        $group = basename($file->getFilenameWithoutExtension());
 
         try {
             $parserFactory = $this->parserFactory ?? new ParserFactory();
@@ -71,19 +74,16 @@ final class PhpLoader
             return new LoadResult([], [], $warnings);
         }
 
+        $lineNumbers = self::dot($lineNumbers, $group);
+        /** @var array<string, int> $lineNumbers */
+
+        $raw = self::dot($raw, $group);
+
+        /** @var array<string, string> $results */
         $results = [];
 
         foreach ($raw as $k => $v) {
-            $line = $lineNumbers[$k] ?? $lineNumbers["int\0" . $k] ?? -1;
-
-            if (!is_string($k)) {
-                $warnings[] = [
-                    sprintf("Invalid key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
-                    $file->getPathname(),
-                    $line,
-                ];
-                continue;
-            }
+            $line = $lineNumbers[$k] ?? -1;
 
             if (!is_string($v)) {
                 $warnings[] = [
@@ -97,6 +97,37 @@ final class PhpLoader
             $results[$k] = $v;
         }
 
+
         return new LoadResult($results, $lineNumbers, $warnings);
+    }
+
+    /**
+     * @param array<array-key, mixed> $array
+     * @return array<array-key, mixed>
+     * @see Arr::dot()
+     */
+    public static function dot(array $array, string $prepend = ''): array
+    {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            if ('' === $prepend) {
+                $path = (string) $key;
+            } elseif (is_int($key)) {
+                $path = sprintf("%s.%d", $prepend, $key);
+            } else {
+                $path = $prepend . '.' . $key;
+            }
+
+            if (is_array($value) && ! empty($value)) {
+                foreach (self::dot($value, $path) as $k2 => $v2) {
+                    $results[$k2] = $v2;
+                }
+            } else {
+                $results[$path] = $value;
+            }
+        }
+
+        return $results;
     }
 }

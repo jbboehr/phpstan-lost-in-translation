@@ -20,15 +20,13 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
-use PhpParser\Node;
-use PHPStan\Analyser\Scope;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use PhpParser\Node;
+use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 
 /**

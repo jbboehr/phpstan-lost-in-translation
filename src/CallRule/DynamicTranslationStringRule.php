@@ -17,9 +17,10 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use PhpParser\Node;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
 

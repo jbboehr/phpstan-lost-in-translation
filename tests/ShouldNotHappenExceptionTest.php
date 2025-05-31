@@ -19,25 +19,12 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule;
-use jbboehr\PHPStanLostInTranslation\InvalidChoiceRule;
-use jbboehr\PHPStanLostInTranslation\InvalidLocaleRule;
-use jbboehr\PHPStanLostInTranslation\InvalidReplacementRule;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule;
-use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
-use PHPStan\Collectors\Collector;
-use PHPStan\Node\CollectedDataNode;
-use PHPStan\Rules\Rule;
 
 final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
 {

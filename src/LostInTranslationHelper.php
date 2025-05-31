@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use function sort;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;

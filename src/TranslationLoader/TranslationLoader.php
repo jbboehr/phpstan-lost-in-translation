@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use function usort;
 use Fuse\Fuse;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\NamespacedItemResolver;

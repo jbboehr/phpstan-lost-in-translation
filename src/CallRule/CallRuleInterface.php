@@ -17,8 +17,9 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PHPStan\Rules\IdentifierRuleError;
 
 interface CallRuleInterface

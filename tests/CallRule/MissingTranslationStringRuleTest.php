@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use PHPStan\Rules\Rule;
 
 /**
@@ -42,7 +43,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testLanguageFacade(): void
     {
         $this->analyse([
-            __DIR__ . '/data/lang-facade.php',
+            __DIR__ . '/../data/lang-facade.php',
         ], [
             [
                 'Missing translation string "lang facade" for locales: ja, zh',
@@ -54,7 +55,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testTransChoiceFunction(): void
     {
         $this->analyse([
-            __DIR__ . '/data/trans-choice-function.php',
+            __DIR__ . '/../data/trans-choice-function.php',
         ], [
             [
                 'Missing translation string "trans choice function" for locales: ja, zh',
@@ -66,7 +67,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testTransFunction(): void
     {
         $this->analyse([
-            __DIR__ . '/data/trans-function.php',
+            __DIR__ . '/../data/trans-function.php',
         ], [
             [
                 'Missing translation string "double underscore" for locales: ja, zh',
@@ -82,7 +83,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testTranslatorMethod(): void
     {
         $this->analyse([
-            __DIR__ . '/data/translator.php',
+            __DIR__ . '/../data/translator.php',
         ], [
             [
                 'Missing translation string "contract basic" for locales: ja, zh',
@@ -111,7 +112,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testTypeInference(): void
     {
         $this->analyse([
-            __DIR__ . '/data/type-inference.php',
+            __DIR__ . '/../data/type-inference.php',
         ], [
             [
                 'Missing translation string "foo" for locales: ja, zh',
@@ -152,7 +153,7 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     public function testFindSimilar(): void
     {
         $this->analyse([
-            __DIR__ . '/data/missing-find-similar.php',
+            __DIR__ . '/../data/missing-find-similar.php',
         ], [
             [
                 'Missing translation string "exists in all localezs" for locales: ja, zh',

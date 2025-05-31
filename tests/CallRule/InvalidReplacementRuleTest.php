@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
@@ -43,7 +44,7 @@ class InvalidReplacementRuleTest extends RuleTestCase
     public function testInvalidReplacements(): void
     {
         $this->analyse([
-            __DIR__ . '/data/invalid-replacement.php',
+            __DIR__ . '/../data/invalid-replacement.php',
         ], [
             [
                 'Unused translation replacement: "bar"',

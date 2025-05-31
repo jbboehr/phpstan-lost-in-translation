@@ -17,9 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use function sort;
 use Illuminate\Support\Str;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 

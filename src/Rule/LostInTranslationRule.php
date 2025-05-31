@@ -19,9 +19,9 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Rule;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\CallRuleInterface;
-use jbboehr\PHPStanLostInTranslation\CallRuleTrait;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleInterface;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleTrait;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PhpParser\Node;

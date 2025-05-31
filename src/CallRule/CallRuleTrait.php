@@ -17,17 +17,13 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
+use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
-use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
-use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\Constant\ConstantIntegerType;
-use PHPStan\Type\IntegerRangeType;
-use PHPStan\Type\TypeCombinator;
-use PHPStan\Type\VerbosityLevel;
 
 /**
  * @phpstan-require-implements CallRuleInterface

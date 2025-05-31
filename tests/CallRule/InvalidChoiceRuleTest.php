@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
@@ -43,7 +44,7 @@ class InvalidChoiceRuleTest extends RuleTestCase
     public function testInvalidChoices(): void
     {
         $this->analyse([
-            __DIR__ . '/data/invalid-choice.php',
+            __DIR__ . '/../data/invalid-choice.php',
         ], [
             [
                 'Translation choice does not cover all possible cases for number of type: 3',

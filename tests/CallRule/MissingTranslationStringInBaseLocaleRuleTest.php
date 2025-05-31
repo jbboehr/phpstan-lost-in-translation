@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use PHPStan\Rules\Rule;
 
 /**
@@ -42,7 +43,7 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
     public function testMissingInBaseLocale(): void
     {
         $this->analyse([
-            __DIR__ . '/data/missing-in-base-locale.php',
+            __DIR__ . '/../data/missing-in-base-locale.php',
         ], [
             [
                 "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",

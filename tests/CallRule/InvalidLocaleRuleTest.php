@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use PHPStan\Rules\Rule;
 
 /**
@@ -42,7 +43,7 @@ class InvalidLocaleRuleTest extends RuleTestCase
     public function testInvalidChoices(): void
     {
         $this->analyse([
-            __DIR__ . '/data/invalid-locale.php',
+            __DIR__ . '/../data/invalid-locale.php',
         ], [
             [
                 'Locale has no available translation strings: invalid_locale',

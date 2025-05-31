@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\DynamicTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use PHPStan\Rules\Rule;
 
 /**
@@ -42,7 +43,7 @@ class DynamicTranslationStringRuleTest extends RuleTestCase
     public function testDynamicTranslationString(): void
     {
         $this->analyse([
-            __DIR__ . '/data/dynamic-translation-string.php',
+            __DIR__ . '/../data/dynamic-translation-string.php',
         ], [
             [
                 'Disallowed dynamic translation string of type: string',

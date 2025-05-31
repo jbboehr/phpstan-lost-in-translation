@@ -19,8 +19,8 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use PHPStan\Rules\Rule;
 

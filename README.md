@@ -298,7 +298,7 @@ Errors in translation lines will be logged as well, including parse errors. **En
 ```neon
 parameters:
     lostInTranslation:
-        translationLoaderWarnings: true
+        translationLoaderErrors: true
 ```
 
 ```json

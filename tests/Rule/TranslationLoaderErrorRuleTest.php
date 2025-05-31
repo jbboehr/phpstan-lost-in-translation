@@ -20,7 +20,7 @@ declare(strict_types=1);
 namespace Rule;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
-use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule;
+use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
@@ -33,14 +33,14 @@ use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
 
 /**
- * @extends RuleTestCase<TranslationLoaderWarningRule>
+ * @extends RuleTestCase<TranslationLoaderErrorRule>
  */
-class TranslationLoaderWarningRuleTest extends RuleTestCase
+class TranslationLoaderErrorRuleTest extends RuleTestCase
 {
     public function createTranslationLoader(): TranslationLoader
     {
         return new TranslationLoader(
-            langPath: __DIR__ . '/../lang-warn',
+            langPath: __DIR__ . '/lang-warn',
             baseLocale: null,
             phpLoader: new PhpLoader(),
             jsonLoader: new JsonLoader(),
@@ -60,7 +60,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
 
     protected function getRule(): Rule
     {
-        return new TranslationLoaderWarningRule(
+        return new TranslationLoaderErrorRule(
             $this->getTranslationLoader(),
         );
     }
@@ -68,7 +68,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
     public function testWarnings(): void
     {
         $this->analyse([
-            __DIR__ . '/../data/translation-loader-warning.php',
+            __DIR__ . '/data/translation-loader-error.php',
         ], [
             // lang-warn/es.json
             [
@@ -143,7 +143,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
         $loader->method('getErrors')
             ->willThrowException($ex);
 
-        $obj = new TranslationLoaderWarningRule($loader);
+        $obj = new TranslationLoaderErrorRule($loader);
 
         $this->expectException(ShouldNotHappenException::class);
         $this->expectExceptionMessage('phpstan-lost-in-translation');

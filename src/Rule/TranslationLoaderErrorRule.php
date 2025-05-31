@@ -31,7 +31,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * @implements Rule<CollectedDataNode>
  */
-final class TranslationLoaderWarningRule implements Rule
+final class TranslationLoaderErrorRule implements Rule
 {
     public function __construct(
         private readonly TranslationLoader $loader,

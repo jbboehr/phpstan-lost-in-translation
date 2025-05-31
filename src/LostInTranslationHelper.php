@@ -266,6 +266,14 @@ class LostInTranslationHelper
     }
 
     /**
+     * @return list<string>
+     */
+    public function searchForSimilarKeys(string $key, ?string $locale = null): array
+    {
+        return $this->translationLoader->searchForSimilarKeys($key, $locale);
+    }
+
+    /**
      * @return list<array{string, string, string, int}>
      */
     public function diffUsed(): array

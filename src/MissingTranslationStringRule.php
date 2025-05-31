@@ -61,7 +61,7 @@ final class MissingTranslationStringRule implements Rule
                 }
 
                 if (count($missingInLocales) > 0) {
-                    $errors[] = RuleErrorBuilder::message(sprintf(
+                    $builder = RuleErrorBuilder::message(sprintf(
                         'Missing translation string %s for locales: %s',
                         json_encode($key, JSON_THROW_ON_ERROR),
                         join(', ', $missingInLocales)
@@ -69,8 +69,17 @@ final class MissingTranslationStringRule implements Rule
                         ->identifier('lostInTranslation.missingTranslationString')
                         ->metadata(Utils::callToMetadata($call))
                         ->line($call->line)
-                        ->file($call->file)
-                        ->build();
+                        ->file($call->file);
+
+                    $similarKeys = $this->helper->searchForSimilarKeys($key);
+
+                    if (count($similarKeys) > 0) {
+                        foreach ($similarKeys as $similarKey) {
+                            $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
+                        }
+                    }
+
+                    $errors[] = $builder->build();
                 }
             }
 

@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use Fuse\Fuse;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\NamespacedItemResolver;
 use Illuminate\Translation\Translator;
@@ -55,11 +56,14 @@ class TranslationLoader
 
     private readonly ?string $baseLocale;
 
+    private readonly Fuse $searchDatabase;
+
     public function __construct(
         ?string $langPath,
         ?string $baseLocale,
         private readonly PhpLoader $phpLoader,
         private readonly JsonLoader $jsonLoader,
+        private readonly float $fuzzySearchThreshold = 0.25,
     ) {
         if ($langPath === null) {
             $langPath = Utils::detectLangPath();
@@ -75,6 +79,7 @@ class TranslationLoader
         $this->namespacedItemResolver = new NamespacedItemResolver();
 
         $this->scan();
+        $this->searchDatabase = $this->buildSearchDatabase();
     }
 
     public function getBaseLocale(): ?string
@@ -115,6 +120,28 @@ class TranslationLoader
         [$namespace, $key] = $this->parseKey($key);
 
         $this->used[$locale][$namespace][$key] = true;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function searchForSimilarKeys(string $key, ?string $locale = null): array
+    {
+        $searchResults = $this->searchDatabase->search($key);
+
+        if (null !== $locale) {
+            $searchResults = array_filter($searchResults, static function (array $result) use ($locale) {
+                return $result['item']['locale'] === $locale;
+            });
+        }
+
+        $candidates = [];
+
+        foreach ($searchResults as $result) {
+            $candidates[$result['item']['key']] = true;
+        }
+
+        return array_keys($candidates);
     }
 
     /**
@@ -259,5 +286,32 @@ class TranslationLoader
         sort($foundLocales, SORT_NATURAL);
 
         $this->foundLocales = $foundLocales;
+    }
+
+    private function buildSearchDatabase(): Fuse
+    {
+        $arr = [];
+
+        foreach ($this->data as $locale => $localeItems) {
+            foreach ($localeItems as $namespace => $namespaceItems) {
+                foreach ($namespaceItems as $key => $value) {
+                    $arr[] = [
+                        'locale' => $locale,
+                        'namespace' => $namespace,
+                        'key' => $key,
+                        'value' => $value,
+                    ];
+                }
+            }
+        }
+
+        return new Fuse($arr, [
+            'isCaseSensitive' => true,
+            'includeScore' => true,
+            'minMatchCharLength' => 2,
+            'shouldSort' => true,
+            'keys' => ['key'],
+            'threshold' => $this->fuzzySearchThreshold,
+        ]);
     }
 }

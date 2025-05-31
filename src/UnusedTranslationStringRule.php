@@ -28,7 +28,6 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
  * @implements Rule<CollectedDataNode>
  */
 final class UnusedTranslationStringRule implements Rule
@@ -46,7 +45,7 @@ final class UnusedTranslationStringRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            /** @var array<string, list<list<UsedTranslationRecord>>> $data */
+            /** @var array<string, list<list<array<string, string>|UsedTranslationRecord>>> $data */
             $data = $node->get(UnusedTranslationStringCollector::class);
 
             /** @phpstan-var list<UsedTranslationRecord> $used */
@@ -58,6 +57,9 @@ final class UnusedTranslationStringRule implements Rule
             foreach ($data as $fileResults) {
                 foreach ($fileResults as $results) {
                     foreach ($results as $result) {
+                        if (is_array($result)) {
+                            $result = UsedTranslationRecord::fromJsonArray($result);
+                        }
                         $used[] = $result;
                     }
                 }
@@ -66,19 +68,17 @@ final class UnusedTranslationStringRule implements Rule
             $possiblyUnused = $this->loader->diffUsed($used);
 
             foreach ($possiblyUnused as $item) {
-                ['locale' => $locale, 'key' => $key, 'file' => $file, 'line' => $line, 'candidate' => $candidate] = $item;
-
                 $builder =  RuleErrorBuilder::message(sprintf(
                     'Possibly unused translation string %s for locale: %s',
-                    json_encode($key, JSON_THROW_ON_ERROR),
-                    join(', ', [$locale])
+                    Utils::e($item['key']),
+                    join(', ', [$item['locale']])
                 ))
                     ->identifier('lostInTranslation.possiblyUnusedTranslationString')
-                    ->file($file)
-                    ->line($line);
+                    ->file($item['file'])
+                    ->line($item['line']);
 
-                if (null !== $candidate) {
-                    $builder->addTip(sprintf('Did you mean %s?', Utils::e($candidate['key'])));
+                if (!empty($item['candidate'])) {
+                    $builder->addTip(sprintf('Did you mean %s?', Utils::e($item['candidate']['key'])));
                 }
 
                 $errors[] = $builder->build();

@@ -31,6 +31,7 @@ final class CallRuleCollection implements IteratorAggregate, \Countable
 {
     private const FLAG_MAP = [
         'disallowDynamicTranslationStrings' => DynamicTranslationStringRule::class,
+        'invalidCharacterEncodings' => InvalidCharacterEncodingRule::class,
         'invalidChoices' => InvalidChoiceRule::class,
         'invalidLocales' => InvalidLocaleRule::class,
         'invalidReplacements' => InvalidReplacementRule::class,

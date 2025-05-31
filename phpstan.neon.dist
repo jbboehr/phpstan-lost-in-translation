@@ -16,5 +16,6 @@ parameters:
         - tests/*BladeRuleTest.php
         - tests/lang-warn/zh/messages.php
         - tests/data/*
+        - tests/**/data/*
     lostInTranslation:
         langPath: tests/lang

@@ -28,12 +28,9 @@ use Orchestra\Testbench\TestCase;
 
 final class UtilsTest extends TestCase
 {
-    public function testRethrowsException(): void
+    public function testEscapeInvalidUnicodeFallback(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('JsonException');
-
-        Utils::e("\xc3\x28");
+        $this->assertSame('"\\xc3("', Utils::e("\xc3\x28"));
     }
 
     public function testFormatTipForKeyValue(): void

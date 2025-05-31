@@ -49,7 +49,7 @@ final class MissingTranslationStringRule implements CallRuleInterface
             if (count($missingInLocales) > 0) {
                 $builder = RuleErrorBuilder::message(sprintf(
                     'Missing translation string %s for locales: %s',
-                    json_encode($key, JSON_THROW_ON_ERROR),
+                    Utils::e($key),
                     join(', ', $missingInLocales)
                 ))
                     ->identifier('lostInTranslation.missingTranslationString')

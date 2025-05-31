@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use Brick\VarExporter\VarExporter;
 use Illuminate\Foundation\Application;
 use PHPStan\Type\VerbosityLevel;
 use Symfony\Component\Intl\Locales;
@@ -112,8 +113,31 @@ final class Utils
         try {
             return json_encode($value, JSON_THROW_ON_ERROR);
         } catch (\JsonException $exception) {
+            if (str_contains($exception->getMessage(), 'Malformed UTF-8 characters')) {
+                return '"' . self::escapeBinary($value) . '"';
+            }
+
             throw new \RuntimeException('JsonException: ' . $exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    public static function escapeBinary(string $value): string
+    {
+        $buf = '';
+
+        for ($i = 0; $i < strlen($value); $i++) {
+            $c = $value[$i];
+
+            if ($c === '"') {
+                $buf .= '\"';
+            } elseif (ctype_print($c)) {
+                $buf .= $c;
+            } else {
+                $buf .= sprintf("\x%02x", ord($c));
+            }
+        }
+
+        return $buf;
     }
 
     public static function formatTipForKeyValue(string $locale, string $key, ?string $value = null): string

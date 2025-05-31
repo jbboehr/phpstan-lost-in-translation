@@ -24,8 +24,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 
 /**
- * @phpstan-type UsedTranslationRecord array{key: string, locale: string, file: string, line: int}
- * @implements Collector<Node\Expr\CallLike, list<UsedTranslationRecord>>
+ * @implements Collector<Node\Expr\CallLike, list<UsedTranslationRecord|array<string,string>>>
  */
 final class UnusedTranslationStringCollector implements Collector
 {
@@ -87,12 +86,12 @@ final class UnusedTranslationStringCollector implements Collector
 
         foreach ($call->keyType->getConstantStrings() as $keyConstantString) {
             foreach ($possibleLocales as $possibleLocale) {
-                $this->queued[] = [
-                    'key' => $keyConstantString->getValue(),
-                    'locale' => $possibleLocale,
-                    'file' => $call->file,
-                    'line' => $call->line,
-                ];
+                $this->queued[] = new UsedTranslationRecord(
+                    key: $keyConstantString->getValue(),
+                    locale: $possibleLocale,
+                    file: $call->file,
+                    line: $call->line,
+                );
             }
         }
     }

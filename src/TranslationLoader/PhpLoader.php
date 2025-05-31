@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
@@ -28,6 +29,7 @@ final class PhpLoader
 {
     public function __construct(
         private readonly ?ParserFactory $parserFactory = null,
+        private readonly bool $invalidCharacterEncodings = true,
     ) {
     }
 
@@ -90,6 +92,24 @@ final class PhpLoader
                     $line,
                 ];
                 continue;
+            }
+
+            if ($this->invalidCharacterEncodings) {
+                if (!mb_check_encoding($k, 'UTF-8')) {
+                    $warnings[] = [
+                        sprintf('Invalid character encoding for key: %s', Utils::e($k)),
+                        $file->getPathname(),
+                        $line,
+                    ];
+                }
+
+                if (!mb_check_encoding($v, 'UTF-8')) {
+                    $warnings[] = [
+                        sprintf('Invalid character encoding for value: %s', Utils::e($k)),
+                        $file->getPathname(),
+                        $line,
+                    ];
+                }
             }
 
             $results[$k] = $v;

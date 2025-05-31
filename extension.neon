@@ -1,6 +1,8 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader
+    arguments:
+      invalidCharacterEncodings: %lostInTranslation.invalidCharacterEncodings%
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader
     arguments:
@@ -19,6 +21,7 @@ services:
 
   - class: jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection
   - class: jbboehr\PHPStanLostInTranslation\CallRule\DynamicTranslationStringRule
+  - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
     arguments:
@@ -47,6 +50,7 @@ parametersSchema:
     lostInTranslation: structure([
         disallowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
+        invalidCharacterEncodings: bool(),
         invalidChoices: bool(),
         invalidLocales: bool(),
         invalidReplacements: bool(),
@@ -62,6 +66,7 @@ parameters:
     lostInTranslation:
         disallowDynamicTranslationStrings: false
         baseLocale: null
+        invalidCharacterEncodings: true
         invalidChoices: true
         invalidLocales: true
         invalidReplacements: true

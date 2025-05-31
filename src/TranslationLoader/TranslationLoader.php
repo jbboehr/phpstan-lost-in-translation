@@ -19,24 +19,21 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
-use Hamcrest\Util;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use function usort;
 use Fuse\Fuse;
-use Illuminate\Foundation\Application;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Symfony\Component\Finder\Finder;
 
 /**
  * @final
  * @internal
- * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
  * @phpstan-type UsedTranslationRecordWithCandidate array{
  *     key: string,
  *     locale: string,
  *     file: string,
  *     line: int,
- *     candidate: ?UsedTranslationRecord
+ *     candidate: ?array{key: string, locale: string, file: string, line: int}
  * }
  */
 class TranslationLoader
@@ -144,10 +141,12 @@ class TranslationLoader
         $usedByKey = [];
 
         foreach ($used as $item) {
-            $usedByKey[$item['locale']][$item['key']] = true;
+            $usedByKey[$item->locale][$item->key] = true;
         }
 
-        $searchDatabase = new Fuse($used, [
+        $searchDatabase = new Fuse(array_map(static function (UsedTranslationRecord $record): array {
+            return $record->toArray();
+        }, $used), [
             'isCaseSensitive' => true,
             'includeScore' => true,
             'minMatchCharLength' => 2,

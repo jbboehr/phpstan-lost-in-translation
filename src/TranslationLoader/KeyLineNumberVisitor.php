@@ -63,7 +63,7 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
                 } elseif ($stackItem instanceof Scalar\String_) {
                     return $stackItem->value;
                 } else {
-                    dd($stackItem);
+                    throw new \DomainException('Unexpected type: ' . get_class($stackItem));
                 }
             }, $this->stack));
             $this->lineNumbers[$path] = $node->getStartLine();

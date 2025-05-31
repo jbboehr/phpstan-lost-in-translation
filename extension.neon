@@ -9,10 +9,12 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
 
 
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule
+  - class: jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule
     arguments:
       invalidLocales: %lostInTranslation.invalidLocales%
       strictLocales: %lostInTranslation.strictLocales%
+  - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
+    tags: ["phpstan.rules.rule"]
 
 
   - class: jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection
@@ -29,15 +31,13 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
-  - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
-    tags: ["phpstan.rules.rule"]
 
 
 conditionalTags:
+	jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule:
+		phpstan.rules.rule: %lostInTranslation.translationLoaderWarnings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector:
 		phpstan.collector: %lostInTranslation.unusedTranslationStrings%
-	jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule:
-		phpstan.rules.rule: %lostInTranslation.translationLoaderWarnings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:

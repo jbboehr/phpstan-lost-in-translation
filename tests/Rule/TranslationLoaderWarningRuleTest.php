@@ -17,11 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Rule;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderWarningRule;
+use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
@@ -39,7 +40,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
     public function setUp(): void
     {
         $this->translationLoader = new TranslationLoader(
-            langPath: __DIR__ . '/lang-warn',
+            langPath: __DIR__ . '/../lang-warn',
             baseLocale: null,
             phpLoader: new PhpLoader(),
             jsonLoader: new JsonLoader(),
@@ -72,7 +73,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
     public function testWarnings(): void
     {
         $this->analyse([
-            __DIR__ . '/data/translation-loader-warning.php',
+            __DIR__ . '/../data/translation-loader-warning.php',
         ], [
             // lang-warn/es.json
             [

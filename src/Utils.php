@@ -28,8 +28,6 @@ use Symfony\Component\Intl\Locales;
  */
 final class Utils
 {
-    private static string $applicationClass = Application::class;
-
     /**
      * @param array<string, string> $extra
      * @return array<string, string>
@@ -67,15 +65,19 @@ final class Utils
         return Locales::exists($locale);
     }
 
-    public static function detectLangPath(): string
+    /**
+     * @internal
+     * @phpstan-param ?class-string<Application> $applicationClass
+     */
+    public static function detectLangPath(?string $applicationClass = Application::class): string
     {
-        $applicationClass = self::$applicationClass;
-
-        if (!class_exists($applicationClass)) {
+        if (null === $applicationClass || !class_exists($applicationClass, false)) {
             return 'lang';
         }
 
-        $app = $applicationClass::getInstance();
+        // I don't want to initialize the application if it's not already initialized...
+        $r = new \ReflectionProperty($applicationClass, 'instance');
+        $app = $r->getValue(null);
 
         if (!($app instanceof Application) || !$app->isBooted()) {
             return 'lang';
@@ -84,15 +86,19 @@ final class Utils
         return $app->langPath();
     }
 
-    public static function detectBaseLocale(): string
+    /**
+     * @internal
+     * @phpstan-param ?class-string<Application> $applicationClass
+     */
+    public static function detectBaseLocale(?string $applicationClass = Application::class): string
     {
-        $applicationClass = self::$applicationClass;
-
-        if (!class_exists($applicationClass)) {
+        if (null === $applicationClass || !class_exists($applicationClass, false)) {
             return 'en';
         }
 
-        $app = $applicationClass::getInstance();
+        // I don't want to initialize the application if it's not already initialized...
+        $r = new \ReflectionProperty($applicationClass, 'instance');
+        $app = $r->getValue(null);
 
         if (!($app instanceof Application) || !$app->isBooted()) {
             return 'en';

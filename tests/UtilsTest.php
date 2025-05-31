@@ -20,6 +20,8 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Container\Container;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\App;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Orchestra\Testbench\TestCase;
@@ -63,14 +65,39 @@ final class UtilsTest extends TestCase
 
     public function testDetectLangPathWithNoApplicationClass(): void
     {
-        $propertyReflection = new \ReflectionProperty(Utils::class, 'applicationClass');
-        $originalApplicationClass = $propertyReflection->getValue();
-        $propertyReflection->setValue(null, 'someclassthatdoesntexisthopefully');
+        $this->assertSame('lang', Utils::detectLangPath(null));
+    }
+
+    public function testDetectLangPathWithUnbootedApplication(): void
+    {
+        $app = $this->createStub(\Illuminate\Contracts\Foundation\Application::class);
+        $original = Application::getInstance();
 
         try {
+            Application::setInstance($app);
+
             $this->assertSame('lang', Utils::detectLangPath());
         } finally {
-            $propertyReflection->setValue(null, $originalApplicationClass);
+            Application::setInstance($original);
+        }
+    }
+
+    public function testDetectBaseLocaleWithNoApplication(): void
+    {
+        $this->assertSame('en', Utils::detectBaseLocale(null));
+    }
+
+    public function testDetectBaseLocaleWithUnbootedApplication(): void
+    {
+        $app = $this->createStub(\Illuminate\Contracts\Foundation\Application::class);
+        $original = Application::getInstance();
+
+        try {
+            Application::setInstance($app);
+
+            $this->assertSame('en', Utils::detectBaseLocale());
+        } finally {
+            Application::setInstance($original);
         }
     }
 }

@@ -19,8 +19,8 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\InvalidChoiceRule;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;

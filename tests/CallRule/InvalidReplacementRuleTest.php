@@ -19,42 +19,46 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\InvalidLocaleRule;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
 /**
  * @extends RuleTestCase<LostInTranslationRule>
  */
-class InvalidLocaleRuleTest extends RuleTestCase
+class InvalidReplacementRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new InvalidLocaleRule($this->getLostInTranslationHelper()),
+                new InvalidReplacementRule(),
             ]),
         );
     }
 
-    public function testInvalidChoices(): void
+    public function testInvalidReplacements(): void
     {
         $this->analyse([
-            __DIR__ . '/data/invalid-locale.php',
+            __DIR__ . '/data/invalid-replacement.php',
         ], [
             [
-                'Locale has no available translation strings: invalid_locale',
+                'Unused translation replacement: "bar"',
                 4,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
             ],
             [
-                'Unknown locale: invalid_locale',
+                'Unused translation replacement: "foo"',
                 4,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
             ],
             [
-                'Locale has no available translation strings: pt_BR',
+                'Replacement string matches multiple variants: "foo"',
                 7,
+                Utils::formatTipForKeyValue('en', ':foo :FOO', ':foo :FOO'),
             ]
         ]);
     }

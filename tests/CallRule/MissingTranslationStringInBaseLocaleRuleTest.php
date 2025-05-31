@@ -19,38 +19,34 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule;
+use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use PHPStan\Rules\Rule;
 
 /**
  * @extends RuleTestCase<LostInTranslationRule>
  */
-class DynamicTranslationStringRuleTest extends RuleTestCase
+class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new DynamicTranslationStringRule(),
+                new MissingTranslationStringInBaseLocaleRule($this->getLostInTranslationHelper()),
             ]),
         );
     }
 
-    public function testDynamicTranslationString(): void
+    public function testMissingInBaseLocale(): void
     {
         $this->analyse([
-            __DIR__ . '/data/dynamic-translation-string.php',
+            __DIR__ . '/data/missing-in-base-locale.php',
         ], [
             [
-                'Disallowed dynamic translation string of type: string',
-                5,
-            ],
-            [
-                "Disallowed dynamic translation string of type: 'bar'|'foo'|Exception",
-                8,
+                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
+                3
             ],
         ]);
     }

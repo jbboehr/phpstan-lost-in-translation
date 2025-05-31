@@ -21,20 +21,21 @@ namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class MissingTranslationStringRule implements CallRuleInterface
 {
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        private readonly TranslationLoader $loader,
     ) {
     }
 
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
-        $baseLocale = $this->helper->getBaseLocale();
+        $baseLocale = $this->loader->getBaseLocale();
 
         foreach ($call->possibleTranslations as $key => $items) {
             $missingInLocales = [];
@@ -56,7 +57,7 @@ final class MissingTranslationStringRule implements CallRuleInterface
                     ->line($call->line)
                     ->file($call->file);
 
-                $similarKeys = $this->helper->searchForSimilarKeys($key);
+                $similarKeys = $this->loader->searchForSimilarKeys($key);
 
                 if (count($similarKeys) > 0) {
                     foreach ($similarKeys as $similarKey) {

@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\CollectedDataNode;
@@ -33,7 +34,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 final class UnusedTranslationStringRule implements Rule
 {
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        private readonly TranslationLoader $loader,
     ) {
     }
 
@@ -62,7 +63,7 @@ final class UnusedTranslationStringRule implements Rule
                 }
             }
 
-            $possiblyUnused = $this->helper->diffUsed($used);
+            $possiblyUnused = $this->loader->diffUsed($used);
 
             foreach ($possiblyUnused as $item) {
                 ['locale' => $locale, 'key' => $key, 'file' => $file, 'line' => $line, 'candidate' => $candidate] = $item;

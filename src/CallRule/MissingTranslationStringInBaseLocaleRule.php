@@ -21,24 +21,25 @@ namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterface
 {
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        private readonly TranslationLoader $loader,
     ) {
     }
 
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
-        $baseLocale = $this->helper->getBaseLocale();
+        $baseLocale = $this->loader->getBaseLocale();
 
         foreach ($call->possibleTranslations as $key => $items) {
             foreach ($items as [$locale, $value]) {
-                if ($locale === $baseLocale && null === $value && $this->helper->isLikelyUntranslated($key)) {
+                if ($locale === $baseLocale && null === $value && self::isLikelyUntranslated($key)) {
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Likely missing translation string %s for base locale: %s',
                         json_encode($key, JSON_THROW_ON_ERROR),
@@ -54,5 +55,12 @@ final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterfac
         }
 
         return $errors;
+    }
+
+    private const GROUP_REGEX = '~^(.+::)?((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*)(?:\.((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*))$~';
+
+    private static function isLikelyUntranslated(string $key): bool
+    {
+        return 1 === preg_match(self::GROUP_REGEX, $key);
     }
 }

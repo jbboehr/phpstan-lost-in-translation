@@ -35,7 +35,7 @@ class InvalidLocaleRuleTest extends RuleTestCase
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new InvalidLocaleRule($this->getLostInTranslationHelper()),
+                new InvalidLocaleRule($this->getTranslationLoader()),
             ]),
         );
     }

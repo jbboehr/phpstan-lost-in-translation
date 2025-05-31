@@ -35,19 +35,17 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
     protected function getRule(): Rule
     {
         return new UnusedTranslationStringRule(
-            $this->getLostInTranslationHelper(),
+            $this->getTranslationLoader(),
         );
     }
 
-    public function createLostInTranslationHelper(): LostInTranslationHelper
+    public function createTranslationLoader(): TranslationLoader
     {
-        return new LostInTranslationHelper(
-            new TranslationLoader(
-                langPath: __DIR__ . '/lang-unused',
-                baseLocale: null,
-                phpLoader: new PhpLoader(),
-                jsonLoader: new JsonLoader(),
-            ),
+        return new TranslationLoader(
+            langPath: __DIR__ . '/lang-unused',
+            baseLocale: null,
+            phpLoader: new PhpLoader(),
+            jsonLoader: new JsonLoader(),
         );
     }
 

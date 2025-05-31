@@ -29,11 +29,9 @@ use PHPStan\Type\Type;
 use WeakMap;
 
 /**
+ * @final
  * @phpstan-type PossibleTranslationRecord array{string, ?string}
  * @phpstan-type PossibleTranslationRecordCollection array<string, list<PossibleTranslationRecord>>
- * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
- * @phpstan-import-type UsedTranslationRecordWithCandidate from TranslationLoader
- * @final
  */
 class LostInTranslationHelper
 {
@@ -251,39 +249,5 @@ class LostInTranslationHelper
         }
 
         return $rv;
-    }
-
-    public function getBaseLocale(): ?string
-    {
-        return $this->translationLoader->getBaseLocale();
-    }
-
-    public function hasLocale(string $locale): bool
-    {
-        return $this->translationLoader->hasLocale($locale);
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function searchForSimilarKeys(string $key, ?string $locale = null): array
-    {
-        return $this->translationLoader->searchForSimilarKeys($key, $locale);
-    }
-
-    /**
-     * @phpstan-param list<UsedTranslationRecord> $used
-     * @phpstan-return list<UsedTranslationRecordWithCandidate>
-     */
-    public function diffUsed(array $used): array
-    {
-        return $this->translationLoader->diffUsed($used);
-    }
-
-    private const GROUP_REGEX = '~^(.+::)?((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*)(?:\.((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*))$~';
-
-    public function isLikelyUntranslated(string $key): bool
-    {
-        return 1 === preg_match(self::GROUP_REGEX, $key);
     }
 }

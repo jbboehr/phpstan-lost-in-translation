@@ -35,7 +35,9 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new MissingTranslationStringInBaseLocaleRule($this->getLostInTranslationHelper()),
+                new MissingTranslationStringInBaseLocaleRule(
+                    $this->getTranslationLoader(),
+                ),
             ]),
         );
     }

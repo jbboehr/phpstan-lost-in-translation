@@ -21,13 +21,14 @@ namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class InvalidLocaleRule implements CallRuleInterface
 {
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        private readonly TranslationLoader $loader,
         private readonly bool $strictLocales = false,
     ) {
     }
@@ -44,7 +45,7 @@ final class InvalidLocaleRule implements CallRuleInterface
         foreach ($localeType->getConstantStrings() as $localeConstantString) {
             $locale = $localeConstantString->getValue();
 
-            if (!$this->helper->hasLocale($locale)) {
+            if (!$this->loader->hasLocale($locale)) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Locale has no available translation strings: %s',
                     $locale,

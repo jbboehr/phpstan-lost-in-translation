@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "illuminate/support": "^9 || ^10 || ^11 || ^12",
+        "ext-mbstring": "*",
         "loilo/fuse": "^7.1",
         "phpstan/phpstan": "^1.12 || ^2.0",
         "salsify/json-streaming-parser": "^8.3",
@@ -50,6 +50,13 @@
                 "extension.neon"
             ]
         }
+    },
+    "scripts": {
+        "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
+        "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",
+        "phpcs": "./vendor/bin/phpcs",
+        "phpstan": "./vendor/bin/phpstan",
+        "phpunit": "./vendor/bin/phpunit"
     },
     "_comment": [
         "Think not that I am come to send peace on earth: I came not to send peace, but a sword. Matthew 10:34"

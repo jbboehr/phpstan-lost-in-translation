@@ -19,12 +19,11 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use Hamcrest\Util;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use function usort;
 use Fuse\Fuse;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\NamespacedItemResolver;
-use Illuminate\Translation\Translator;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use Symfony\Component\Finder\Finder;
 
@@ -44,8 +43,6 @@ class TranslationLoader
 {
     private readonly string $langPath;
 
-    private readonly NamespacedItemResolver $namespacedItemResolver;
-
     /** @var array<string, array<string, array<string, string>>> */
     private array $data = [];
 
@@ -61,9 +58,12 @@ class TranslationLoader
     /** @var array<string, array{string, int}> */
     private array $locations = [];
 
-    private readonly ?string $baseLocale;
+    private readonly string $baseLocale;
 
     private readonly Fuse $searchDatabase;
+
+    /** @var array<string, array{string, string}>  */
+    private array $parsed = [];
 
     public function __construct(
         ?string $langPath,
@@ -72,24 +72,15 @@ class TranslationLoader
         private readonly JsonLoader $jsonLoader,
         private readonly float $fuzzySearchThreshold = 0.25,
     ) {
-        if ($langPath === null) {
-            $langPath = Utils::detectLangPath();
-        }
-
-        $this->langPath = realpath($langPath) ?: $langPath;
-
-        if (null === $baseLocale && class_exists(Application::class, false)) {
-            $baseLocale = Application::getInstance()->currentLocale();
-        }
-
-        $this->baseLocale = $baseLocale;
-        $this->namespacedItemResolver = new NamespacedItemResolver();
+        $this->langPath = realpath($langPath ?? Utils::detectLangPath()) ?: Utils::detectLangPath();
+        $this->baseLocale = $baseLocale ?? Utils::detectBaseLocale();
 
         $this->scan();
+
         $this->searchDatabase = $this->buildSearchDatabase();
     }
 
-    public function getBaseLocale(): ?string
+    public function getBaseLocale(): string
     {
         return $this->baseLocale;
     }
@@ -223,13 +214,21 @@ class TranslationLoader
     }
 
     /**
-     * @see Translator::parseKey()
+     * @see \Illuminate\Translation\Translator::parseKey()
+     * @see \Illuminate\Support\NamespacedItemResolver::parseKey()
      * @return array{string, string}
      */
     public function parseKey(string $key): array
     {
-        /** @var array{?string, string, ?string} $segments */
-        $segments = $this->namespacedItemResolver->parseKey($key);
+        if (isset($this->parsed[$key])) {
+            return $this->parsed[$key];
+        }
+
+        if (!str_contains($key, '::')) {
+            $segments = self::parseBasicSegments(explode('.', $key));
+        } else {
+            $segments = self::parseNamespacedSegments($key);
+        }
 
         if (is_null($segments[0])) {
             $segments[0] = '*';
@@ -241,7 +240,7 @@ class TranslationLoader
             $key = $segments[1] . '.' . $segments[2];
         }
 
-        return [$segments[0], $key];
+        return $this->parsed[$key] = [$segments[0], $key];
     }
 
     private function scan(): void
@@ -256,8 +255,8 @@ class TranslationLoader
             $a = $a->getPathname();
             $b = $b->getPathname();
 
-            $asc = substr_count($a, '/');
-            $bsc = substr_count($b, '/');
+            $asc = mb_substr_count($a, '/', 'UTF-8');
+            $bsc = mb_substr_count($b, '/', 'UTF-8');
 
             if ($asc !== $bsc) {
                 return $asc <=> $bsc;
@@ -347,5 +346,41 @@ class TranslationLoader
             'keys' => ['key'],
             'threshold' => $this->fuzzySearchThreshold,
         ]);
+    }
+
+    /**
+     * @see \Illuminate\Support\NamespacedItemResolver::parseNamespacedSegments()
+     * @license https://github.com/laravel/framework/blob/10.x/LICENSE.md
+     * @return array{string, string, ?string}
+     */
+    private static function parseNamespacedSegments(string $key): array
+    {
+        [$namespace, $item] = explode('::', $key);
+
+        $itemSegments = explode('.', $item);
+
+        $groupAndItem = array_slice(
+            self::parseBasicSegments($itemSegments),
+            1
+        );
+
+        return [$namespace, $groupAndItem[0], $groupAndItem[1] ?? null];
+    }
+
+    /**
+     * @see \Illuminate\Support\NamespacedItemResolver::parseBasicSegments()
+     * @license https://github.com/laravel/framework/blob/10.x/LICENSE.md
+     * @param list<string> $segments
+     * @return array{null, string, ?string}
+     */
+    private static function parseBasicSegments(array $segments): array
+    {
+        $group = $segments[0];
+
+        $item = count($segments) === 1
+            ? null
+            : implode('.', array_slice($segments, 1));
+
+        return [null, $group, $item];
     }
 }

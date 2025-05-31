@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use function sort;
-use Illuminate\Support\Str;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -67,8 +66,8 @@ final class InvalidReplacementRule implements CallRuleInterface
         sort($replaceKeys, SORT_NATURAL);
 
         foreach ($replaceKeys as $search) {
-            $replaceVariantCount = (int) str_contains($value, ':' . Str::ucfirst($search))
-                + (int) str_contains($value, ':' . Str::upper($search))
+            $replaceVariantCount = (int) str_contains($value, ':' . self::ucfirst($search))
+                + (int) str_contains($value, ':' . mb_strtoupper($search, 'UTF-8'))
                 + (int) str_contains($value, ':' . $search);
 
             if ($replaceVariantCount === 0) {
@@ -91,5 +90,13 @@ final class InvalidReplacementRule implements CallRuleInterface
         }
 
         return $errors;
+    }
+
+    /**
+     * @see \Illuminate\Support\Str::ucfirst()
+     */
+    private static function ucfirst(string $search): string
+    {
+        return mb_strtoupper(mb_substr($search, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($search, 1, null, 'UTF-8');
     }
 }

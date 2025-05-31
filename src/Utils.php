@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Arr;
 use PHPStan\Type\VerbosityLevel;
 use Symfony\Component\Intl\Locales;
 
@@ -83,6 +82,23 @@ final class Utils
         }
 
         return $app->langPath();
+    }
+
+    public static function detectBaseLocale(): string
+    {
+        $applicationClass = self::$applicationClass;
+
+        if (!class_exists($applicationClass)) {
+            return 'en';
+        }
+
+        $app = $applicationClass::getInstance();
+
+        if (!($app instanceof Application) || !$app->isBooted()) {
+            return 'en';
+        }
+
+        return $app->currentLocale();
     }
 
     public static function e(string $value): string

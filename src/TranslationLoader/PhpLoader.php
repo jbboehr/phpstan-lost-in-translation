@@ -19,8 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
-use Illuminate\Support\Arr;
-use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
@@ -104,7 +102,7 @@ final class PhpLoader
     /**
      * @param array<array-key, mixed> $array
      * @return array<array-key, mixed>
-     * @see Arr::dot()
+     * @see \Illuminate\Support\Arr::dot()
      */
     public static function dot(array $array, string $prepend = ''): array
     {

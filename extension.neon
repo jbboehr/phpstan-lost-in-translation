@@ -7,7 +7,16 @@ services:
       baseLocale: %lostInTranslation.baseLocale%
       langPath: %lostInTranslation.langPath%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
+
+
+  - class: jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule
+    arguments:
+      invalidLocales: %lostInTranslation.invalidLocales%
+      strictLocales: %lostInTranslation.strictLocales%
+
+
   - class: jbboehr\PHPStanLostInTranslation\DynamicTranslationStringRule
+    tags: ["lostInTranslation.rule"]
   - class: jbboehr\PHPStanLostInTranslation\InvalidChoiceRule
   - class: jbboehr\PHPStanLostInTranslation\InvalidLocaleRule
     arguments:
@@ -15,12 +24,17 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringInBaseLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\MissingTranslationStringRule
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoaderWarningRule
-    arguments:
-      invalidLocales: %lostInTranslation.invalidLocales%
-      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
+
+
+  - class: jbboehr\PHPStanLostInTranslation\Collector\LostInTranslationCollector
+    tags: ["phpstan.collector"]
+  - class: jbboehr\PHPStanLostInTranslation\Collector\LostInTranslationFakeCollectorRule
+    tags: ["phpstan.rules.rule"]
+  - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
+    tags: ["phpstan.rules.rule"]
+
 
 conditionalTags:
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector:

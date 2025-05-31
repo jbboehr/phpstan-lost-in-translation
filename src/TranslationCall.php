@@ -24,7 +24,7 @@ use PHPStan\Type\Type;
 /**
  * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
  */
-final class TranslationCall
+final class TranslationCall implements \JsonSerializable
 {
     /**
      * @phpstan-param PossibleTranslationRecordCollection $possibleTranslations
@@ -41,5 +41,37 @@ final class TranslationCall
         public readonly ?Type $numberType = null,
         public readonly bool $isChoice = false,
     ) {
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'className' => $this->className,
+            'functionName' => $this->functionName,
+            'file' => $this->file,
+            'line' => $this->line,
+            'possibleTranslations' => $this->possibleTranslations,
+            'keyType' => $this->keyType !== null ? serialize($this->keyType) : null,
+            'replaceType' => $this->replaceType !== null ? serialize($this->replaceType) : null,
+            'localeType' => $this->localeType !== null ? serialize($this->localeType) : null,
+            'numberType' => $this->numberType !== null ? serialize($this->numberType) : null,
+            'isChoice' => $this->isChoice,
+        ];
+    }
+
+    public static function fromJsonArray(array $json): self
+    {
+        return new self(
+            className: $json['className'] ?? null,
+            functionName: $json['functionName'] ?? throw new \DomainException(),
+            file: $json['file'] ?? throw new \DomainException(),
+            line: $json['line'] ?? throw new \DomainException(),
+            possibleTranslations: $json['possibleTranslations'] ?? throw new \DomainException(),
+            keyType: unserialize($json['keyType'] ?? throw new \DomainException()),
+            replaceType: isset($json['replaceType']) ? unserialize($json['replaceType']) : null,
+            localeType: isset($json['localeType']) ? unserialize($json['localeType']) : null,
+            numberType: isset($json['numberType']) ? unserialize($json['numberType']) : null,
+            isChoice: $json['isChoice'] ?? throw new \DomainException(),
+        );
     }
 }

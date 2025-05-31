@@ -27,65 +27,53 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * @implements Rule<Node\Expr\CallLike>
  */
-final class MissingTranslationStringRule implements Rule
+final class MissingTranslationStringRule implements Rule, CallRuleInterface
 {
+    use CallRuleTrait;
+
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        LostInTranslationHelper $helper,
     ) {
+        $this->helper = $helper;
     }
 
-    public function getNodeType(): string
+    public function processCall(TranslationCall $call): array
     {
-        return Node\Expr\CallLike::class;
-    }
+        $errors = [];
+        $baseLocale = $this->helper->getBaseLocale();
 
-    public function processNode(Node $node, Scope $scope): array
-    {
-        try {
-            $call = $this->helper->parseCallLike($node, $scope);
+        foreach ($call->possibleTranslations as $key => $items) {
+            $missingInLocales = [];
 
-            if (null === $call) {
-                return [];
-            }
-
-            $errors = [];
-            $baseLocale = $this->helper->getBaseLocale();
-
-            foreach ($call->possibleTranslations as $key => $items) {
-                $missingInLocales = [];
-
-                foreach ($items as [$locale, $value]) {
-                    if (null === $value && $locale !== $baseLocale) {
-                        $missingInLocales[] = $locale;
-                    }
-                }
-
-                if (count($missingInLocales) > 0) {
-                    $builder = RuleErrorBuilder::message(sprintf(
-                        'Missing translation string %s for locales: %s',
-                        json_encode($key, JSON_THROW_ON_ERROR),
-                        join(', ', $missingInLocales)
-                    ))
-                        ->identifier('lostInTranslation.missingTranslationString')
-                        ->metadata(Utils::callToMetadata($call))
-                        ->line($call->line)
-                        ->file($call->file);
-
-                    $similarKeys = $this->helper->searchForSimilarKeys($key);
-
-                    if (count($similarKeys) > 0) {
-                        foreach ($similarKeys as $similarKey) {
-                            $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
-                        }
-                    }
-
-                    $errors[] = $builder->build();
+            foreach ($items as [$locale, $value]) {
+                if (null === $value && $locale !== $baseLocale) {
+                    $missingInLocales[] = $locale;
                 }
             }
 
-            return $errors;
-        } catch (\Throwable $e) {
-            ShouldNotHappenException::rethrow($e);
+            if (count($missingInLocales) > 0) {
+                $builder = RuleErrorBuilder::message(sprintf(
+                    'Missing translation string %s for locales: %s',
+                    json_encode($key, JSON_THROW_ON_ERROR),
+                    join(', ', $missingInLocales)
+                ))
+                    ->identifier('lostInTranslation.missingTranslationString')
+                    ->metadata(Utils::callToMetadata($call))
+                    ->line($call->line)
+                    ->file($call->file);
+
+                $similarKeys = $this->helper->searchForSimilarKeys($key);
+
+                if (count($similarKeys) > 0) {
+                    foreach ($similarKeys as $similarKey) {
+                        $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
+                    }
+                }
+
+                $errors[] = $builder->build();
+            }
         }
+
+        return $errors;
     }
 }

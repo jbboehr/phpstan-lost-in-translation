@@ -27,50 +27,38 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * @implements Rule<Node\Expr\CallLike>
  */
-final class MissingTranslationStringInBaseLocaleRule implements Rule
+final class MissingTranslationStringInBaseLocaleRule implements Rule, CallRuleInterface
 {
+    use CallRuleTrait;
+
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        LostInTranslationHelper $helper,
     ) {
+        $this->helper = $helper;
     }
 
-    public function getNodeType(): string
+    public function processCall(TranslationCall $call): array
     {
-        return Node\Expr\CallLike::class;
-    }
+        $errors = [];
+        $baseLocale = $this->helper->getBaseLocale();
 
-    public function processNode(Node $node, Scope $scope): array
-    {
-        try {
-            $call = $this->helper->parseCallLike($node, $scope);
-
-            if (null === $call) {
-                return [];
-            }
-
-            $errors = [];
-            $baseLocale = $this->helper->getBaseLocale();
-
-            foreach ($call->possibleTranslations as $key => $items) {
-                foreach ($items as [$locale, $value]) {
-                    if ($locale === $baseLocale && null === $value && $this->helper->isLikelyUntranslated($key)) {
-                        $errors[] = RuleErrorBuilder::message(sprintf(
-                            'Likely missing translation string %s for base locale: %s',
-                            json_encode($key, JSON_THROW_ON_ERROR),
-                            $baseLocale
-                        ))
-                            ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
-                            ->metadata(Utils::callToMetadata($call))
-                            ->line($call->line)
-                            ->file($call->file)
-                            ->build();
-                    }
+        foreach ($call->possibleTranslations as $key => $items) {
+            foreach ($items as [$locale, $value]) {
+                if ($locale === $baseLocale && null === $value && $this->helper->isLikelyUntranslated($key)) {
+                    $errors[] = RuleErrorBuilder::message(sprintf(
+                        'Likely missing translation string %s for base locale: %s',
+                        json_encode($key, JSON_THROW_ON_ERROR),
+                        $baseLocale
+                    ))
+                        ->identifier('lostInTranslation.missingBaseLocaleTranslationString')
+                        ->metadata(Utils::callToMetadata($call))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
                 }
             }
-
-            return $errors;
-        } catch (\Throwable $e) {
-            ShouldNotHappenException::rethrow($e);
         }
+
+        return $errors;
     }
 }

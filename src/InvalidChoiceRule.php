@@ -32,42 +32,30 @@ use PHPStan\Type\VerbosityLevel;
 /**
  * @implements Rule<Node\Expr\CallLike>
  */
-final class InvalidChoiceRule implements Rule
+final class InvalidChoiceRule implements Rule, CallRuleInterface
 {
+    use CallRuleTrait;
+
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        LostInTranslationHelper $helper,
     ) {
+        $this->helper = $helper;
     }
 
-    public function getNodeType(): string
+    public function processCall(TranslationCall $call): array
     {
-        return Node\Expr\CallLike::class;
-    }
+        $errors = [];
 
-    public function processNode(Node $node, Scope $scope): array
-    {
-        try {
-            $call = $this->helper->parseCallLike($node, $scope);
-
-            if (null === $call || !$call->isChoice || null === $call->numberType) {
-                return [];
+        foreach ($call->possibleTranslations as $key => $items) {
+            foreach ($items as [$locale, $value]) {
+                $errors = array_merge(
+                    $errors,
+                    $this->analyzeChoices($call, $locale, $key, $value ?? $key),
+                );
             }
-
-            $errors = [];
-
-            foreach ($call->possibleTranslations as $key => $items) {
-                foreach ($items as [$locale, $value]) {
-                    $errors = array_merge(
-                        $errors,
-                        $this->analyzeChoices($call, $locale, $key, $value ?? $key),
-                    );
-                }
-            }
-
-            return $errors;
-        } catch (\Throwable $e) {
-            ShouldNotHappenException::rethrow($e);
         }
+
+        return $errors;
     }
 
     /**

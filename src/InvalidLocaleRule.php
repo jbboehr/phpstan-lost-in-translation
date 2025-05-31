@@ -28,67 +28,58 @@ use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\VerbosityLevel;
-use Symfony\Component\Intl\Locales;
 
 /**
  * @implements Rule<Node\Expr\CallLike>
  */
-final class InvalidLocaleRule implements Rule
+final class InvalidLocaleRule implements Rule, CallRuleInterface
 {
+    use CallRuleTrait;
+
     public function __construct(
-        private readonly LostInTranslationHelper $helper,
+        LostInTranslationHelper $helper,
         private readonly bool $strictLocales = false,
     ) {
+        $this->helper = $helper;
     }
 
-    public function getNodeType(): string
+    public function processCall(TranslationCall $call): array
     {
-        return Node\Expr\CallLike::class;
-    }
-
-    public function processNode(Node $node, Scope $scope): array
-    {
-        try {
-            $call = $this->helper->parseCallLike($node, $scope);
-
-            if (null === $call || null === $call->localeType) {
-                return [];
-            }
-
-            $localeType = $call->localeType;
-            $errors = [];
-
-            foreach ($localeType->getConstantStrings() as $localeConstantString) {
-                $locale = $localeConstantString->getValue();
-
-                if (!$this->helper->hasLocale($locale)) {
-                    $errors[] = RuleErrorBuilder::message(sprintf(
-                        'Locale has no available translation strings: %s',
-                        $locale,
-                    ))
-                        ->identifier('lostInTranslation.noLocaleTranslations')
-                        ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
-                        ->line($call->line)
-                        ->file($call->file)
-                        ->build();
-                }
-
-                if (!Utils::checkLocaleExists($locale, $this->strictLocales)) {
-                    $errors[] = RuleErrorBuilder::message(sprintf(
-                        'Unknown locale: %s',
-                        $locale,
-                    ))
-                        ->identifier('lostInTranslation.unknownLocale')
-                        ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
-                        ->line($call->line)
-                        ->file($call->file)
-                        ->build();
-                }
-            }
-
-            return $errors;
-        } catch (\Throwable $e) {
-            ShouldNotHappenException::rethrow($e);
+        if (null === $call->localeType) {
+            return [];
         }
+
+        $localeType = $call->localeType;
+        $errors = [];
+
+        foreach ($localeType->getConstantStrings() as $localeConstantString) {
+            $locale = $localeConstantString->getValue();
+
+            if (!$this->helper->hasLocale($locale)) {
+                $errors[] = RuleErrorBuilder::message(sprintf(
+                    'Locale has no available translation strings: %s',
+                    $locale,
+                ))
+                    ->identifier('lostInTranslation.noLocaleTranslations')
+                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
+                    ->line($call->line)
+                    ->file($call->file)
+                    ->build();
+            }
+
+            if (!Utils::checkLocaleExists($locale, $this->strictLocales)) {
+                $errors[] = RuleErrorBuilder::message(sprintf(
+                    'Unknown locale: %s',
+                    $locale,
+                ))
+                    ->identifier('lostInTranslation.unknownLocale')
+                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
+                    ->line($call->line)
+                    ->file($call->file)
+                    ->build();
+            }
+        }
+
+        return $errors;
     }
 }

@@ -21,40 +21,39 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\Type\Constant\ConstantIntegerType;
+use PHPStan\Type\IntegerRangeType;
+use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\VerbosityLevel;
-use PHPStan\Rules\IdentifierRuleError;
 
 /**
- * @implements Rule<Node\Expr\CallLike>
+ * @phpstan-require-implements CallRuleInterface
+ * @phpstan-require-implements Rule<Node\Expr\CallLike>
  */
-final class DynamicTranslationStringRule implements Rule, CallRuleInterface
+trait CallRuleTrait
 {
-    use CallRuleTrait;
+    private readonly LostInTranslationHelper $helper;
 
-    public function __construct(
-        LostInTranslationHelper $helper,
-    ) {
-        $this->helper = $helper;
+    public function getNodeType(): string
+    {
+        return Node\Expr\CallLike::class;
     }
 
-    public function processCall(TranslationCall $call): array
+    public function processNode(Node $node, Scope $scope): array
     {
-        $errors = [];
+        try {
+            $call = $this->helper->parseCallLike($node, $scope);
 
-        if (count($call->keyType->getConstantStrings()) <= 0) {
-            $errors[] = RuleErrorBuilder::message(sprintf(
-                'Disallowed dynamic translation string of type: %s',
-                $call->keyType->describe(VerbosityLevel::precise())
-            ))
-                    ->identifier('lostInTranslation.dynamicTranslationString')
-                    ->metadata(Utils::callToMetadata($call))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
+            if ($call !== null) {
+                return $this->processCall($call);
+            }
+
+            return [];
+        } catch (\Throwable $e) {
+            ShouldNotHappenException::rethrow($e);
         }
-
-        return $errors;
     }
 }

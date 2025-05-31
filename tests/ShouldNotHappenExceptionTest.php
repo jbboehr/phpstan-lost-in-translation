@@ -132,8 +132,6 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
         $mock = $this->createMock(LostInTranslationHelper::class);
         $mock->method('parseCallLike')
             ->willThrowException($ex);
-        $mock->method('markUsed')
-            ->willThrowException($ex);
 
         $node = $this->createStub(FuncCall::class);
 

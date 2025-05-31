@@ -49,7 +49,7 @@ final class UnusedTranslationStringFakeCollectorRule implements Rule
             $call = $this->helper->parseCallLike($node, $scope);
 
             if (null !== $call) {
-                $this->collector->push($call->possibleTranslations);
+                $this->collector->push($call);
             }
 
             return [];

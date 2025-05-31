@@ -24,13 +24,13 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 
 /**
- * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
- * @implements Collector<Node\Expr\CallLike, PossibleTranslationRecordCollection>
+ * @phpstan-type UsedTranslationRecord array{key: string, locale: string, file: string, line: int}
+ * @implements Collector<Node\Expr\CallLike, list<UsedTranslationRecord>>
  */
 final class UnusedTranslationStringCollector implements Collector
 {
-    /** @var ?PossibleTranslationRecordCollection */
-    private ?array $queued = null;
+    /** @phpstan-var list<UsedTranslationRecord> */
+    private array $queued = [];
 
     public function __construct(
         private readonly LostInTranslationHelper $helper,
@@ -46,45 +46,54 @@ final class UnusedTranslationStringCollector implements Collector
     {
         try {
             if (str_contains($scope->getFile(), 'blade-compiled')) {
-                return [];
+                return null;
             }
 
-            return self::merge(
-                $this->helper->parseCallLike($node, $scope)?->possibleTranslations,
-                $this->queued,
-            );
+            $call = $this->helper->parseCallLike($node, $scope);
+
+            if (null !== $call) {
+                $this->push($call);
+            }
+
+            if (count($this->queued) <= 0) {
+                return null;
+            }
+
+            $queued = $this->queued;
+            $this->queued = [];
+            return $queued;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
         }
     }
 
-    /**
-     * @phpstan-param PossibleTranslationRecordCollection $data
-     */
-    public function push(array $data): void
+    public function push(TranslationCall $call): void
     {
-        $this->queued = self::merge($this->queued, $data);
-    }
-
-    /**
-     * @param ?PossibleTranslationRecordCollection $left
-     * @param ?PossibleTranslationRecordCollection $right
-     * @return ?PossibleTranslationRecordCollection
-     */
-    private static function merge(?array $left, ?array $right): ?array
-    {
-        if ($left === null || count($left) <= 0) {
-            return $right;
+        if (count($call->keyType->getConstantStrings()) <= 0) {
+            return;
         }
 
-        if ($right === null || count($right) <= 0) {
-            return $left;
+        $possibleLocales = [];
+
+        if ($call->localeType !== null) {
+            foreach ($call->localeType->getConstantStrings() as $localeConstantString) {
+                $possibleLocales[] = $localeConstantString->getValue();
+            }
         }
 
-        foreach ($right as $key => $items) {
-            $left[$key] = array_merge($left[$key] ?? [], $items);
+        if (count($possibleLocales) <= 0) {
+            $possibleLocales = ['*'];
         }
 
-        return $left;
+        foreach ($call->keyType->getConstantStrings() as $keyConstantString) {
+            foreach ($possibleLocales as $possibleLocale) {
+                $this->queued[] = [
+                    'key' => $keyConstantString->getValue(),
+                    'locale' => $possibleLocale,
+                    'file' => $call->file,
+                    'line' => $call->line,
+                ];
+            }
+        }
     }
 }

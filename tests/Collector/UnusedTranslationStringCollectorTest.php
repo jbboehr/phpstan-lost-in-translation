@@ -41,8 +41,6 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
         $helper = $this->createMock(LostInTranslationHelper::class);
         $helper->method('parseCallLike')
             ->willThrowException($ex);
-        $helper->method('markUsed')
-            ->willThrowException($ex);
 
         $obj = new UnusedTranslationStringCollector($helper);
 

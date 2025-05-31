@@ -42,8 +42,6 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
         $helper = $this->createMock(LostInTranslationHelper::class);
         $helper->method('parseCallLike')
             ->willThrowException($ex);
-        $helper->method('markUsed')
-            ->willThrowException($ex);
 
         $scope = $this->createMock(Scope::class);
         $scope->method('getFile')

@@ -1,4 +1,5 @@
 {
     "this string is not used anywhere": "this string is not used anywhere",
-    "only used in blade": "only used in blade"
+    "only used in blade": "only used in blade",
+    "exists in all locales": "exists in all locales"
 }

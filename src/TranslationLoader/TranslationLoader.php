@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use function usort;
 use Fuse\Fuse;
 use Illuminate\Foundation\Application;
@@ -30,6 +31,14 @@ use Symfony\Component\Finder\Finder;
 /**
  * @final
  * @internal
+ * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
+ * @phpstan-type UsedTranslationRecordWithCandidate array{
+ *     key: string,
+ *     locale: string,
+ *     file: string,
+ *     line: int,
+ *     candidate: ?UsedTranslationRecord
+ * }
  */
 class TranslationLoader
 {
@@ -39,9 +48,6 @@ class TranslationLoader
 
     /** @var array<string, array<string, array<string, string>>> */
     private array $data = [];
-
-    /** @var array<string, array<string, array<string, bool>>> */
-    private array $used = [];
 
     /** @var list<array{string, string, int}> */
     private array $warnings = [];
@@ -116,13 +122,6 @@ class TranslationLoader
         return $this->data[$locale][$namespace][$key] ?? null;
     }
 
-    public function markUsed(string $locale, string $key): void
-    {
-        [$namespace, $key] = $this->parseKey($key);
-
-        $this->used[$locale][$namespace][$key] = true;
-    }
-
     /**
      * @return list<string>
      */
@@ -146,36 +145,70 @@ class TranslationLoader
     }
 
     /**
-     * @return list<array{string, string, string, int}>
+     * @phpstan-param list<UsedTranslationRecord> $used
+     * @phpstan-return list<UsedTranslationRecordWithCandidate>
      */
-    public function diffUsed(): array
+    public function diffUsed(array $used): array
     {
+        $usedByKey = [];
+
+        foreach ($used as $item) {
+            $usedByKey[$item['locale']][$item['key']] = true;
+        }
+
+        $searchDatabase = new Fuse($used, [
+            'isCaseSensitive' => true,
+            'includeScore' => true,
+            'minMatchCharLength' => 2,
+            'shouldSort' => true,
+            'keys' => ['key'],
+            'threshold' => $this->fuzzySearchThreshold,
+        ]);
+
         $possiblyUnused = [];
 
-        foreach ($this->data as $locale => $t1) {
-            foreach ($t1 as $namespace => $t2) {
-                foreach ($t2 as $item => $flag) {
-                    if (
-                        !isset($this->used[$locale][$namespace][$item]) &&
-                        !isset($this->used['*'][$namespace][$item])
-                    ) {
-                        $buf = $item;
+        foreach ($this->data as $locale => $localeData) {
+            foreach ($localeData as $namespace => $namespaceData) {
+                foreach ($namespaceData as $item => $value) {
+                    $key = $item;
 
-                        if ($namespace !== '*') {
-                            $buf = $namespace . '::' . $buf;
+                    if ($namespace !== '*') {
+                        $key = $namespace . '::' . $key;
+                    }
+
+                    if (isset($usedByKey[$locale][$key]) || isset($usedByKey['*'][$key])) {
+                        continue;
+                    }
+
+                    $candidate = null;
+
+                    foreach ($searchDatabase->search($key) as $searchResult) {
+                        if (!($searchResult['item']['locale'] === $locale || $searchResult['item']['locale'] === '*')) {
+                            continue;
                         }
 
-                        [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
-
-                        $possiblyUnused[] = [$locale, $buf, $f, $l];
+                        $candidate = $searchResult['item'];
                     }
+
+                    [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
+
+                    $possiblyUnused[] = [
+                        'locale' => $locale,
+                        'key' => $key,
+                        'file' => $f,
+                        'line' => $l,
+                        'candidate' => $candidate
+                    ];
                 }
             }
         }
 
-        usort($possiblyUnused, function ($dat) {
-            // @TODO make this faster
-            return strnatcasecmp(join(', ', $dat), join(',', $dat));
+        usort($possiblyUnused, static function (array $left, array $right) {
+            if ($left['locale'] !== $right['locale']) {
+                return strnatcasecmp($left['locale'], $right['locale']);
+            }
+
+            return strnatcasecmp($left['key'], $right['key']);
         });
 
         return $possiblyUnused;

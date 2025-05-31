@@ -31,6 +31,8 @@ use WeakMap;
 /**
  * @phpstan-type PossibleTranslationRecord array{string, ?string}
  * @phpstan-type PossibleTranslationRecordCollection array<string, list<PossibleTranslationRecord>>
+ * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
+ * @phpstan-import-type UsedTranslationRecordWithCandidate from TranslationLoader
  * @final
  */
 class LostInTranslationHelper
@@ -261,11 +263,6 @@ class LostInTranslationHelper
         return $this->translationLoader->hasLocale($locale);
     }
 
-    public function markUsed(string $locale, string $key): void
-    {
-        $this->translationLoader->markUsed($locale, $key);
-    }
-
     /**
      * @return list<string>
      */
@@ -275,11 +272,12 @@ class LostInTranslationHelper
     }
 
     /**
-     * @return list<array{string, string, string, int}>
+     * @phpstan-param list<UsedTranslationRecord> $used
+     * @phpstan-return list<UsedTranslationRecordWithCandidate>
      */
-    public function diffUsed(): array
+    public function diffUsed(array $used): array
     {
-        return $this->translationLoader->diffUsed();
+        return $this->translationLoader->diffUsed($used);
     }
 
     private const GROUP_REGEX = '~^(.+::)?((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*)(?:\.((?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*))$~';

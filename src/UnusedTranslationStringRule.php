@@ -22,11 +22,12 @@ namespace jbboehr\PHPStanLostInTranslation;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\CollectedDataNode;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
+ * @phpstan-import-type UsedTranslationRecord from UnusedTranslationStringCollector
  * @implements Rule<CollectedDataNode>
  */
 final class UnusedTranslationStringRule implements Rule
@@ -44,35 +45,42 @@ final class UnusedTranslationStringRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            /** @var array<string, list<PossibleTranslationRecordCollection>> $data */
+            /** @var array<string, list<list<UsedTranslationRecord>>> $data */
             $data = $node->get(UnusedTranslationStringCollector::class);
 
+            /** @phpstan-var list<UsedTranslationRecord> $used */
+            $used = [];
+
+            /** @phpstan-var list<IdentifierRuleError> $errors */
             $errors = [];
 
-            foreach ($data as $results) {
-                foreach ($results as $result) {
-                    foreach ($result as $key => $items) {
-                        foreach ($items as [$locale, $value]) {
-                            $this->helper->markUsed($locale, $key);
-                        }
+            foreach ($data as $fileResults) {
+                foreach ($fileResults as $results) {
+                    foreach ($results as $result) {
+                        $used[] = $result;
                     }
                 }
             }
 
-            $possiblyUnused = $this->helper->diffUsed();
+            $possiblyUnused = $this->helper->diffUsed($used);
 
             foreach ($possiblyUnused as $item) {
-                [$locale, $key, $file, $line] = $item;
+                ['locale' => $locale, 'key' => $key, 'file' => $file, 'line' => $line, 'candidate' => $candidate] = $item;
 
-                $errors[] = RuleErrorBuilder::message(sprintf(
+                $builder =  RuleErrorBuilder::message(sprintf(
                     'Possibly unused translation string %s for locale: %s',
                     json_encode($key, JSON_THROW_ON_ERROR),
                     join(', ', [$locale])
                 ))
                     ->identifier('lostInTranslation.possiblyUnusedTranslationString')
                     ->file($file)
-                    ->line($line)
-                    ->build();
+                    ->line($line);
+
+                if (null !== $candidate) {
+                    $builder->addTip(sprintf('Did you mean %s?', Utils::e($candidate['key'])));
+                }
+
+                $errors[] = $builder->build();
             }
 
             return $errors;

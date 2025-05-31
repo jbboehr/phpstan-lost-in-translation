@@ -36,16 +36,38 @@ abstract class RuleTestCase extends BaseRuleTestCase
 {
     protected ?LostInTranslationHelper $lostInTranslationHelper = null;
 
+    protected ?TranslationLoader $translationLoader = null;
+
+    public function tearDown(): void
+    {
+        $this->lostInTranslationHelper = null;
+        $this->translationLoader = null;
+
+        parent::tearDown();
+    }
+
+    public function createTranslationLoader(): TranslationLoader
+    {
+        return new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'en',
+            phpLoader: new PhpLoader(),
+            jsonLoader: new JsonLoader(),
+        );
+    }
+
+    public function getTranslationLoader(): TranslationLoader
+    {
+        if (null === $this->translationLoader) {
+            $this->translationLoader = $this->createTranslationLoader();
+        }
+
+        return $this->translationLoader;
+    }
+
     public function createLostInTranslationHelper(): LostInTranslationHelper
     {
-        return new LostInTranslationHelper(
-            new TranslationLoader(
-                langPath: __DIR__ . '/lang',
-                baseLocale: 'en',
-                phpLoader: new PhpLoader(),
-                jsonLoader: new JsonLoader(),
-            ),
-        );
+        return new LostInTranslationHelper($this->getTranslationLoader());
     }
 
     public function getLostInTranslationHelper(): LostInTranslationHelper

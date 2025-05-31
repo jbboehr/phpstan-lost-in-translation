@@ -35,11 +35,9 @@ use PHPStan\Rules\Rule;
  */
 class TranslationLoaderWarningRuleTest extends RuleTestCase
 {
-    private TranslationLoader $translationLoader;
-
-    public function setUp(): void
+    public function createTranslationLoader(): TranslationLoader
     {
-        $this->translationLoader = new TranslationLoader(
+        return new TranslationLoader(
             langPath: __DIR__ . '/../lang-warn',
             baseLocale: null,
             phpLoader: new PhpLoader(),
@@ -61,13 +59,8 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
     protected function getRule(): Rule
     {
         return new TranslationLoaderWarningRule(
-            $this->translationLoader,
+            $this->getTranslationLoader(),
         );
-    }
-
-    public function createLostInTranslationHelper(): LostInTranslationHelper
-    {
-        return new LostInTranslationHelper($this->translationLoader);
     }
 
     public function testWarnings(): void

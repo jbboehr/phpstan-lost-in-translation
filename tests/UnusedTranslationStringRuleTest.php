@@ -34,7 +34,9 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
 {
     protected function getRule(): Rule
     {
-        return new UnusedTranslationStringRule($this->getLostInTranslationHelper());
+        return new UnusedTranslationStringRule(
+            $this->getLostInTranslationHelper(),
+        );
     }
 
     public function createLostInTranslationHelper(): LostInTranslationHelper
@@ -56,7 +58,8 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
         ], [
             [
                 'Possibly unused translation string "unused_in_en" for locale: en',
-                3
+                3,
+                'Did you mean "used_in_en"?',
             ],
             [
                 'Possibly unused translation string "unused_in_ja" for locale: ja',

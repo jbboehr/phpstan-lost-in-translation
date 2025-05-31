@@ -369,6 +369,50 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon -v --no-progress e2e/src/
  ------ -----------------------------------------------------------------
 ```
 
+### Invalid character encoding
+
+If a translation string is not valid UTF-8, an error will be issued. **Enabled by default.**
+
+```neon
+parameters:
+    lostInTranslation:
+        invalidCharacterEncodings: true
+```
+
+```php
+<?php return [
+  "\xf0\x28\x8c\xbc" => "\xf0\x28\x8c\xbc",
+];
+
+```
+
+```php
+<?php
+
+__("messages.\xf0\x28\x8c\xbc", [], 'ja');
+```
+
+```console
+$ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/invalid-character-encodings.php
+ ------ --------------------------------------------------------------------------------
+  Line   e2e/lang/ja/messages.php
+ ------ --------------------------------------------------------------------------------
+  3      Invalid character encoding for key: "messages.\xf0(\x8c\xbc"
+         🪪  lostInTranslation.translationLoaderWarning
+  3      Invalid character encoding for value: "messages.\xf0(\x8c\xbc"
+         🪪  lostInTranslation.translationLoaderWarning
+ ------ --------------------------------------------------------------------------------
+
+ ------ ------------------------------------------------------------------------------
+  Line   invalid-character-encodings.php
+ ------ ------------------------------------------------------------------------------
+  3      Invalid character encoding for key "messages.\xf0(\x8c\xbc"
+         🪪  lostInTranslation.invalidCharacterEncoding
+  3      Invalid character encoding for value "messages.\xf0(\x8c\xbc" in locale "ja"
+         🪪  lostInTranslation.invalidCharacterEncoding
+ ------ ------------------------------------------------------------------------------
+```
+
 ## Configuration
 
 ```neon
@@ -380,6 +424,8 @@ parameters:
         baseLocale: null
         # the path to your language directory if not `./lang`. May use value set in Laravel if unconfigured.
         langPath: null
+        # issue errors for invalid character encodings
+        invalidCharacterEncodings: true
         # should we analyze choices for invalid values?
         invalidChoices: true
         # warn on locales that have no translation strings or are invalid locale identifiers

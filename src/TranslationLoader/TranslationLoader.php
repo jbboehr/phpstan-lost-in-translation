@@ -22,6 +22,8 @@ namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 use Fuse\Fuse;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
+use PHPStan\Rules\IdentifierRuleError;
+use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\Finder;
 use function usort;
 
@@ -43,8 +45,8 @@ class TranslationLoader
     /** @var array<string, array<string, array<string, string>>> */
     private array $data = [];
 
-    /** @var list<array{string, string, int}> */
-    private array $warnings = [];
+    /** @var list<IdentifierRuleError> */
+    private array $errors = [];
 
     /** @var list<string> */
     private array $foundLocales = [];
@@ -205,11 +207,11 @@ class TranslationLoader
     }
 
     /**
-     * @return list<array{string, string, int}>
+     * @return list<IdentifierRuleError>
      */
-    public function getWarnings(): array
+    public function getErrors(): array
     {
-        return $this->warnings;
+        return $this->errors;
     }
 
     /**
@@ -294,17 +296,17 @@ class TranslationLoader
                 continue;
             }
 
-            $this->warnings = array_merge($this->warnings, $result->warnings);
+            $this->errors = array_merge($this->errors, $result->errors);
 
             foreach ($result->translations as $k => $v) {
                 $line = ($result->locations[$k] ?? -1);
 
                 if (isset($this->data[$locale][$namespace][$k])) {
-                    $this->warnings[] = [
-                        sprintf("Conflicting key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
-                        $file->getPathname(),
-                        $line,
-                    ];
+                    $this->errors[] = RuleErrorBuilder::message(sprintf("Conflicting key: %s", Utils::e($k)))
+                        ->identifier('lostInTranslation.conflictingTranslationKey')
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
                 }
 
                 $this->data[$locale][$namespace][$k] = $v;

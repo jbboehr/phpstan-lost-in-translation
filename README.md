@@ -319,14 +319,14 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
   Line   lang/zh.json
  ------ ------------------------------------------------
   2      Invalid value: 2
-         🪪  lostInTranslation.translationLoaderWarning
+         🪪  lostInTranslation.translationLoaderError
  ------ ------------------------------------------------
 
  ------ ------------------------------------------------
   Line   lang/zh/messages.php
  ------ ------------------------------------------------
   2      Invalid value: 3
-         🪪  lostInTranslation.translationLoaderWarning
+         🪪  lostInTranslation.translationLoaderError
  ------ ------------------------------------------------
 ```
 
@@ -398,9 +398,9 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
   Line   e2e/lang/ja/messages.php
  ------ --------------------------------------------------------------------------------
   3      Invalid character encoding for key: "messages.\xf0(\x8c\xbc"
-         🪪  lostInTranslation.translationLoaderWarning
+         🪪  lostInTranslation.invalidCharacterEncoding
   3      Invalid character encoding for value: "messages.\xf0(\x8c\xbc"
-         🪪  lostInTranslation.translationLoaderWarning
+         🪪  lostInTranslation.invalidCharacterEncoding
  ------ --------------------------------------------------------------------------------
 
  ------ ------------------------------------------------------------------------------

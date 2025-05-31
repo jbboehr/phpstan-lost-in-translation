@@ -20,43 +20,41 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use JsonStreamingParser\Parser;
+use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
 
 final class JsonLoader
 {
     public function load(SplFileInfo $file): LoadResult
     {
-        $warnings = [];
+        $errors = [];
 
         $buffer = $file->getContents();
         try {
             $raw = json_decode($buffer, true, flags: JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            $warnings[] = [
-                sprintf('Failed to parse JSON file: %s', $e->getMessage()),
-                $file->getPathname(),
-                -1,
-            ];
-            return new LoadResult([], [], $warnings);
+            $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse JSON: %s', $e->getMessage()))
+                ->identifier('lostInTranslation.translationLoaderError')
+                ->file($file->getPathname())
+                ->build();
+            return new LoadResult([], [], $errors);
         }
 
         if (!is_array($raw)) {
-            $warnings[] = [
-                sprintf('Invalid data type: "%s"', gettype($raw)),
-                $file->getPathname(),
-                -1,
-            ];
-            return new LoadResult([], [], $warnings);
+            $errors[] = RuleErrorBuilder::message(sprintf('Invalid data type: "%s"', gettype($raw)))
+                ->identifier('lostInTranslation.translationLoaderError')
+                ->file($file->getPathname())
+                ->build();
+            return new LoadResult([], [], $errors);
         }
 
         try {
             $lineNumbers = $this->buildLineNumberMap($file);
         } catch (\Throwable $e) {
-            $warnings[] = [
-                sprintf('Failed to get line numbers for JSON file: %s', $e->getMessage()),
-                $file->getPathname(),
-                -1,
-            ];
+            $errors[] = RuleErrorBuilder::message(sprintf('Failed to get line numbers for JSON file: %s', $e->getMessage()))
+                ->identifier('lostInTranslation.translationLoaderError')
+                ->file($file->getPathname())
+                ->build();
             $lineNumbers = [];
         }
 
@@ -66,27 +64,27 @@ final class JsonLoader
             $line = $lineNumbers[$k] ?? $lineNumbers["int\0" . $k] ?? -1;
 
             if (!is_string($k)) {
-                $warnings[] = [
-                    sprintf("Invalid key: %s", json_encode($k, JSON_THROW_ON_ERROR)),
-                    $file->getPathname(),
-                    $line,
-                ];
+                $errors[] = RuleErrorBuilder::message(sprintf("Invalid key: %d", $k))
+                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->file($file->getPathname())
+                    ->line($line)
+                    ->build();
                 continue;
             }
 
             if (!is_string($v)) {
-                $warnings[] = [
-                    sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)),
-                    $file->getPathname(),
-                    $line,
-                ];
+                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
+                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->file($file->getPathname())
+                    ->line($line)
+                    ->build();
                 continue;
             }
 
             $results[$k] = $v;
         }
 
-        return new LoadResult($results, $lineNumbers, $warnings);
+        return new LoadResult($results, $lineNumbers, $errors);
     }
 
     /**

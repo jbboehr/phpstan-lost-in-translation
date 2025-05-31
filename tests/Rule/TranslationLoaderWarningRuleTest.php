@@ -77,7 +77,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
             ],
             // lang-warn/ja.json
             [
-                "Failed to parse JSON file: Syntax error",
+                "Failed to parse JSON: Syntax error",
                 -1,
             ],
             // lang-warn/pt.json
@@ -140,7 +140,7 @@ class TranslationLoaderWarningRuleTest extends RuleTestCase
         $node = new CollectedDataNode([], false);
 
         $loader = $this->createMock(TranslationLoader::class);
-        $loader->method('getWarnings')
+        $loader->method('getErrors')
             ->willThrowException($ex);
 
         $obj = new TranslationLoaderWarningRule($loader);

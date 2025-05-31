@@ -19,17 +19,19 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use PHPStan\Rules\IdentifierRuleError;
+
 final class LoadResult
 {
     /**
      * @param array<string, string> $translations
      * @param array<string, int> $locations
-     * @param list<array{string, string, int}> $warnings
+     * @param list<IdentifierRuleError> $errors
      */
     public function __construct(
         public readonly array $translations,
         public readonly array $locations,
-        public readonly array $warnings,
+        public readonly array $errors,
     ) {
     }
 }

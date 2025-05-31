@@ -48,15 +48,7 @@ final class TranslationLoaderWarningRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            $errors = [];
-
-            foreach ($this->loader->getWarnings() as $warning) {
-                $errors[] = RuleErrorBuilder::message($warning[0])
-                    ->identifier('lostInTranslation.translationLoaderWarning')
-                    ->file($warning[1])
-                    ->line($warning[2])
-                    ->build();
-            }
+            $errors = $this->loader->getErrors();
 
             if ($this->invalidLocales) {
                 foreach ($this->loader->getLocaleFiles() as $locale => $localeFiles) {

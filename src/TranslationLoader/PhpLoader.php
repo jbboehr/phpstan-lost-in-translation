@@ -23,6 +23,7 @@ use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
+use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
 
 final class PhpLoader
@@ -38,7 +39,7 @@ final class PhpLoader
      */
     public function load(SplFileInfo $file): mixed
     {
-        $warnings = [];
+        $errors = [];
         $group = basename($file->getFilenameWithoutExtension());
 
         try {
@@ -53,12 +54,12 @@ final class PhpLoader
             $traverser->traverse($stmts);
             $lineNumbers = $visitor->getLineNumbers();
         } catch (Error $e) {
-            $warnings[] = [
-                sprintf('Failed to parse file with error: %s', $e->getMessage()),
-                $file->getPathname(),
-                $e->getStartLine(),
-            ];
-            return new LoadResult([], [], $warnings);
+            $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse file with error: %s', $e->getMessage()))
+                ->identifier('lostInTranslation.translationLoaderError')
+                ->file($file->getPathname())
+                ->line($e->getStartLine())
+                ->build();
+            return new LoadResult([], [], $errors);
         }
 
         $raw = (static function (string $__): mixed {
@@ -66,12 +67,12 @@ final class PhpLoader
         })($file->getPathname());
 
         if (!is_array($raw)) {
-            $warnings[] = [
-                sprintf('Invalid data type "%s"', gettype($raw)),
-                $file->getPathname(),
-                -1,
-            ];
-            return new LoadResult([], [], $warnings);
+            $errors[] = RuleErrorBuilder::message(sprintf('Invalid data type "%s"', gettype($raw)))
+                ->identifier('lostInTranslation.translationLoaderError')
+                ->file($file->getPathname())
+                ->line(-1)
+                ->build();
+            return new LoadResult([], [], $errors);
         }
 
         $lineNumbers = self::dot($lineNumbers, $group);
@@ -86,29 +87,29 @@ final class PhpLoader
             $line = $lineNumbers[$k] ?? -1;
 
             if (!is_string($v)) {
-                $warnings[] = [
-                    sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)),
-                    $file->getPathname(),
-                    $line,
-                ];
+                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
+                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->file($file->getPathname())
+                    ->line($line)
+                    ->build();
                 continue;
             }
 
             if ($this->invalidCharacterEncodings) {
                 if (!mb_check_encoding($k, 'UTF-8')) {
-                    $warnings[] = [
-                        sprintf('Invalid character encoding for key: %s', Utils::e($k)),
-                        $file->getPathname(),
-                        $line,
-                    ];
+                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for key: %s', Utils::e($k)))
+                        ->identifier('lostInTranslation.invalidCharacterEncoding')
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
                 }
 
                 if (!mb_check_encoding($v, 'UTF-8')) {
-                    $warnings[] = [
-                        sprintf('Invalid character encoding for value: %s', Utils::e($k)),
-                        $file->getPathname(),
-                        $line,
-                    ];
+                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for value: %s', Utils::e($v)))
+                        ->identifier('lostInTranslation.invalidCharacterEncoding')
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
                 }
             }
 
@@ -116,7 +117,7 @@ final class PhpLoader
         }
 
 
-        return new LoadResult($results, $lineNumbers, $warnings);
+        return new LoadResult($results, $lineNumbers, $errors);
     }
 
     /**

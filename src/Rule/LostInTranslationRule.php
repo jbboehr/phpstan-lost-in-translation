@@ -20,38 +20,46 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Rule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleInterface;
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleTrait;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use PhpParser\Node;
+use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 
 /**
  * @implements Rule<Node\Expr\CallLike>
  */
-final class LostInTranslationRule implements Rule, CallRuleInterface
+final class LostInTranslationRule implements Rule
 {
-    use CallRuleTrait;
-
     public function __construct(
-        LostInTranslationHelper $helper,
+        private readonly LostInTranslationHelper $helper,
         private readonly CallRuleCollection $rules,
     ) {
-        $this->helper = $helper;
     }
 
-    public function processCall(TranslationCall $call): array
+    public function getNodeType(): string
     {
-        $errors = [];
+        return Node\Expr\CallLike::class;
+    }
 
-        foreach ($this->rules as $rule) {
-            $errors = array_merge(
-                $errors,
-                $rule->processCall($call),
-            );
+    public function processNode(Node $node, Scope $scope): array
+    {
+        try {
+            $errors = [];
+            $call = $this->helper->parseCallLike($node, $scope);
+
+            if ($call !== null) {
+                foreach ($this->rules as $rule) {
+                    $errors = array_merge(
+                        $errors,
+                        $rule->processCall($call),
+                    );
+                }
+            }
+
+            return $errors;
+        } catch (\Throwable $e) {
+            ShouldNotHappenException::rethrow($e);
         }
-
-        return $errors;
     }
 }

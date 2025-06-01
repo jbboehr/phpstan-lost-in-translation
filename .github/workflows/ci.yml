@@ -116,6 +116,9 @@ jobs:
             - name: Run e2e tests
               run: ./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner
 
+            - name: Run phpbench
+              run: ./vendor/bin/phpbench run
+
     coverage:
         runs-on: ubuntu-latest
         name: "Coverage | PHP ${{ matrix.php-version }}"

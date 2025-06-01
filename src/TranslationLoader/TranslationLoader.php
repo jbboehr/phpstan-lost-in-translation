@@ -79,6 +79,23 @@ class TranslationLoader
         $this->searchDatabase = $this->buildSearchDatabase();
     }
 
+    /**
+     * @internal
+     */
+    public function add(string $locale, string $key, string $value): void
+    {
+        [$namespace, $key] = $this->parseKey($key);
+
+        $this->data[$locale][$namespace][$key] = $value;
+
+        $this->searchDatabase->add([
+            'key' => $key,
+            'value' => $value,
+            'locale' => $locale,
+        ]);
+    }
+
+
     public function getBaseLocale(): string
     {
         return $this->baseLocale;

@@ -78,7 +78,7 @@ final class UnusedTranslationStringRule implements Rule
                     ->line($item['line']);
 
                 if (!empty($item['candidate'])) {
-                    $builder->addTip(sprintf('Did you mean %s?', Utils::e($item['candidate']['key'])));
+                    $builder->addTip(sprintf('Did you mean %s?', Utils::e($item['candidate'])));
                 }
 
                 $errors[] = $builder->build();

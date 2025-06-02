@@ -14,7 +14,6 @@
     "require": {
         "php": "^8.1",
         "ext-mbstring": "*",
-        "loilo/fuse": "^7.1",
         "phpstan/phpstan": "^1.12 || ^2.0",
         "salsify/json-streaming-parser": "^8.3",
         "symfony/finder": "^6 || ^7",
@@ -29,6 +28,7 @@
         "composer-runtime-api": "*",
         "larastan/larastan": "^2.11 || ^3.4",
         "laravel/framework": "^9 || ^10 || ^11 || ^12",
+        "loilo/fuse": "^7.1",
         "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3",
         "phpbench/phpbench": "^1.4",
         "phpstan/phpstan-phpunit": "^1.4.2 || ^2.0.6",

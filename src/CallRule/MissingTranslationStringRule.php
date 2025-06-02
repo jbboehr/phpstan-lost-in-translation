@@ -56,12 +56,10 @@ final class MissingTranslationStringRule implements CallRuleInterface
                     ->line($call->line)
                     ->file($call->file);
 
-                $similarKeys = $this->loader->searchForSimilarKeys($key);
+                $similarKey = $this->loader->searchForSimilarKeys($key);
 
-                if (count($similarKeys) > 0) {
-                    foreach ($similarKeys as $similarKey) {
-                        $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
-                    }
+                if (null !== $similarKey) {
+                    $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
                 }
 
                 $errors[] = $builder->build();

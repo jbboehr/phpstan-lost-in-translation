@@ -19,7 +19,8 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
-use Fuse\Fuse;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -35,7 +36,7 @@ use function usort;
  *     locale: string,
  *     file: string,
  *     line: int,
- *     candidate: ?array{key: string, locale: string, file: string, line: int}
+ *     candidate: ?string
  * }
  */
 class TranslationLoader
@@ -59,7 +60,7 @@ class TranslationLoader
 
     private readonly string $baseLocale;
 
-    private readonly Fuse $searchDatabase;
+    private readonly FuzzyStringSetInterface $searchDatabase;
 
     /** @var array<string, array{string, string}>  */
     private array $parsed = [];
@@ -69,7 +70,7 @@ class TranslationLoader
         ?string $baseLocale,
         private readonly PhpLoader $phpLoader,
         private readonly JsonLoader $jsonLoader,
-        private readonly float $fuzzySearchThreshold = 0.25,
+        private readonly FuzzyStringSetFactory $fuzzyStringSetFactory = new FuzzyStringSetFactory(),
     ) {
         $this->langPath = realpath($langPath ?? Utils::detectLangPath()) ?: Utils::detectLangPath();
         $this->baseLocale = $baseLocale ?? Utils::detectBaseLocale();
@@ -88,11 +89,7 @@ class TranslationLoader
 
         $this->data[$locale][$namespace][$key] = $value;
 
-        $this->searchDatabase->add([
-            'key' => $key,
-            'value' => $value,
-            'locale' => $locale,
-        ]);
+        $this->searchDatabase->addMany([$key, $value]);
     }
 
 
@@ -129,26 +126,9 @@ class TranslationLoader
         return $this->data[$locale][$namespace][$key] ?? null;
     }
 
-    /**
-     * @return list<string>
-     */
-    public function searchForSimilarKeys(string $key, ?string $locale = null): array
+    public function searchForSimilarKeys(string $key): ?string
     {
-        $searchResults = $this->searchDatabase->search($key);
-
-        if (null !== $locale) {
-            $searchResults = array_filter($searchResults, static function (array $result) use ($locale) {
-                return $result['item']['locale'] === $locale;
-            });
-        }
-
-        $candidates = [];
-
-        foreach ($searchResults as $result) {
-            $candidates[$result['item']['key']] = true;
-        }
-
-        return array_keys($candidates);
+        return $this->searchDatabase->search($key);
     }
 
     /**
@@ -158,21 +138,14 @@ class TranslationLoader
     public function diffUsed(array $used): array
     {
         $usedByKey = [];
+        $sets = [];
 
         foreach ($used as $item) {
+            $set = $sets[$item->locale] = ($sets[$item->locale] ?? $this->fuzzyStringSetFactory->createFuzzyStringSet());
+            $set->add($item->key);
+
             $usedByKey[$item->locale][$item->key] = true;
         }
-
-        $searchDatabase = new Fuse(array_map(static function (UsedTranslationRecord $record): array {
-            return $record->toArray();
-        }, $used), [
-            'isCaseSensitive' => true,
-            'includeScore' => true,
-            'minMatchCharLength' => 2,
-            'shouldSort' => true,
-            'keys' => ['key'],
-            'threshold' => $this->fuzzySearchThreshold,
-        ]);
 
         $possiblyUnused = [];
 
@@ -189,15 +162,8 @@ class TranslationLoader
                         continue;
                     }
 
-                    $candidate = null;
-
-                    foreach ($searchDatabase->search($key) as $searchResult) {
-                        if (!($searchResult['item']['locale'] === $locale || $searchResult['item']['locale'] === '*')) {
-                            continue;
-                        }
-
-                        $candidate = $searchResult['item'];
-                    }
+                    $set = $sets[$locale] ?? null;
+                    $candidate = $set?->search($key);
 
                     [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
 
@@ -339,31 +305,20 @@ class TranslationLoader
         $this->foundLocales = $foundLocales;
     }
 
-    private function buildSearchDatabase(): Fuse
+    private function buildSearchDatabase(): FuzzyStringSetInterface
     {
         $arr = [];
 
-        foreach ($this->data as $locale => $localeItems) {
-            foreach ($localeItems as $namespace => $namespaceItems) {
+        foreach ($this->data as $localeItems) {
+            foreach ($localeItems as $namespaceItems) {
                 foreach ($namespaceItems as $key => $value) {
-                    $arr[] = [
-                        'locale' => $locale,
-                        'namespace' => $namespace,
-                        'key' => $key,
-                        'value' => $value,
-                    ];
+                    $arr[$key] = true;
+                    $arr[$value] = true;
                 }
             }
         }
 
-        return new Fuse($arr, [
-            'isCaseSensitive' => true,
-            'includeScore' => true,
-            'minMatchCharLength' => 2,
-            'shouldSort' => true,
-            'keys' => ['key'],
-            'threshold' => $this->fuzzySearchThreshold,
-        ]);
+        return $this->fuzzyStringSetFactory->createFuzzyStringSet(array_keys($arr));
     }
 
     /**

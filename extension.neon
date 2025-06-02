@@ -1,5 +1,6 @@
 services:
   - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
+  - class: jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory
   - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader
     arguments:
       invalidCharacterEncodings: %lostInTranslation.invalidCharacterEncodings%

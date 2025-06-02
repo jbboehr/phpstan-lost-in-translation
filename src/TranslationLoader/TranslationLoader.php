@@ -21,6 +21,7 @@ namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -141,7 +142,12 @@ class TranslationLoader
         $sets = [];
 
         foreach ($used as $item) {
-            $set = $sets[$item->locale] = ($sets[$item->locale] ?? $this->fuzzyStringSetFactory->createFuzzyStringSet());
+            if (isset($sets[$item->locale])) {
+                $set = $sets[$item->locale];
+            } else {
+                $set = $sets[$item->locale] = new MemoizingFuzzyStringSet($this->fuzzyStringSetFactory->createFuzzyStringSet());
+            }
+
             $set->add($item->key);
 
             $usedByKey[$item->locale][$item->key] = true;
@@ -162,8 +168,7 @@ class TranslationLoader
                         continue;
                     }
 
-                    $set = $sets[$locale] ?? null;
-                    $candidate = $set?->search($key);
+                    $candidate = (($sets[$locale] ?? null)?->search($key)) ?? (($sets['*'] ?? null)?->search($key));
 
                     [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
 
@@ -318,7 +323,9 @@ class TranslationLoader
             }
         }
 
-        return $this->fuzzyStringSetFactory->createFuzzyStringSet(array_keys($arr));
+        return new MemoizingFuzzyStringSet(
+            $this->fuzzyStringSetFactory->createFuzzyStringSet(array_keys($arr)),
+        );
     }
 
     /**

@@ -47,6 +47,24 @@ final class FuzzyStringSetTest extends TestCase
      * @dataProvider benchmarkProvider
      * @param class-string<AbstractFuzzyStringSetBenchmark> $className
      */
+    public function testDataSet1Memoized(string $className): void
+    {
+        self::expectNotToPerformAssertions();
+
+        /** @var AbstractFuzzyStringSetBenchmark $benchmark */
+        $benchmark = new $className();
+
+        $benchmark->setupDataSet1Memoized();
+
+        for ($i = 0; $i < 10; ++$i) {
+            $benchmark->benchDataSet1Memoized();
+        }
+    }
+
+    /**
+     * @dataProvider benchmarkProvider
+     * @param class-string<AbstractFuzzyStringSetBenchmark> $className
+     */
     public function testDataSet2(string $className): void
     {
         self::expectNotToPerformAssertions();
@@ -62,6 +80,7 @@ final class FuzzyStringSetTest extends TestCase
     {
         $set = new NullFuzzyStringSet();
         $set->addMany(AbstractFuzzyStringSetBenchmark::DATA_SET_1);
+        $set->add(AbstractFuzzyStringSetBenchmark::DATA_SET_1[0]);
 
         $this->assertNull($set->search('tezt'));
     }

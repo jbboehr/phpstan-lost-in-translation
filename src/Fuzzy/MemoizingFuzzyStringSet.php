@@ -19,55 +19,38 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 
-final class NaiveFuzzyStringSet implements FuzzyStringSetInterface
+final class MemoizingFuzzyStringSet implements FuzzyStringSetInterface
 {
-    /** @var array<string, true> */
-    private array $strings = [];
-
     /**
-     * @param ?list<string> $strings
+     * @var array<string, ?string>
      */
-    public function __construct(?array $strings = null)
-    {
-        $this->addMany($strings ?? []);
+    private array $memo = [];
+
+    public function __construct(
+        private readonly FuzzyStringSetInterface $inner,
+    ) {
     }
 
     public function add(string $string): void
     {
-        $this->strings[$string] = true;
+        $this->memo = [];
+
+        $this->inner->add($string);
     }
 
     public function addMany(array $strings): void
     {
-        foreach ($strings as $string) {
-            $this->strings[$string] = true;
-        }
+        $this->memo = [];
+
+        $this->inner->addMany($strings);
     }
 
     public function search(string $string): ?string
     {
-        $stringWithSmallestDelta = null;
-        $smallestDelta = null;
-
-        foreach ($this->strings as $otherString => $unused) {
-            $delta = levenshtein($string, $otherString);
-
-            if ($smallestDelta === null || $smallestDelta > $delta) {
-                $stringWithSmallestDelta = $otherString;
-                $smallestDelta = $delta;
-            }
+        if (array_key_exists($string, $this->memo)) {
+            return $this->memo[$string];
         }
 
-        if ($smallestDelta === null) {
-            return null;
-        }
-
-        $ratio = $smallestDelta / strlen($string);
-
-        if ($ratio > self::THRESHOLD) {
-            return null;
-        }
-
-        return $stringWithSmallestDelta;
+        return $this->memo[$string] = $this->inner->search($string);
     }
 }

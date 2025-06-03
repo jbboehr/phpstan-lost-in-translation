@@ -20,12 +20,13 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
 
 final class DynamicTranslationStringRule implements CallRuleInterface
 {
+    public const IDENTIFIER = 'lostInTranslation.dynamicTranslationString';
+
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
@@ -35,8 +36,7 @@ final class DynamicTranslationStringRule implements CallRuleInterface
                 'Disallowed dynamic translation string of type: %s',
                 $call->keyType->describe(VerbosityLevel::precise()),
             ))
-                ->identifier('lostInTranslation.dynamicTranslationString')
-                ->metadata(Utils::callToMetadata($call))
+                ->identifier(self::IDENTIFIER)
                 ->line($call->line)
                 ->file($call->file)
                 ->build();

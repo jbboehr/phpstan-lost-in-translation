@@ -19,12 +19,15 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class InvalidCharacterEncodingRule implements CallRuleInterface
 {
+    public const IDENTIFIER = 'lostInTranslation.invalidCharacterEncoding';
+
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
@@ -35,8 +38,10 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                     'Invalid character encoding for key %s',
                     Utils::e($key),
                 ))
-                    ->identifier('lostInTranslation.invalidCharacterEncoding')
-                    ->metadata(Utils::callToMetadata($call, ['lit::key' => $key]))
+                    ->identifier(self::IDENTIFIER)
+                    ->metadata([
+                        Identifier::METADATA_KEY => $key,
+                    ])
                     ->line($call->line)
                     ->file($call->file)
                     ->build();
@@ -49,8 +54,12 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                         Utils::e($key),
                         Utils::e($locale),
                     ))
-                        ->identifier('lostInTranslation.invalidCharacterEncoding')
-                        ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                        ->identifier(self::IDENTIFIER)
+                        ->metadata([
+                            Identifier::METADATA_LOCALE => $locale,
+                            Identifier::METADATA_KEY => $key,
+                            Identifier::METADATA_VALUE => $value,
+                        ])
                         ->line($call->line)
                         ->file($call->file)
                         ->build();

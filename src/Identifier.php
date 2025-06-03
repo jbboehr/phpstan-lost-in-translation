@@ -17,17 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\CallRule;
+namespace jbboehr\PHPStanLostInTranslation;
 
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use PHPStan\Rules\IdentifierRuleError;
-use PHPStan\ShouldNotHappenException;
-
-interface CallRuleInterface
+final class Identifier
 {
-    /**
-     * @return list<IdentifierRuleError>
-     * @throws ShouldNotHappenException
-     */
-    public function processCall(TranslationCall $call): array;
+    public const METADATA_KEY = 'lostInTranslation::key';
+    public const METADATA_LOCALE = 'lostInTranslation::locale';
+    public const METADATA_VALUE = 'lostInTranslation::value';
+    public const METADATA_MISSING_IN_LOCALES = 'lit::missingInLocales';
 }

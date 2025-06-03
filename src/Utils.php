@@ -20,7 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 use Illuminate\Foundation\Application;
-use PHPStan\Type\VerbosityLevel;
 use Symfony\Component\Intl\Locales;
 
 /**
@@ -28,26 +27,6 @@ use Symfony\Component\Intl\Locales;
  */
 final class Utils
 {
-    /**
-     * @param array<string, string> $extra
-     * @return array<string, string>
-     */
-    public static function callToMetadata(TranslationCall $call, array $extra = []): array
-    {
-        $metadata = [];
-        $metadata['lit::key'] = $call->keyType->describe(VerbosityLevel::precise());
-
-        if (null !== $call->replaceType) {
-            $metadata['lit::replace'] = $call->replaceType->describe(VerbosityLevel::precise());
-        }
-
-        if (null !== $call->localeType) {
-            $metadata['lit::locale'] = $call->localeType->describe(VerbosityLevel::precise());
-        }
-
-        return array_merge($metadata, $extra);
-    }
-
     public static function checkLocaleExists(string $locale, bool $strict = false): bool
     {
         if (!$strict) {

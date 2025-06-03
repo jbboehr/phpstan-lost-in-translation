@@ -19,14 +19,19 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
 use function sort;
 
 final class InvalidReplacementRule implements CallRuleInterface
 {
+    public const IDENTIFIER_UNUSED = 'lostInTranslation.unusedReplacement';
+    public const IDENTIFIER_MULTIPLE_VARIANTS = 'lostInTranslation.multipleReplaceVariants';
+
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
@@ -45,6 +50,7 @@ final class InvalidReplacementRule implements CallRuleInterface
 
     /**
      * @return list<IdentifierRuleError>
+     * @throws PHPStanShouldNotHappenException
      */
     private function analyzeReplacements(TranslationCall $call, string $locale, string $key, string $value): array
     {
@@ -72,16 +78,24 @@ final class InvalidReplacementRule implements CallRuleInterface
 
             if ($replaceVariantCount === 0) {
                 $errors[] = RuleErrorBuilder::message(sprintf('Unused translation replacement: %s', Utils::e($search)))
-                    ->identifier('lostInTranslation.unusedReplacement')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->identifier(self::IDENTIFIER_UNUSED)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_VALUE => $value,
+                    ])
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)
                     ->build();
             } elseif ($replaceVariantCount > 1) {
                 $errors[] = RuleErrorBuilder::message(sprintf('Replacement string matches multiple variants: %s', Utils::e($search)))
-                    ->identifier('lostInTranslation.multipleReplaceVariants')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->identifier(self::IDENTIFIER_MULTIPLE_VARIANTS)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_VALUE => $value,
+                    ])
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)

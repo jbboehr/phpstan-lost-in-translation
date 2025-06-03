@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -26,6 +27,9 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 final class InvalidLocaleRule implements CallRuleInterface
 {
+    public const IDENTIFIER_NO_TRANSLATIONS = 'lostInTranslation.noLocaleTranslations';
+    public const IDENTIFIER_UNKNOWN_LOCALE = 'lostInTranslation.unknownLocale';
+
     public function __construct(
         private readonly TranslationLoader $loader,
         private readonly bool $strictLocales = false,
@@ -49,8 +53,10 @@ final class InvalidLocaleRule implements CallRuleInterface
                     'Locale has no available translation strings: %s',
                     $locale,
                 ))
-                    ->identifier('lostInTranslation.noLocaleTranslations')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
+                    ->identifier(self::IDENTIFIER_NO_TRANSLATIONS)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                    ])
                     ->line($call->line)
                     ->file($call->file)
                     ->build();
@@ -61,8 +67,10 @@ final class InvalidLocaleRule implements CallRuleInterface
                     'Unknown locale: %s',
                     $locale,
                 ))
-                    ->identifier('lostInTranslation.unknownLocale')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale]))
+                    ->identifier(self::IDENTIFIER_UNKNOWN_LOCALE)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                    ])
                     ->line($call->line)
                     ->file($call->file)
                     ->build();

@@ -19,10 +19,12 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\TypeCombinator;
@@ -30,6 +32,10 @@ use PHPStan\Type\VerbosityLevel;
 
 final class InvalidChoiceRule implements CallRuleInterface
 {
+    public const IDENTIFIER_MALFORMED = 'lostInTranslation.malformedTranslationChoice';
+    public const IDENTIFIER_MISSING_CASE = 'lostInTranslation.choiceMissingCase';
+    public const IDENTIFIER_NON_NUMERIC = 'lostInTranslation.nonNumericChoice';
+
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
@@ -48,6 +54,7 @@ final class InvalidChoiceRule implements CallRuleInterface
 
     /**
      * @return list<IdentifierRuleError>
+     * @throws PHPStanShouldNotHappenException
      * @see MessageSelector::choose()
      */
     private function analyzeChoices(TranslationCall $call, string $locale, string $key, string $value): array
@@ -70,8 +77,12 @@ final class InvalidChoiceRule implements CallRuleInterface
                 }
 
                 $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
-                    ->identifier('lostInTranslation.malformedTranslationChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->identifier(self::IDENTIFIER_MALFORMED)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_VALUE => $value,
+                    ])
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)
@@ -93,8 +104,12 @@ final class InvalidChoiceRule implements CallRuleInterface
 
             if (!is_numeric($from) && $from !== '*') {
                 $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($from)))
-                    ->identifier('lostInTranslation.nonNumericChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->identifier(self::IDENTIFIER_NON_NUMERIC)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_VALUE => $value,
+                    ])
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)
@@ -102,8 +117,12 @@ final class InvalidChoiceRule implements CallRuleInterface
                 continue;
             } elseif (!is_numeric($to) && $to !== '*') {
                 $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($to)))
-                    ->identifier('lostInTranslation.nonNumericChoice')
-                    ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                    ->identifier(self::IDENTIFIER_NON_NUMERIC)
+                    ->metadata([
+                        Identifier::METADATA_LOCALE => $locale,
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_VALUE => $value,
+                    ])
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)
@@ -142,8 +161,12 @@ final class InvalidChoiceRule implements CallRuleInterface
                 'Translation choice does not cover all possible cases for number of type: %s',
                 $numberType->describe(VerbosityLevel::precise()),
             ))
-                ->identifier('lostInTranslation.choiceMissingCase')
-                ->metadata(Utils::callToMetadata($call, ['lit::locale' => $locale, 'lit::key' => $key, 'lit::value' => $value]))
+                ->identifier(self::IDENTIFIER_MISSING_CASE)
+                ->metadata([
+                    Identifier::METADATA_LOCALE => $locale,
+                    Identifier::METADATA_KEY => $key,
+                    Identifier::METADATA_VALUE => $value,
+                ])
                 ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                 ->line($call->line)
                 ->file($call->file)

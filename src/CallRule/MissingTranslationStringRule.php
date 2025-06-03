@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -26,6 +27,8 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 final class MissingTranslationStringRule implements CallRuleInterface
 {
+    public const IDENTIFIER = 'lostInTranslation.missingTranslationString';
+
     public function __construct(
         private readonly TranslationLoader $loader,
     ) {
@@ -51,8 +54,11 @@ final class MissingTranslationStringRule implements CallRuleInterface
                     Utils::e($key),
                     join(', ', $missingInLocales),
                 ))
-                    ->identifier('lostInTranslation.missingTranslationString')
-                    ->metadata(Utils::callToMetadata($call))
+                    ->identifier(self::IDENTIFIER)
+                    ->metadata([
+                        Identifier::METADATA_KEY => $key,
+                        Identifier::METADATA_MISSING_IN_LOCALES => $missingInLocales,
+                    ])
                     ->line($call->line)
                     ->file($call->file);
 

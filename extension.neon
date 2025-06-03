@@ -37,6 +37,9 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
 
 
+  errorFormatter.lostInTranslationJson:
+    class: jbboehr\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter
+
 
 conditionalTags:
 	jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule:

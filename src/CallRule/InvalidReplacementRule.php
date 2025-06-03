@@ -29,8 +29,8 @@ use function sort;
 
 final class InvalidReplacementRule implements CallRuleInterface
 {
-    public const IDENTIFIER_UNUSED = 'lostInTranslation.unusedReplacement';
-    public const IDENTIFIER_MULTIPLE_VARIANTS = 'lostInTranslation.multipleReplaceVariants';
+    public const IDENTIFIER_UNUSED = 'lostInTranslation.invalidReplacement.unused';
+    public const IDENTIFIER_MULTIPLE_VARIANTS = 'lostInTranslation.invalidReplacement.multipleVariants';
 
     public function processCall(TranslationCall $call): array
     {

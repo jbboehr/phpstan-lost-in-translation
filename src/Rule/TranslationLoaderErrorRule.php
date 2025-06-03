@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Rule;
 
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -59,7 +60,7 @@ final class TranslationLoaderErrorRule implements Rule
                             'Unknown locale: %s',
                             $locale,
                         ))
-                            ->identifier('lostInTranslation.unknownLocale')
+                            ->identifier(InvalidLocaleRule::IDENTIFIER_UNKNOWN_LOCALE)
                             ->metadata(['lit::locale' => $locale])
                             ->file($file)
                             ->build();

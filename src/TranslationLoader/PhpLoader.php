@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
@@ -28,6 +29,8 @@ use Symfony\Component\Finder\SplFileInfo;
 
 final class PhpLoader
 {
+    public const IDENTIFIER = 'lostInTranslation.translationLoaderError';
+
     public function __construct(
         private readonly ?ParserFactory $parserFactory = null,
         private readonly bool $invalidCharacterEncodings = true,
@@ -55,7 +58,7 @@ final class PhpLoader
             $lineNumbers = $visitor->getLineNumbers();
         } catch (Error $e) {
             $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse file with error: %s', $e->getMessage()))
-                ->identifier('lostInTranslation.translationLoaderError')
+                ->identifier(self::IDENTIFIER)
                 ->file($file->getPathname())
                 ->line($e->getStartLine())
                 ->build();
@@ -68,7 +71,7 @@ final class PhpLoader
 
         if (!is_array($raw)) {
             $errors[] = RuleErrorBuilder::message(sprintf('Invalid data type "%s"', gettype($raw)))
-                ->identifier('lostInTranslation.translationLoaderError')
+                ->identifier(self::IDENTIFIER)
                 ->file($file->getPathname())
                 ->line(-1)
                 ->build();
@@ -88,7 +91,7 @@ final class PhpLoader
 
             if (!is_string($v)) {
                 $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
-                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->identifier(self::IDENTIFIER)
                     ->file($file->getPathname())
                     ->line($line)
                     ->build();
@@ -98,7 +101,7 @@ final class PhpLoader
             if ($this->invalidCharacterEncodings) {
                 if (!mb_check_encoding($k, 'UTF-8')) {
                     $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for key: %s', Utils::e($k)))
-                        ->identifier('lostInTranslation.invalidCharacterEncoding')
+                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
                         ->file($file->getPathname())
                         ->line($line)
                         ->build();
@@ -106,7 +109,7 @@ final class PhpLoader
 
                 if (!mb_check_encoding($v, 'UTF-8')) {
                     $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for value: %s', Utils::e($v)))
-                        ->identifier('lostInTranslation.invalidCharacterEncoding')
+                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
                         ->file($file->getPathname())
                         ->line($line)
                         ->build();

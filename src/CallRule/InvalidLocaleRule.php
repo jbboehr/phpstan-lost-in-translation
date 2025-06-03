@@ -27,8 +27,8 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 final class InvalidLocaleRule implements CallRuleInterface
 {
-    public const IDENTIFIER_NO_TRANSLATIONS = 'lostInTranslation.noLocaleTranslations';
-    public const IDENTIFIER_UNKNOWN_LOCALE = 'lostInTranslation.unknownLocale';
+    public const IDENTIFIER_NO_TRANSLATIONS = 'lostInTranslation.invalidLocale.noTranslations';
+    public const IDENTIFIER_UNKNOWN_LOCALE = 'lostInTranslation.invalidLocale.unknown';
 
     public function __construct(
         private readonly TranslationLoader $loader,

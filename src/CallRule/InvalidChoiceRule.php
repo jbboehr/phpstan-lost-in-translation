@@ -32,9 +32,9 @@ use PHPStan\Type\VerbosityLevel;
 
 final class InvalidChoiceRule implements CallRuleInterface
 {
-    public const IDENTIFIER_MALFORMED = 'lostInTranslation.malformedTranslationChoice';
-    public const IDENTIFIER_MISSING_CASE = 'lostInTranslation.choiceMissingCase';
-    public const IDENTIFIER_NON_NUMERIC = 'lostInTranslation.nonNumericChoice';
+    public const IDENTIFIER_MALFORMED = 'lostInTranslation.invalidChoice.malformed';
+    public const IDENTIFIER_MISSING_CASE = 'lostInTranslation.invalidChoice.missingCase';
+    public const IDENTIFIER_NON_NUMERIC = 'lostInTranslation.invalidChoice.nonNumeric';
 
     public function processCall(TranslationCall $call): array
     {

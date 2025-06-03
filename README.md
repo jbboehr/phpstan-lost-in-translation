@@ -252,13 +252,13 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
   Line   invalid-replacement.php
  ------ -------------------------------------------------------------------------------
   4      Unused translation replacement: "bar"
-         🪪  lostInTranslation.unusedReplacement
+         🪪  lostInTranslation.invalidReplacement.unused
          💡 Locale: "en", Key: "exists in all locales", Value: "exists in all locales"
   4      Unused translation replacement: "foo"
-         🪪  lostInTranslation.unusedReplacement
+         🪪  lostInTranslation.invalidReplacement.unused
          💡 Locale: "en", Key: "exists in all locales", Value: "exists in all locales"
   7      Replacement string matches multiple variants: "foo"
-         🪪  lostInTranslation.multipleReplaceVariants
+         🪪  lostInTranslation.invalidReplacement.multipleVariants
          💡 Locale: "en", Key: ":foo :FOO", Value: ":foo :FOO"
  ------ -------------------------------------------------------------------------------
 ```
@@ -285,7 +285,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
   Line   invalid-choice.php
  ------ ------------------------------------------------------------------------------------------------------------------
   3      Translation choice does not cover all possible cases for number of type: 3
-         🪪  lostInTranslation.choiceMissingCase
+         🪪  lostInTranslation.invalidChoice.missingCase
          💡 Locale: "en", Key: "{0} There are none|{1} There is one|[2] There are :count", Value: "{0} There are none|{1}
             There is one|[2] There are :count"
  ------ ------------------------------------------------------------------------------------------------------------------
@@ -356,16 +356,16 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon -v --no-progress e2e/src/
   Line   e2e/lang/fake.json
  ------ --------------------------------------------------------------------------
   -1     Unknown locale: fake
-         🪪  lostInTranslation.unknownLocale
+         🪪  lostInTranslation.invalidLocale.unknown
  ------ --------------------------------------------------------------------------
 
  ------ -----------------------------------------------------------------
   Line   invalid-locale.php
  ------ -----------------------------------------------------------------
   3      Locale has no available translation strings: invalid_locale
-         🪪  lostInTranslation.noLocaleTranslations
+         🪪  lostInTranslation.invalidLocale.noTranslations
   3      Unknown locale: invalid_locale
-         🪪  lostInTranslation.unknownLocale
+         🪪  lostInTranslation.invalidLocale.unknown
  ------ -----------------------------------------------------------------
 ```
 

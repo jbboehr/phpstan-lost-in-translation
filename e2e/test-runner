@@ -20,7 +20,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $expectedErrors = [
-    'lang/fake.json:-1:lostInTranslation.unknownLocale',
+    'lang/fake.json:-1:lostInTranslation.invalidLocale.unknown',
     'lang/ja.json:2:lostInTranslation.possiblyUnusedTranslationString',
     'lang/ja/messages:2:lostInTranslation.possiblyUnusedTranslationString',
     'lang/ja/messages:3:lostInTranslation.invalidCharacterEncoding',
@@ -32,13 +32,13 @@ $expectedErrors = [
     'src/dynamic-translation-string:8:lostInTranslation.dynamicTranslationString',
     'src/invalid-character-encodings:3:lostInTranslation.invalidCharacterEncoding',
     'src/invalid-character-encodings:3:lostInTranslation.invalidCharacterEncoding',
-    'src/invalid-choice:3:lostInTranslation.choiceMissingCase',
-    'src/invalid-locale:3:lostInTranslation.noLocaleTranslations',
+    'src/invalid-choice:3:lostInTranslation.invalidChoice.missingCase',
+    'src/invalid-locale:3:lostInTranslation.invalidLocale.noTranslations',
+    'src/invalid-locale:3:lostInTranslation.invalidLocale.unknown',
     'src/invalid-locale:3:lostInTranslation.missingTranslationString',
-    'src/invalid-locale:3:lostInTranslation.unknownLocale',
-    'src/invalid-replacement:4:lostInTranslation.unusedReplacement',
-    'src/invalid-replacement:4:lostInTranslation.unusedReplacement',
-    'src/invalid-replacement:7:lostInTranslation.multipleReplaceVariants',
+    'src/invalid-replacement:7:lostInTranslation.invalidReplacement.multipleVariants',
+    'src/invalid-replacement:4:lostInTranslation.invalidReplacement.unused',
+    'src/invalid-replacement:4:lostInTranslation.invalidReplacement.unused',
     'src/missing-translation-string:3:lostInTranslation.missingTranslationString',
     'src/missing-translation-string-in-base-locale:3:lostInTranslation.missingBaseLocaleTranslationString',
 ];

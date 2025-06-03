@@ -25,6 +25,8 @@ use Symfony\Component\Finder\SplFileInfo;
 
 final class JsonLoader
 {
+    public const IDENTIFIER = 'lostInTranslation.translationLoaderError';
+
     public function load(SplFileInfo $file): LoadResult
     {
         $errors = [];
@@ -34,7 +36,7 @@ final class JsonLoader
             $raw = json_decode($buffer, true, flags: JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
             $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse JSON: %s', $e->getMessage()))
-                ->identifier('lostInTranslation.translationLoaderError')
+                ->identifier(self::IDENTIFIER)
                 ->file($file->getPathname())
                 ->build();
             return new LoadResult([], [], $errors);
@@ -42,7 +44,7 @@ final class JsonLoader
 
         if (!is_array($raw)) {
             $errors[] = RuleErrorBuilder::message(sprintf('Invalid data type: "%s"', gettype($raw)))
-                ->identifier('lostInTranslation.translationLoaderError')
+                ->identifier(self::IDENTIFIER)
                 ->file($file->getPathname())
                 ->build();
             return new LoadResult([], [], $errors);
@@ -52,7 +54,7 @@ final class JsonLoader
             $lineNumbers = $this->buildLineNumberMap($file);
         } catch (\Throwable $e) {
             $errors[] = RuleErrorBuilder::message(sprintf('Failed to get line numbers for JSON file: %s', $e->getMessage()))
-                ->identifier('lostInTranslation.translationLoaderError')
+                ->identifier(self::IDENTIFIER)
                 ->file($file->getPathname())
                 ->build();
             $lineNumbers = [];
@@ -65,7 +67,7 @@ final class JsonLoader
 
             if (!is_string($k)) {
                 $errors[] = RuleErrorBuilder::message(sprintf("Invalid key: %d", $k))
-                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->identifier(self::IDENTIFIER)
                     ->file($file->getPathname())
                     ->line($line)
                     ->build();
@@ -74,7 +76,7 @@ final class JsonLoader
 
             if (!is_string($v)) {
                 $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
-                    ->identifier('lostInTranslation.translationLoaderError')
+                    ->identifier(self::IDENTIFIER)
                     ->file($file->getPathname())
                     ->line($line)
                     ->build();

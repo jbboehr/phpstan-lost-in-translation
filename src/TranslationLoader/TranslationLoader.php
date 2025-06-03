@@ -43,6 +43,8 @@ use function usort;
  */
 class TranslationLoader
 {
+    public const IDENTIFIER_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingKey';
+
     private readonly string $langPath;
 
     /** @var array<string, array<string, array<string, string>>> */
@@ -301,7 +303,7 @@ class TranslationLoader
 
                 if (isset($this->data[$locale][$namespace][$k])) {
                     $this->errors[] = RuleErrorBuilder::message(sprintf("Conflicting key: %s", Utils::e($k)))
-                        ->identifier('lostInTranslation.conflictingTranslationKey')
+                        ->identifier(self::IDENTIFIER_CONFLICT)
                         ->file($file->getPathname())
                         ->line($line)
                         ->build();

@@ -21,8 +21,6 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpBench\Attributes\Assert;
 use PhpBench\Attributes\Iterations;
@@ -40,8 +38,6 @@ final class MissingTranslationStringRuleBenchmark
         $this->loader = new TranslationLoader(
             langPath: __DIR__ . '/../lang',
             baseLocale: 'en',
-            phpLoader: new PhpLoader(),
-            jsonLoader: new JsonLoader(),
         );
 
         $this->rule = new MissingTranslationStringRule($this->loader);

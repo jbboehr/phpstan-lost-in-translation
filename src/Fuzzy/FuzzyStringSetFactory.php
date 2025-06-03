@@ -26,6 +26,7 @@ class FuzzyStringSetFactory
      */
     public function __construct(
         private readonly string $className = NaiveFuzzyStringSet::class,
+        private readonly bool $memoizing = true,
     ) {
     }
     /**
@@ -37,6 +38,11 @@ class FuzzyStringSetFactory
         $className = $this->className;
         $set = new $className();
         $set->addMany($strings);
-        return $set;
+
+        if ($this->memoizing) {
+            return new MemoizingFuzzyStringSet($set);
+        } else {
+            return $set;
+        }
     }
 }

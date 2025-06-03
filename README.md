@@ -34,7 +34,7 @@ following extra PHPStan extensions installed:
 
 ## Features
 
-## Type inference
+### Type inference
 
 Note that for most of the features below, we can only analyze any potential constant strings in the type of the
 variable passed into the translation function.
@@ -432,6 +432,8 @@ parameters:
         invalidLocales: true
         # should we analyze translation replacements for invalid values?
         invalidReplacements: true
+        # look for similar keys? might want to disable this, a bit slow
+        fuzzySearch: true
         # look for missing translation strings? (main feature)
         missingTranslationStrings: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)

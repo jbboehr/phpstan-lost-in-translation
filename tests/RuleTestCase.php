@@ -20,8 +20,6 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use PHPStan\Rules\Rule;
@@ -37,6 +35,8 @@ abstract class RuleTestCase extends BaseRuleTestCase
 
     protected ?TranslationLoader $translationLoader = null;
 
+    protected bool $fuzzySearch = true;
+
     public function tearDown(): void
     {
         $this->lostInTranslationHelper = null;
@@ -50,8 +50,7 @@ abstract class RuleTestCase extends BaseRuleTestCase
         return new TranslationLoader(
             langPath: __DIR__ . '/lang',
             baseLocale: 'en',
-            phpLoader: new PhpLoader(),
-            jsonLoader: new JsonLoader(),
+            fuzzySearch: $this->fuzzySearch,
         );
     }
 

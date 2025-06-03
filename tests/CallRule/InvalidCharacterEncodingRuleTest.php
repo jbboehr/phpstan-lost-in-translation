@@ -23,8 +23,6 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PHPStan\Rules\Rule;
 
@@ -48,8 +46,6 @@ class InvalidCharacterEncodingRuleTest extends RuleTestCase
         return new TranslationLoader(
             langPath: __DIR__ . '/lang-invalid-character-encoding',
             baseLocale: 'en',
-            phpLoader: new PhpLoader(),
-            jsonLoader: new JsonLoader(),
         );
     }
 

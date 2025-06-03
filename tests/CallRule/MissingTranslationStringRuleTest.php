@@ -168,4 +168,22 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             ],
         ]);
     }
+
+    public function testFindSimilarDisabled(): void
+    {
+        $this->fuzzySearch = false;
+
+        $this->analyse([
+            __DIR__ . '/../data/missing-find-similar.php',
+        ], [
+            [
+                'Missing translation string "exists in all localezs" for locales: ja, zh',
+                3,
+            ],
+            [
+                'Missing translation string "this one should not be similar to anything" for locales: ja, zh',
+                4,
+            ],
+        ]);
+    }
 }

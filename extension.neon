@@ -9,6 +9,7 @@ services:
     arguments:
       baseLocale: %lostInTranslation.baseLocale%
       langPath: %lostInTranslation.langPath%
+      fuzzySearch: %lostInTranslation.fuzzySearch%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
 
 
@@ -55,6 +56,7 @@ parametersSchema:
         invalidChoices: bool(),
         invalidLocales: bool(),
         invalidReplacements: bool(),
+        fuzzySearch: bool(),
         langPath: schema(string(), nullable()),
         missingTranslationStringsInBaseLocale: bool(),
         missingTranslationStrings: bool(),
@@ -71,6 +73,7 @@ parameters:
         invalidChoices: true
         invalidLocales: true
         invalidReplacements: true
+        fuzzySearch: true
         langPath: null
         missingTranslationStringsInBaseLocale: true
         missingTranslationStrings: true

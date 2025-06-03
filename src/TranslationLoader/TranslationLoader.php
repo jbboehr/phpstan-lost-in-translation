@@ -21,7 +21,8 @@ namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -61,20 +62,29 @@ class TranslationLoader
 
     private readonly string $baseLocale;
 
+    private readonly FuzzyStringSetFactory $fuzzyStringSetFactory;
+
     private readonly FuzzyStringSetInterface $searchDatabase;
 
     /** @var array<string, array{string, string}>  */
     private array $parsed = [];
 
     public function __construct(
-        ?string $langPath,
-        ?string $baseLocale,
-        private readonly PhpLoader $phpLoader,
-        private readonly JsonLoader $jsonLoader,
-        private readonly FuzzyStringSetFactory $fuzzyStringSetFactory = new FuzzyStringSetFactory(),
+        ?string $langPath = null,
+        ?string $baseLocale = null,
+        bool $fuzzySearch = true,
+        private readonly PhpLoader $phpLoader = new PhpLoader(),
+        private readonly JsonLoader $jsonLoader = new JsonLoader(),
+        ?FuzzyStringSetFactory $fuzzyStringSetFactory = null,
     ) {
         $this->langPath = realpath($langPath ?? Utils::detectLangPath()) ?: Utils::detectLangPath();
         $this->baseLocale = $baseLocale ?? Utils::detectBaseLocale();
+
+        if (!$fuzzySearch) {
+            $this->fuzzyStringSetFactory = new FuzzyStringSetFactory(NullFuzzyStringSet::class, false);
+        } else {
+            $this->fuzzyStringSetFactory = $fuzzyStringSetFactory ?? new FuzzyStringSetFactory(NaiveFuzzyStringSet::class, true);
+        }
 
         $this->scan();
 
@@ -145,7 +155,7 @@ class TranslationLoader
             if (isset($sets[$item->locale])) {
                 $set = $sets[$item->locale];
             } else {
-                $set = $sets[$item->locale] = new MemoizingFuzzyStringSet($this->fuzzyStringSetFactory->createFuzzyStringSet());
+                $set = $sets[$item->locale] = $this->fuzzyStringSetFactory->createFuzzyStringSet();
             }
 
             $set->add($item->key);
@@ -323,9 +333,7 @@ class TranslationLoader
             }
         }
 
-        return new MemoizingFuzzyStringSet(
-            $this->fuzzyStringSetFactory->createFuzzyStringSet(array_keys($arr)),
-        );
+        return $this->fuzzyStringSetFactory->createFuzzyStringSet(array_keys($arr));
     }
 
     /**

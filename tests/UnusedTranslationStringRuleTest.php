@@ -19,8 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
@@ -43,8 +41,6 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
         return new TranslationLoader(
             langPath: __DIR__ . '/lang-unused',
             baseLocale: null,
-            phpLoader: new PhpLoader(),
-            jsonLoader: new JsonLoader(),
         );
     }
 

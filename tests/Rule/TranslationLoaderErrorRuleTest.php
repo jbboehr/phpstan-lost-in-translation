@@ -23,8 +23,6 @@ use Illuminate\Foundation\Bootstrap\HandleExceptions;
 use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
@@ -42,8 +40,6 @@ class TranslationLoaderErrorRuleTest extends RuleTestCase
         return new TranslationLoader(
             langPath: __DIR__ . '/lang-warn',
             baseLocale: null,
-            phpLoader: new PhpLoader(),
-            jsonLoader: new JsonLoader(),
         );
     }
 

@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -54,9 +53,7 @@ final class InvalidLocaleRule implements CallRuleInterface
                     $locale,
                 ))
                     ->identifier(self::IDENTIFIER_NO_TRANSLATIONS)
-                    ->metadata([
-                        Identifier::METADATA_LOCALE => $locale,
-                    ])
+                    ->metadata(Utils::metadata(locale: $locale))
                     ->line($call->line)
                     ->file($call->file)
                     ->build();
@@ -68,9 +65,7 @@ final class InvalidLocaleRule implements CallRuleInterface
                     $locale,
                 ))
                     ->identifier(self::IDENTIFIER_UNKNOWN_LOCALE)
-                    ->metadata([
-                        Identifier::METADATA_LOCALE => $locale,
-                    ])
+                    ->metadata(Utils::metadata(locale: $locale))
                     ->line($call->line)
                     ->file($call->file)
                     ->build();

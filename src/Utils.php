@@ -24,9 +24,41 @@ use Symfony\Component\Intl\Locales;
 
 /**
  * @internal
+ * @phpstan-import-type MetadataType from Identifier
  */
 final class Utils
 {
+    /**
+     * @param ?list<string> $missingInLocales
+     * @phpstan-return MetadataType
+     */
+    public static function metadata(
+        ?string $key = null,
+        ?string $locale = null,
+        ?string $value = null,
+        ?array $missingInLocales = null,
+    ): array {
+        $metadata = [];
+
+        if (null !== $key) {
+            $metadata[Identifier::METADATA_KEY] = $key;
+        }
+
+        if (null !== $locale) {
+            $metadata[Identifier::METADATA_LOCALE] = $locale;
+        }
+
+        if (null !== $value) {
+            $metadata[Identifier::METADATA_VALUE] = $value;
+        }
+
+        if (null !== $missingInLocales) {
+            $metadata[Identifier::METADATA_MISSING_IN_LOCALES] = $missingInLocales;
+        }
+
+        return $metadata;
+    }
+
     public static function checkLocaleExists(string $locale, bool $strict = false): bool
     {
         if (!$strict) {

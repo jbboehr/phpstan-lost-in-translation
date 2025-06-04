@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -55,10 +54,7 @@ final class MissingTranslationStringRule implements CallRuleInterface
                     join(', ', $missingInLocales),
                 ))
                     ->identifier(self::IDENTIFIER)
-                    ->metadata([
-                        Identifier::METADATA_KEY => $key,
-                        Identifier::METADATA_MISSING_IN_LOCALES => $missingInLocales,
-                    ])
+                    ->metadata(Utils::metadata(key: $key, missingInLocales: $missingInLocales))
                     ->line($call->line)
                     ->file($call->file);
 

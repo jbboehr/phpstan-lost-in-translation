@@ -19,10 +19,20 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+/**
+ * @note can't use constants here AFAIK
+ * @phpstan-type MetadataType array<string, mixed>&array{
+ *   "lostInTranslation::key"?: string,
+ *   "lostInTranslation::locale"?: string,
+ *   "lostInTranslation::value"?: string,
+ *   "lostInTranslation::missingInLocales"?: list<string>,
+ *   ...
+ * }
+ */
 final class Identifier
 {
     public const METADATA_KEY = 'lostInTranslation::key';
     public const METADATA_LOCALE = 'lostInTranslation::locale';
     public const METADATA_VALUE = 'lostInTranslation::value';
-    public const METADATA_MISSING_IN_LOCALES = 'lit::missingInLocales';
+    public const METADATA_MISSING_IN_LOCALES = 'lostInTranslation::missingInLocales';
 }

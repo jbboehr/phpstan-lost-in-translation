@@ -26,6 +26,7 @@
     },
     "require-dev": {
         "composer-runtime-api": "*",
+        "brick/varexporter": "*",
         "larastan/larastan": "^2.11 || ^3.4",
         "laravel/framework": "^9 || ^10 || ^11 || ^12",
         "loilo/fuse": "^7.1",

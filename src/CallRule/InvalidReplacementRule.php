@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -79,11 +78,7 @@ final class InvalidReplacementRule implements CallRuleInterface
             if ($replaceVariantCount === 0) {
                 $errors[] = RuleErrorBuilder::message(sprintf('Unused translation replacement: %s', Utils::e($search)))
                     ->identifier(self::IDENTIFIER_UNUSED)
-                    ->metadata([
-                        Identifier::METADATA_LOCALE => $locale,
-                        Identifier::METADATA_KEY => $key,
-                        Identifier::METADATA_VALUE => $value,
-                    ])
+                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)
@@ -91,11 +86,7 @@ final class InvalidReplacementRule implements CallRuleInterface
             } elseif ($replaceVariantCount > 1) {
                 $errors[] = RuleErrorBuilder::message(sprintf('Replacement string matches multiple variants: %s', Utils::e($search)))
                     ->identifier(self::IDENTIFIER_MULTIPLE_VARIANTS)
-                    ->metadata([
-                        Identifier::METADATA_LOCALE => $locale,
-                        Identifier::METADATA_KEY => $key,
-                        Identifier::METADATA_VALUE => $value,
-                    ])
+                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
                     ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
                     ->line($call->line)
                     ->file($call->file)

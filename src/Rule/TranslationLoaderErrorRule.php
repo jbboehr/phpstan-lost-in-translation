@@ -61,7 +61,7 @@ final class TranslationLoaderErrorRule implements Rule
                             $locale,
                         ))
                             ->identifier(InvalidLocaleRule::IDENTIFIER_UNKNOWN_LOCALE)
-                            ->metadata(['lit::locale' => $locale])
+                            ->metadata(Utils::metadata(locale: $locale))
                             ->file($file)
                             ->build();
                     }

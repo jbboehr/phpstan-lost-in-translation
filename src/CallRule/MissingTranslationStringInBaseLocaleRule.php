@@ -19,9 +19,9 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterface
@@ -47,10 +47,7 @@ final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterfac
                         $baseLocale,
                     ))
                         ->identifier(self::IDENTIFIER)
-                        ->metadata([
-                            Identifier::METADATA_LOCALE => $baseLocale,
-                            Identifier::METADATA_KEY => $key,
-                        ])
+                        ->metadata(Utils::metadata(key: $key, locale: $locale))
                         ->line($call->line)
                         ->file($call->file)
                         ->build();

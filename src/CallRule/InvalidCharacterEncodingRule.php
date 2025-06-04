@@ -19,7 +19,6 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -39,9 +38,7 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                     Utils::e($key),
                 ))
                     ->identifier(self::IDENTIFIER)
-                    ->metadata([
-                        Identifier::METADATA_KEY => $key,
-                    ])
+                    ->metadata(Utils::metadata(key: $key))
                     ->line($call->line)
                     ->file($call->file)
                     ->build();
@@ -55,11 +52,7 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                         Utils::e($locale),
                     ))
                         ->identifier(self::IDENTIFIER)
-                        ->metadata([
-                            Identifier::METADATA_LOCALE => $locale,
-                            Identifier::METADATA_KEY => $key,
-                            Identifier::METADATA_VALUE => $value,
-                        ])
+                        ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
                         ->line($call->line)
                         ->file($call->file)
                         ->build();

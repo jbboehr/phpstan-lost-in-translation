@@ -32,23 +32,24 @@ use PHPStan\Command\Output;
 
 /**
  * @phpstan-type MissingType array<string, array<string, null>>
+ * @phpstan-import-type MetadataType from Identifier
  */
 final class JsonErrorFormatter implements ErrorFormatter
 {
+    private readonly \Closure $criticalLogger;
+
+    /**
+     * @param bool $pretty
+     * @phpstan-param \Closure(string): void $criticalLogger
+     */
     public function __construct(
         private readonly bool $pretty = true,
+        ?\Closure $criticalLogger = null,
     ) {
+        $this->criticalLogger = $criticalLogger ?? static function (string $message) {
+            error_log($message);
+        };
     }
-
-//    public function formatErrors(AnalysisResult $analysisResult, Output $output) : int
-//    {
-//        // Output special CI format when supported CI is detected
-//        $this->ciDetectedErrorFormatter->formatErrors($analysisResult, $output);
-//
-//        // Custom format here...
-//
-//        return 0;
-//    }
 
     public function formatErrors(AnalysisResult $analysisResult, Output $output): int
     {
@@ -66,18 +67,19 @@ final class JsonErrorFormatter implements ErrorFormatter
                     continue;
                 }
 
+                /** @phpstan-var MetadataType $metadata */
                 $metadata = $fileSpecificError->getMetadata();
-                $key = $metadata[Identifier::METADATA_KEY];
+                $key = $metadata[Identifier::METADATA_KEY] ?? null;
                 $locale = $metadata[Identifier::METADATA_LOCALE] ?? '*';
 
-                if (!is_string($key) || !is_string($locale)) {
+                if (null === $key) {
                     continue;
                 }
 
                 switch ($id) {
                     case MissingTranslationStringRule::IDENTIFIER:
                         /** @var list<string> $missingInLocales */
-                        $missingInLocales = $metadata[Identifier::METADATA_MISSING_IN_LOCALES];
+                        $missingInLocales = $metadata[Identifier::METADATA_MISSING_IN_LOCALES] ?? [];
 
                         foreach ($missingInLocales as $missingInLocale) {
                             $missing[$id][$missingInLocale][$key] = null;
@@ -104,7 +106,7 @@ final class JsonErrorFormatter implements ErrorFormatter
             return $analysisResult->hasErrors() ? 1 : 0;
         } catch (\Throwable $e) {
             // Seems to silence exceptions?
-            error_log((string) $e);
+            ($this->criticalLogger)((string) $e);
             ShouldNotHappenException::rethrow($e);
         }
     }

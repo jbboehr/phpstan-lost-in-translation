@@ -79,11 +79,11 @@ final class PhpLoader
         }
 
         $lineNumbers = self::dot($lineNumbers, $group);
-        /** @var array<string, int> $lineNumbers */
+        /** @var array<non-empty-string, int> $lineNumbers */
 
         $raw = self::dot($raw, $group);
 
-        /** @var array<string, string> $results */
+        /** @var array<non-empty-string, non-empty-string> $results */
         $results = [];
 
         foreach ($raw as $k => $v) {
@@ -95,6 +95,11 @@ final class PhpLoader
                     ->file($file->getPathname())
                     ->line($line)
                     ->build();
+                continue;
+            }
+
+            // discard empty keys and values
+            if (strlen($k) <= 0 || strlen($v) <= 0) {
                 continue;
             }
 

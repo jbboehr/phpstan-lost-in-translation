@@ -21,6 +21,9 @@ namespace jbboehr\PHPStanLostInTranslation;
 
 final class UsedTranslationRecord implements \JsonSerializable
 {
+    /**
+     * @param non-empty-string $file
+     */
     public function __construct(
         public readonly string $key,
         public readonly string $locale,
@@ -62,7 +65,7 @@ final class UsedTranslationRecord implements \JsonSerializable
     }
 
     /**
-     * @return array{key: string, locale: string, file: string, line: int}
+     * @return array{key: string, locale: string, file: non-empty-string, line: int}
      */
     public function toArray(): array
     {

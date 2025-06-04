@@ -85,7 +85,9 @@ final class MissingTranslationStringRuleBenchmark
                 $buf .= $chars[mt_rand(0, strlen($chars) - 1)];
             }
 
-            $this->loader->add('ja', $buf, $buf);
+            if (strlen($buf) > 0) {
+                $this->loader->add('ja', $buf, $buf);
+            }
         }
     }
 }

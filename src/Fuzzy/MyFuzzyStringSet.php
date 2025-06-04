@@ -32,14 +32,14 @@ final class MyFuzzyStringSet implements FuzzyStringSetInterface
      */
     private array $index = [];
 
-    /** @var array<int, string> */
+    /** @var array<int, non-empty-string> */
     private array $strings = [];
 
-    /** @var array<string, int> */
+    /** @var array<non-empty-string, int> */
     private array $stringToIndex = [];
 
     /**
-     * @param ?list<string> $strings
+     * @param ?list<non-empty-string> $strings
      */
     public function __construct(?array $strings = null)
     {
@@ -56,7 +56,7 @@ final class MyFuzzyStringSet implements FuzzyStringSetInterface
     }
 
     /**
-     * @param list<string> $strings
+     * @param list<non-empty-string> $strings
      */
     public function addMany(array $strings): void
     {

@@ -23,12 +23,19 @@ interface FuzzyStringSetInterface
 {
     public const THRESHOLD = 0.25;
 
+    /**
+     * @param non-empty-string $string
+     */
     public function add(string $string): void;
 
     /**
-     * @param list<string> $strings
+     * @param list<non-empty-string> $strings
      */
     public function addMany(array $strings): void;
 
+    /**
+     * @param non-empty-string $string
+     * @return ?non-empty-string
+     */
     public function search(string $string): ?string;
 }

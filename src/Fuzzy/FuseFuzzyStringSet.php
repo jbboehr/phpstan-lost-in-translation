@@ -26,7 +26,7 @@ final class FuseFuzzyStringSet implements FuzzyStringSetInterface
     private readonly Fuse $fuse;
 
     /**
-     * @param ?list<string> $strings
+     * @param ?list<non-empty-string> $strings
      */
     public function __construct(?array $strings = null)
     {

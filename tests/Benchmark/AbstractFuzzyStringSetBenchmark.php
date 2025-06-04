@@ -28,7 +28,7 @@ use PhpBench\Attributes\Revs;
 abstract class AbstractFuzzyStringSetBenchmark
 {
     /**
-     * @param list<string> $strings
+     * @param list<non-empty-string> $strings
      */
     abstract public function createFuzzyStringSet(array $strings): FuzzyStringSetInterface;
 

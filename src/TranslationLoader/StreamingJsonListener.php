@@ -26,7 +26,7 @@ class StreamingJsonListener implements ListenerInterface, PositionAwareInterface
 {
     private int $lineNumber = -1;
 
-    /** @var array<string, int> */
+    /** @var array<non-empty-string, int> */
     private array $locations = [];
 
     /** @phpstan-var list<array{self::*, array{}}> */
@@ -39,7 +39,7 @@ class StreamingJsonListener implements ListenerInterface, PositionAwareInterface
     private const DOCUMENT = 3;
 
     /**
-     * @return array<string, int>
+     * @return array<non-empty-string, int>
      */
     public function getLocations(): array
     {
@@ -86,7 +86,9 @@ class StreamingJsonListener implements ListenerInterface, PositionAwareInterface
 
         switch ($this->stack[count($this->stack) - 1][0]) {
             case self::OBJECT:
-                $this->locations[$key] = $this->lineNumber;
+                if (strlen($key) > 0) {
+                    $this->locations[$key] = $this->lineNumber;
+                }
                 break;
         }
     }

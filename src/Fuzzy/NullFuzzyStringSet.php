@@ -22,7 +22,7 @@ namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 final class NullFuzzyStringSet implements FuzzyStringSetInterface
 {
     /**
-     * @param ?list<string> $strings
+     * @param ?list<non-empty-string> $strings
      * @phpstan-ignore constructor.unusedParameter
      */
     public function __construct(?array $strings = null)

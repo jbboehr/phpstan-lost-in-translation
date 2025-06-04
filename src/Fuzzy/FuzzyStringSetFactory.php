@@ -29,8 +29,9 @@ class FuzzyStringSetFactory
         private readonly bool $memoizing = true,
     ) {
     }
+
     /**
-     * @param list<string> $strings
+     * @param list<non-empty-string> $strings
      * @return FuzzyStringSetInterface
      */
     public function createFuzzyStringSet(array $strings = []): FuzzyStringSetInterface

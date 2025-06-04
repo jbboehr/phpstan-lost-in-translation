@@ -21,11 +21,11 @@ namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 
 final class NaiveFuzzyStringSet implements FuzzyStringSetInterface
 {
-    /** @var array<string, true> */
+    /** @var array<non-empty-string, true> */
     private array $strings = [];
 
     /**
-     * @param ?list<string> $strings
+     * @param ?list<non-empty-string> $strings
      */
     public function __construct(?array $strings = null)
     {

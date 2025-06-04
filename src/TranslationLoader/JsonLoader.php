@@ -83,6 +83,11 @@ final class JsonLoader
                 continue;
             }
 
+            // discard empty keys and values
+            if (strlen($k) <= 0 || strlen($v) <= 0) {
+                continue;
+            }
+
             $results[$k] = $v;
         }
 
@@ -90,7 +95,7 @@ final class JsonLoader
     }
 
     /**
-     * @return array<string, int>
+     * @return array<non-empty-string, int>
      */
     private function buildLineNumberMap(SplFileInfo $file): array
     {

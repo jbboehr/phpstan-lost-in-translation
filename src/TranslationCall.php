@@ -28,6 +28,7 @@ final class TranslationCall implements \JsonSerializable
 {
     /**
      * @phpstan-param PossibleTranslationRecordCollection $possibleTranslations
+     * @phpstan-param non-empty-string $file
      */
     public function __construct(
         public readonly ?string $className,

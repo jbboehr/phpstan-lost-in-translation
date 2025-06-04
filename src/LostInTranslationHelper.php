@@ -201,11 +201,14 @@ class LostInTranslationHelper
 
         $keyType = $scope->getType($key);
         $localeType = $locale !== null ? $scope->getType($locale) : null;
+        $file = $scope->getFile(); // @TODO this might be getting the compiled blade path...
+
+        assert(strlen($file) > 0);
 
         return new TranslationCall(
             className: $className,
             functionName: $name,
-            file: $scope->getFile(), // @TODO this might be getting the compiled blade path...
+            file: $file,
             line: $node->getLine(),
             possibleTranslations: $this->gatherPossibleTranslations($keyType, $localeType),
             keyType: $keyType,

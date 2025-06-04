@@ -22,7 +22,7 @@ namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 final class MemoizingFuzzyStringSet implements FuzzyStringSetInterface
 {
     /**
-     * @var array<string, ?string>
+     * @var array<non-empty-string, ?non-empty-string>
      */
     private array $memo = [];
 

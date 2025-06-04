@@ -47,16 +47,16 @@ class TranslationLoader
 
     private readonly string $langPath;
 
-    /** @var array<string, array<string, array<string, string>>> */
+    /** @var array<non-empty-string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
     private array $data = [];
 
     /** @var list<IdentifierRuleError> */
     private array $errors = [];
 
-    /** @var list<string> */
+    /** @var list<non-empty-string> */
     private array $foundLocales = [];
 
-    /** @var array<string, non-empty-list<string>> */
+    /** @var array<non-empty-string, non-empty-list<string>> */
     private array $localeFiles = [];
 
     /** @var array<string, array{string, int}> */
@@ -68,7 +68,7 @@ class TranslationLoader
 
     private readonly FuzzyStringSetInterface $searchDatabase;
 
-    /** @var array<string, array{string, string}>  */
+    /** @var array<non-empty-string, array{non-empty-string, non-empty-string}>  */
     private array $parsed = [];
 
     public function __construct(
@@ -94,11 +94,18 @@ class TranslationLoader
     }
 
     /**
+     * @param non-empty-string $key
+     * @param non-empty-string $locale
+     * @param non-empty-string $value
      * @internal
      */
     public function add(string $locale, string $key, string $value): void
     {
         [$namespace, $key] = $this->parseKey($key);
+
+        if (strlen($key) <= 0) {
+            return;
+        }
 
         $this->data[$locale][$namespace][$key] = $value;
 
@@ -136,9 +143,16 @@ class TranslationLoader
     {
         [$namespace, $key] = $this->parseKey($key);
 
+        if (strlen($key) <= 0) {
+            return null;
+        }
+
         return $this->data[$locale][$namespace][$key] ?? null;
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public function searchForSimilarKeys(string $key): ?string
     {
         return $this->searchDatabase->search($key);
@@ -160,7 +174,9 @@ class TranslationLoader
                 $set = $sets[$item->locale] = $this->fuzzyStringSetFactory->createFuzzyStringSet();
             }
 
-            $set->add($item->key);
+            if (strlen($item->key) > 0) {
+                $set->add($item->key);
+            }
 
             $usedByKey[$item->locale][$item->key] = true;
         }
@@ -217,16 +233,20 @@ class TranslationLoader
     /**
      * @see \Illuminate\Translation\Translator::parseKey()
      * @see \Illuminate\Support\NamespacedItemResolver::parseKey()
-     * @return array{string, string}
+     * @return array{non-empty-string, string}
      */
     public function parseKey(string $key): array
     {
+        if (strlen($key) <= 0) {
+            return ['*', ''];
+        }
+
         if (isset($this->parsed[$key])) {
             return $this->parsed[$key];
         }
 
         if (!str_contains($key, '::')) {
-            $segments = self::parseBasicSegments(explode('.', $key));
+            $segments = self::parseBasicSegments($key);
         } else {
             $segments = self::parseNamespacedSegments($key);
         }
@@ -283,6 +303,7 @@ class TranslationLoader
             $locale = $matches[1];
             //$group = $matches[2] ?? null;
             $namespace = '*';
+
             $foundLocales[$locale] = true;
             $this->localeFiles[$locale][] = $file->getPathname();
 
@@ -341,16 +362,19 @@ class TranslationLoader
     /**
      * @see \Illuminate\Support\NamespacedItemResolver::parseNamespacedSegments()
      * @license https://github.com/laravel/framework/blob/10.x/LICENSE.md
-     * @return array{string, string, ?string}
+     * @param non-empty-string $key
+     * @return array{non-empty-string, non-empty-string, ?non-empty-string}
      */
     private static function parseNamespacedSegments(string $key): array
     {
         [$namespace, $item] = explode('::', $key);
 
-        $itemSegments = explode('.', $item);
+        if (strlen($namespace) <= 0 || strlen($item) <= 0) {
+            return ['*', $key, null];
+        }
 
         $groupAndItem = array_slice(
-            self::parseBasicSegments($itemSegments),
+            self::parseBasicSegments($item),
             1,
         );
 
@@ -360,16 +384,30 @@ class TranslationLoader
     /**
      * @see \Illuminate\Support\NamespacedItemResolver::parseBasicSegments()
      * @license https://github.com/laravel/framework/blob/10.x/LICENSE.md
-     * @param list<string> $segments
-     * @return array{null, string, ?string}
+     * @return array{null, non-empty-string, ?non-empty-string}
      */
-    private static function parseBasicSegments(array $segments): array
+    private static function parseBasicSegments(string $key): array
     {
+        $dotCount = substr_count($key, '.');
+
+        if ($dotCount <= 0 || ($dotCount === 1 && $key[0] === '.' || $key[-1] === '.')) {
+            assert(strlen($key) > 0);
+
+            return [null, $key, null];
+        }
+
+        $segments = explode('.', $key);
         $group = $segments[0];
 
-        $item = count($segments) === 1
-            ? null
-            : implode('.', array_slice($segments, 1));
+        assert(strlen($group) > 0);
+
+        if (count($segments) <= 1) {
+            return [null, $group, null];
+        }
+
+        $item = implode('.', array_slice($segments, 1));
+
+        assert(strlen($item) > 0);
 
         return [null, $group, $item];
     }

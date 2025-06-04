@@ -24,8 +24,8 @@ use PHPStan\Rules\IdentifierRuleError;
 final class LoadResult
 {
     /**
-     * @param array<string, string> $translations
-     * @param array<string, int> $locations
+     * @param array<non-empty-string, non-empty-string> $translations
+     * @param array<non-empty-string, int> $locations
      * @param list<IdentifierRuleError> $errors
      */
     public function __construct(

@@ -25,7 +25,7 @@ use PhpParser\NodeVisitorAbstract;
 
 final class KeyLineNumberVisitor extends NodeVisitorAbstract
 {
-    /** @var array<string, int> */
+    /** @var array<non-empty-string, int> */
     private array $lineNumbers = [];
 
     /** @var list<Scalar\LNumber|Scalar\String_|"unknown"> */
@@ -63,7 +63,9 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
                     return $stackItem;
                 }
             }, $this->stack));
-            $this->lineNumbers[$path] = $node->getStartLine();
+            if (strlen($path) > 0) {
+                $this->lineNumbers[$path] = $node->getStartLine();
+            }
             array_pop($this->stack);
         }
 
@@ -71,7 +73,7 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * @return array<string, int>
+     * @return array<non-empty-string, int>
      */
     public function getLineNumbers(): array
     {

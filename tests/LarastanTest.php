@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace Mfn\PHPStanLostInTranslation\Tests;
 
+use Illuminate\Foundation\Bootstrap\HandleExceptions;
 use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use Mfn\PHPStanLostInTranslation\Rule\LostInTranslationRule;
@@ -47,6 +48,18 @@ class LarastanTest extends RuleTestCase
 
         if (!\Composer\InstalledVersions::isInstalled('larastan/larastan')) {
             self::markTestSkipped('Requires larastan to be installed');
+        }
+    }
+
+    /**
+     * @see https://github.com/laravel/framework/issues/49502#issuecomment-2222592953
+     */
+    public function tearDown(): void
+    {
+        parent::tearDown();
+
+        if (class_exists(HandleExceptions::class, false) && method_exists(HandleExceptions::class, 'flushState')) {
+            HandleExceptions::flushState();
         }
     }
 

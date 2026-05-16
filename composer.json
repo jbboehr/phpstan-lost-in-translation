@@ -41,7 +41,8 @@
         "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5",
         "slevomat/coding-standard": "^8.18",
         "squizlabs/php_codesniffer": "^3.13",
-        "tomasvotruba/bladestan": ">=0.6"
+        "tomasvotruba/bladestan": ">=0.6",
+        "webmozart/assert": "*"
     },
     "autoload-dev": {
         "psr-4": {

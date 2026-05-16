@@ -140,7 +140,7 @@ final class Utils
 
             if ($c === '"') {
                 $buf .= '\"';
-            } elseif (ctype_print($c)) {
+            } elseif (ord($c) >= 0x20 && ord($c) < 0x7f) {
                 $buf .= $c;
             } else {
                 $buf .= sprintf("\x%02x", ord($c));

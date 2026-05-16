@@ -390,7 +390,7 @@ class TranslationLoader
     {
         $dotCount = substr_count($key, '.');
 
-        if ($dotCount <= 0 || ($dotCount === 1 && $key[0] === '.' || $key[-1] === '.')) {
+        if ($dotCount <= 0 || $key[0] === '.' || $key[-1] === '.') {
             assert(strlen($key) > 0);
 
             return [null, $key, null];

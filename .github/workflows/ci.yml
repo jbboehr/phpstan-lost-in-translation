@@ -54,33 +54,38 @@ jobs:
 
     test:
         runs-on: ubuntu-latest
-        name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }}"
+        name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }} | bladestan ${{ matrix.bladestan-version }}"
         strategy:
             fail-fast: false
             matrix:
                 include:
                     - php-version: "8.1"
-                      laravel-version: "9"
-                    - php-version: "8.2"
-                      laravel-version: "9"
-                    - php-version: "8.1"
                       laravel-version: "10"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.2"
                       laravel-version: "10"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.3"
                       laravel-version: "10"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.2"
                       laravel-version: "11"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.3"
                       laravel-version: "11"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.4"
                       laravel-version: "11"
+                      bladestan-version: "0.6.0"
                     - php-version: "8.2"
                       laravel-version: "12"
+                      bladestan-version: "0.11.5"
                     - php-version: "8.3"
                       laravel-version: "12"
+                      bladestan-version: "0.11.5"
                     - php-version: "8.4"
                       laravel-version: "12"
+                      bladestan-version: "0.11.5"
         steps:
             - uses: actions/checkout@v4
 
@@ -96,12 +101,12 @@ jobs:
               uses: actions/cache@v4
               with:
                   path: vendor
-                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}-laravel${{ matrix.laravel-version }}- }}
+                  key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}-laravel${{ matrix.laravel-version }}-bladestan${{ matrix.bladestan-version }}
                   restore-keys: |
                       ${{ runner.os }}-php-
 
-            - name: Install laravel
-              run: composer require --no-update --dev --no-progress --no-interaction --prefer-dist laravel/framework:^${{ matrix.laravel-version }}
+            - name: Pin laravel and bladestan
+              run: composer require --no-update --dev --no-progress --no-interaction --prefer-dist laravel/framework:^${{ matrix.laravel-version }} tomasvotruba/bladestan:^${{ matrix.bladestan-version }}
 
             - name: Install dependencies
               run: composer update --no-progress --no-interaction --prefer-dist

@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Collector;
+namespace Mfn\PHPStanLostInTranslation\Tests\Collector;
 
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use Mfn\PHPStanLostInTranslation\LostInTranslationHelper;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 

@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
-use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
+use Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use Mfn\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use Mfn\PHPStanLostInTranslation\UnusedTranslationStringRule;
 use PHPStan\Rules\Rule;
 
 /**

@@ -17,10 +17,10 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
+namespace Mfn\PHPStanLostInTranslation\Tests\Benchmark;
 
-use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
+use Mfn\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
+use Mfn\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
 use PhpBench\Attributes\BeforeMethods;
 use PhpBench\Attributes\Iterations;
 use PhpBench\Attributes\Revs;

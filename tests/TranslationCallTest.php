@@ -17,9 +17,9 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use Mfn\PHPStanLostInTranslation\TranslationCall;
 use PHPStan\Type\Constant\ConstantStringType;
 
 final class TranslationCallTest extends \PHPUnit\Framework\TestCase

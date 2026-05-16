@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
+namespace Mfn\PHPStanLostInTranslation\Tests\Benchmark;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
+use Mfn\PHPStanLostInTranslation\TranslationCall;
+use Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpBench\Attributes\Assert;
 use PhpBench\Attributes\Iterations;
 use PhpBench\Attributes\Revs;

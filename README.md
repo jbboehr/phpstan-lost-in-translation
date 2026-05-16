@@ -1,7 +1,9 @@
 
 # phpstan-lost-in-translation
 
-[![ci](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml/badge.svg)](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml)
+> Note: this is a fork of https://github.com/jbboehr/phpstan-lost-in-translation
+
+[![ci](https://github.com/mfn/phpstan-lost-in-translation/actions/workflows/ci.yml/badge.svg)](https://github.com/mfn/phpstan-lost-in-translation/actions/workflows/ci.yml)
 [![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3%2b-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
 
@@ -10,7 +12,7 @@
 To use this extension, require it in [Composer](https://getcomposer.org/):
 
 ```bash
-composer require --dev jbboehr/phpstan-lost-in-translation
+composer require --dev mfn/phpstan-lost-in-translation
 ```
 
 If you also install [phpstan/extension-installer](https://github.com/phpstan/extension-installer) then you're all set!
@@ -21,7 +23,7 @@ If you don't want to use `phpstan/extension-installer`, include `extension.neon`
 
 ```neon
 includes:
-    - vendor/jbboehr/phpstan-lost-in-translation/extension.neon
+    - vendor/mfn/phpstan-lost-in-translation/extension.neon
 ```
 
 ## Additional Requirements

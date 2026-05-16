@@ -17,12 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
+namespace Mfn\PHPStanLostInTranslation\Tests\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
-use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
-use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use Mfn\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
+use Mfn\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use Mfn\PHPStanLostInTranslation\Tests\RuleTestCase;
 use PHPStan\Rules\Rule;
 
 /**

@@ -1,14 +1,18 @@
 {
-    "name": "jbboehr/phpstan-lost-in-translation",
+    "name": "mfn/phpstan-lost-in-translation",
     "description": "Helps find missing translation strings in Laravel applications",
     "type": "phpstan-extension",
     "keywords": ["laravel", "larastan", "bladestan", "phpstan", "php", "package", "static analysis", "code analysis", "code analyse"],
     "license": "AGPL-3.0+",
-    "homepage": "https://github.com/jbboehr/phpstan-lost-in-translation",
+    "homepage": "https://github.com/mfn/phpstan-lost-in-translation",
     "authors": [
         {
             "name": "John Boehr",
             "email": "jbboehr@gmail.com"
+        },
+        {
+            "name": "Markus Podar",
+            "email": "markus.podar@gmail.com"
         }
     ],
     "require": {
@@ -21,7 +25,7 @@
     },
     "autoload": {
         "psr-4": {
-            "jbboehr\\PHPStanLostInTranslation\\": "src/"
+            "Mfn\\PHPStanLostInTranslation\\": "src/"
         }
     },
     "require-dev": {
@@ -41,7 +45,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "jbboehr\\PHPStanLostInTranslation\\Tests\\": "tests"
+            "Mfn\\PHPStanLostInTranslation\\Tests\\": "tests"
         }
     },
     "config": {

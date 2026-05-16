@@ -17,13 +17,13 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
+namespace Mfn\PHPStanLostInTranslation\Tests\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
-use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
-use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use Mfn\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
+use Mfn\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use Mfn\PHPStanLostInTranslation\Tests\RuleTestCase;
+use Mfn\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
 /**

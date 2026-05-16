@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
 use Bladestan\Rules\BladeRule;
 use Illuminate\Contracts\View\Factory as ViewFactory;

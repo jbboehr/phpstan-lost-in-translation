@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace Mfn\PHPStanLostInTranslation;
 
 /**
  * @note can't use constants here AFAIK

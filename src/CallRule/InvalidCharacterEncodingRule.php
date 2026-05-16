@@ -17,10 +17,10 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\CallRule;
+namespace Mfn\PHPStanLostInTranslation\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\TranslationCall;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\TranslationCall;
+use Mfn\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
 final class InvalidCharacterEncodingRule implements CallRuleInterface

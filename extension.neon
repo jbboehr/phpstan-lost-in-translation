@@ -1,54 +1,54 @@
 services:
-  - class: jbboehr\PHPStanLostInTranslation\LostInTranslationHelper
-  - class: jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader
+  - class: Mfn\PHPStanLostInTranslation\LostInTranslationHelper
+  - class: Mfn\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory
+  - class: Mfn\PHPStanLostInTranslation\TranslationLoader\PhpLoader
     arguments:
       invalidCharacterEncodings: %lostInTranslation.invalidCharacterEncodings%
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader
-  - class: jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader
+  - class: Mfn\PHPStanLostInTranslation\TranslationLoader\JsonLoader
+  - class: Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader
     arguments:
       baseLocale: %lostInTranslation.baseLocale%
       langPath: %lostInTranslation.langPath%
       fuzzySearch: %lostInTranslation.fuzzySearch%
-  - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
+  - class: Mfn\PHPStanLostInTranslation\UnusedTranslationStringCollector
 
 
-  - class: jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule
+  - class: Mfn\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule
     arguments:
       invalidLocales: %lostInTranslation.invalidLocales%
       strictLocales: %lostInTranslation.strictLocales%
-  - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
+  - class: Mfn\PHPStanLostInTranslation\Rule\LostInTranslationRule
     tags: ["phpstan.rules.rule"]
 
 
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\DynamicTranslationStringRule
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection
+  - class: Mfn\PHPStanLostInTranslation\CallRule\DynamicTranslationStringRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\InvalidChoiceRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
     arguments:
       strictLocales: %lostInTranslation.strictLocales%
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule
-  - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\InvalidReplacementRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule
+  - class: Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule
 
 
-  - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
-  - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
+  - class: Mfn\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
+  - class: Mfn\PHPStanLostInTranslation\UnusedTranslationStringRule
 
 
   errorFormatter.lostInTranslationJson:
-    class: jbboehr\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter
+    class: Mfn\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter
 
 
 conditionalTags:
-	jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule:
+	Mfn\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule:
 		phpstan.rules.rule: %lostInTranslation.translationLoaderErrors%
-	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector:
+	Mfn\PHPStanLostInTranslation\UnusedTranslationStringCollector:
 		phpstan.collector: %lostInTranslation.unusedTranslationStrings%
-	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule:
+	Mfn\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
-	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
+	Mfn\PHPStanLostInTranslation\UnusedTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 
 parametersSchema:

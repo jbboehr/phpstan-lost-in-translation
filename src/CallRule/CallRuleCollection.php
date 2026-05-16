@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\CallRule;
+namespace Mfn\PHPStanLostInTranslation\CallRule;
 
 use IteratorAggregate;
 use PHPStan\DependencyInjection\Container;

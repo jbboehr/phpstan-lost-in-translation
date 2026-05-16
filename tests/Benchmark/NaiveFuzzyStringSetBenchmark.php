@@ -17,10 +17,10 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
+namespace Mfn\PHPStanLostInTranslation\Tests\Benchmark;
 
-use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
+use Mfn\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
+use Mfn\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
 
 final class NaiveFuzzyStringSetBenchmark extends AbstractFuzzyStringSetBenchmark
 {

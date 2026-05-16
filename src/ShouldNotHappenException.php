@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace Mfn\PHPStanLostInTranslation;
 
 final class ShouldNotHappenException extends \RuntimeException
 {
-    private const URL = 'https://github.com/jbboehr/phpstan-lost-in-translation/issues';
+    private const URL = 'https://github.com/mfn/phpstan-lost-in-translation/issues';
 
     /**
      * @throws self

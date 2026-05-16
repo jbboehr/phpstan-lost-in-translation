@@ -17,13 +17,13 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Fuzzy;
+namespace Mfn\PHPStanLostInTranslation\Tests\Fuzzy;
 
-use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\AbstractFuzzyStringSetBenchmark;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\FuseFuzzyStringSetBenchmark;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\MyFuzzyStringSetBenchmark;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\NaiveFuzzyStringSetBenchmark;
+use Mfn\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
+use Mfn\PHPStanLostInTranslation\Tests\Benchmark\AbstractFuzzyStringSetBenchmark;
+use Mfn\PHPStanLostInTranslation\Tests\Benchmark\FuseFuzzyStringSetBenchmark;
+use Mfn\PHPStanLostInTranslation\Tests\Benchmark\MyFuzzyStringSetBenchmark;
+use Mfn\PHPStanLostInTranslation\Tests\Benchmark\NaiveFuzzyStringSetBenchmark;
 use PHPUnit\Framework\TestCase;
 
 final class FuzzyStringSetTest extends TestCase

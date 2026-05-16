@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
 use Illuminate\View\FileViewFinder;

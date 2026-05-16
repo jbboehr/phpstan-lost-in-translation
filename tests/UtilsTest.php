@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
 use Illuminate\Container\Container;
 use Illuminate\Foundation\Application;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\Utils;
 use Orchestra\Testbench\TestCase;
 
 final class UtilsTest extends TestCase

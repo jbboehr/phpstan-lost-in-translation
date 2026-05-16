@@ -17,12 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use Mfn\PHPStanLostInTranslation\LostInTranslationHelper;
+use Mfn\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 

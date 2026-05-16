@@ -17,12 +17,12 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Rule;
+namespace Mfn\PHPStanLostInTranslation\Rule;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use Mfn\PHPStanLostInTranslation\Utils;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\CollectedDataNode;

@@ -17,10 +17,10 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
+namespace Mfn\PHPStanLostInTranslation\TranslationLoader;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
+use Mfn\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;

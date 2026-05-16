@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
+namespace Mfn\PHPStanLostInTranslation\TranslationLoader;
 
 use PHPStan\Rules\IdentifierRuleError;
 

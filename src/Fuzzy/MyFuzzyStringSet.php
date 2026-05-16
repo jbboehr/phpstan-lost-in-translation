@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
+namespace Mfn\PHPStanLostInTranslation\Fuzzy;
 
 /**
  * @note sadly, turns out this is worse than a naive search

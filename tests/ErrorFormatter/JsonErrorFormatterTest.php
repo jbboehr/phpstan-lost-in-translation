@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\ErrorFormatter;
+namespace Mfn\PHPStanLostInTranslation\Tests\ErrorFormatter;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
-use jbboehr\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
+use Mfn\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
 use Nette\Utils\Json;
 use PHPStan\Command\AnalysisResult;
 use PHPStan\Command\Output;
@@ -84,20 +84,20 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo3OiJmb28uYmFyIjtzOjY6ImxvY2FsZSI7czoyOiJlbiI7czo0OiJmaWxlIjtzOjk2OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9taXNzaW5nLXRyYW5zbGF0aW9uLXN0cmluZy1pbi1iYXNlLWxvY2FsZS5waHAiO3M6NDoibGluZSI7aTozO30=',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo3OiJmb28uYmFyIjtzOjY6ImxvY2FsZSI7czoyOiJlbiI7czo0OiJmaWxlIjtzOjk2OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9taXNzaW5nLXRyYW5zbGF0aW9uLXN0cmluZy1pbi1iYXNlLWxvY2FsZS5waHAiO3M6NDoibGluZSI7aTozO30=',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/missing-translation-string-in-base-locale.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo1NjoiezB9IFRoZXJlIGFyZSBub25lfHsxfSBUaGVyZSBpcyBvbmV8WzJdIFRoZXJlIGFyZSA6Y291bnQiO3M6NjoibG9jYWxlIjtzOjI6ImVuIjtzOjQ6ImZpbGUiO3M6Njk6Ii9ob21lL3Jpbi9Db2RlL3BocHN0YW4tbG9zdC1pbi10cmFuc2xhdGlvbi9lMmUvc3JjL2ludmFsaWQtY2hvaWNlLnBocCI7czo0OiJsaW5lIjtpOjM7fQ==',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo1NjoiezB9IFRoZXJlIGFyZSBub25lfHsxfSBUaGVyZSBpcyBvbmV8WzJdIFRoZXJlIGFyZSA6Y291bnQiO3M6NjoibG9jYWxlIjtzOjI6ImVuIjtzOjQ6ImZpbGUiO3M6Njk6Ii9ob21lL3Jpbi9Db2RlL3BocHN0YW4tbG9zdC1pbi10cmFuc2xhdGlvbi9lMmUvc3JjL2ludmFsaWQtY2hvaWNlLnBocCI7czo0OiJsaW5lIjtpOjM7fQ==',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/invalid-choice.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => 'sample',
@@ -107,77 +107,77 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxODoiYmxhZGUgYXQgZGlyZWN0aXZlIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6NTt9',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxODoiYmxhZGUgYXQgZGlyZWN0aXZlIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6NTt9',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMzoiYmxhZGUgZG91YmxlIHVuZGVyc2NvcmUiO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo1NjoiL3RtcC8yNGZmNThjNmNiYjJiOTA3Njc0ZWYyYWJiODVhODVkYy1ibGFkZS1jb21waWxlZC5waHAiO3M6NDoibGluZSI7aTo3O30=',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMzoiYmxhZGUgZG91YmxlIHVuZGVyc2NvcmUiO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo1NjoiL3RtcC8yNGZmNThjNmNiYjJiOTA3Njc0ZWYyYWJiODVhODVkYy1ibGFkZS1jb21waWxlZC5waHAiO3M6NDoibGluZSI7aTo3O30=',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMToiZXhpc3RzIGluIGFsbCBsb2NhbGVzIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6OTt9',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMToiZXhpc3RzIGluIGFsbCBsb2NhbGVzIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6OTt9',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxMDoib25seSBpbiBqYSI7czo2OiJsb2NhbGUiO3M6MToiKiI7czo0OiJmaWxlIjtzOjU2OiIvdG1wLzI0ZmY1OGM2Y2JiMmI5MDc2NzRlZjJhYmI4NWE4NWRjLWJsYWRlLWNvbXBpbGVkLnBocCI7czo0OiJsaW5lIjtpOjExO30=',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxMDoib25seSBpbiBqYSI7czo2OiJsb2NhbGUiO3M6MToiKiI7czo0OiJmaWxlIjtzOjU2OiIvdG1wLzI0ZmY1OGM2Y2JiMmI5MDc2NzRlZjJhYmI4NWE4NWRjLWJsYWRlLWNvbXBpbGVkLnBocCI7czo0OiJsaW5lIjtpOjExO30=',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxNjoidmlhIGFwcCBmdW5jdGlvbiI7czo2OiJsb2NhbGUiO3M6MToiKiI7czo0OiJmaWxlIjtzOjU2OiIvdG1wLzI0ZmY1OGM2Y2JiMmI5MDc2NzRlZjJhYmI4NWE4NWRjLWJsYWRlLWNvbXBpbGVkLnBocCI7czo0OiJsaW5lIjtpOjE2O30=',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxNjoidmlhIGFwcCBmdW5jdGlvbiI7czo2OiJsb2NhbGUiO3M6MToiKiI7czo0OiJmaWxlIjtzOjU2OiIvdG1wLzI0ZmY1OGM2Y2JiMmI5MDc2NzRlZjJhYmI4NWE4NWRjLWJsYWRlLWNvbXBpbGVkLnBocCI7czo0OiJsaW5lIjtpOjE2O30=',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxNDoidmlhIGFwcCBmYWNhZGUiO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo1NjoiL3RtcC8yNGZmNThjNmNiYjJiOTA3Njc0ZWYyYWJiODVhODVkYy1ibGFkZS1jb21waWxlZC5waHAiO3M6NDoibGluZSI7aToxODt9',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxNDoidmlhIGFwcCBmYWNhZGUiO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo1NjoiL3RtcC8yNGZmNThjNmNiYjJiOTA3Njc0ZWYyYWJiODVhODVkYy1ibGFkZS1jb21waWxlZC5waHAiO3M6NDoibGluZSI7aToxODt9',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyNzoidmlhIGFwcCBmdW5jdGlvbiB3aXRoIGNsYXNzIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6MjA7fQ==',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyNzoidmlhIGFwcCBmdW5jdGlvbiB3aXRoIGNsYXNzIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6MjA7fQ==',
                             ],
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxODoib25seSB1c2VkIGluIGJsYWRlIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6MjM7fQ==',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxODoib25seSB1c2VkIGluIGJsYWRlIjtzOjY6ImxvY2FsZSI7czoxOiIqIjtzOjQ6ImZpbGUiO3M6NTY6Ii90bXAvMjRmZjU4YzZjYmIyYjkwNzY3NGVmMmFiYjg1YTg1ZGMtYmxhZGUtY29tcGlsZWQucGhwIjtzOjQ6ImxpbmUiO2k6MjM7fQ==',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/blade.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMToiZXhpc3RzIGluIGFsbCBsb2NhbGVzIjtzOjY6ImxvY2FsZSI7czoyOiJlbiI7czo0OiJmaWxlIjtzOjc0OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9pbnZhbGlkLXJlcGxhY2VtZW50LnBocCI7czo0OiJsaW5lIjtpOjQ7fQ==',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyMToiZXhpc3RzIGluIGFsbCBsb2NhbGVzIjtzOjY6ImxvY2FsZSI7czoyOiJlbiI7czo0OiJmaWxlIjtzOjc0OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9pbnZhbGlkLXJlcGxhY2VtZW50LnBocCI7czo0OiJsaW5lIjtpOjQ7fQ==',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/invalid-replacement.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo5OiI6Zm9vIDpGT08iO3M6NjoibG9jYWxlIjtzOjI6ImVuIjtzOjQ6ImZpbGUiO3M6NzQ6Ii9ob21lL3Jpbi9Db2RlL3BocHN0YW4tbG9zdC1pbi10cmFuc2xhdGlvbi9lMmUvc3JjL2ludmFsaWQtcmVwbGFjZW1lbnQucGhwIjtzOjQ6ImxpbmUiO2k6Nzt9',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo5OiI6Zm9vIDpGT08iO3M6NjoibG9jYWxlIjtzOjI6ImVuIjtzOjQ6ImZpbGUiO3M6NzQ6Ii9ob21lL3Jpbi9Db2RlL3BocHN0YW4tbG9zdC1pbi10cmFuc2xhdGlvbi9lMmUvc3JjL2ludmFsaWQtcmVwbGFjZW1lbnQucGhwIjtzOjQ6ImxpbmUiO2k6Nzt9',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/invalid-replacement.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxMzoibWVzc2FnZXMu8CiMvCI7czo2OiJsb2NhbGUiO3M6MjoiamEiO3M6NDoiZmlsZSI7czo4MjoiL2hvbWUvcmluL0NvZGUvcGhwc3Rhbi1sb3N0LWluLXRyYW5zbGF0aW9uL2UyZS9zcmMvaW52YWxpZC1jaGFyYWN0ZXItZW5jb2RpbmdzLnBocCI7czo0OiJsaW5lIjtpOjM7fQ==',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoxMzoibWVzc2FnZXMu8CiMvCI7czo2OiJsb2NhbGUiO3M6MjoiamEiO3M6NDoiZmlsZSI7czo4MjoiL2hvbWUvcmluL0NvZGUvcGhwc3Rhbi1sb3N0LWluLXRyYW5zbGF0aW9uL2UyZS9zcmMvaW52YWxpZC1jaGFyYWN0ZXItZW5jb2RpbmdzLnBocCI7czo0OiJsaW5lIjtpOjM7fQ==',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/invalid-character-encodings.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyNjoibWlzc2luZyB0cmFuc2xhdGlvbiBzdHJpbmciO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo4MToiL2hvbWUvcmluL0NvZGUvcGhwc3Rhbi1sb3N0LWluLXRyYW5zbGF0aW9uL2UyZS9zcmMvbWlzc2luZy10cmFuc2xhdGlvbi1zdHJpbmcucGhwIjtzOjQ6ImxpbmUiO2k6Mzt9',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czoyNjoibWlzc2luZyB0cmFuc2xhdGlvbiBzdHJpbmciO3M6NjoibG9jYWxlIjtzOjE6IioiO3M6NDoiZmlsZSI7czo4MToiL2hvbWUvcmluL0NvZGUvcGhwc3Rhbi1sb3N0LWluLXRyYW5zbGF0aW9uL2UyZS9zcmMvbWlzc2luZy10cmFuc2xhdGlvbi1zdHJpbmcucGhwIjtzOjQ6ImxpbmUiO2k6Mzt9',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/missing-translation-string.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                     \PHPStan\Collectors\CollectedData::__set_state([
                         'data' => [
                             [
-                                'jbboehr\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo2OiJmb29iYXIiO3M6NjoibG9jYWxlIjtzOjE0OiJpbnZhbGlkX2xvY2FsZSI7czo0OiJmaWxlIjtzOjY5OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9pbnZhbGlkLWxvY2FsZS5waHAiO3M6NDoibGluZSI7aTozO30=',
+                                'Mfn\\PHPStanLostInTranslation\\UsedTranslationRecord' => 'Tzo1NDoiamJib2VoclxQSFBTdGFuTG9zdEluVHJhbnNsYXRpb25cVXNlZFRyYW5zbGF0aW9uUmVjb3JkIjo0OntzOjM6ImtleSI7czo2OiJmb29iYXIiO3M6NjoibG9jYWxlIjtzOjE0OiJpbnZhbGlkX2xvY2FsZSI7czo0OiJmaWxlIjtzOjY5OiIvaG9tZS9yaW4vQ29kZS9waHBzdGFuLWxvc3QtaW4tdHJhbnNsYXRpb24vZTJlL3NyYy9pbnZhbGlkLWxvY2FsZS5waHAiO3M6NDoibGluZSI7aTozO30=',
                             ],
                         ],
                         'filePath' => __DIR__ . '/../../e2e/src/invalid-locale.php',
-                        'collectorType' => 'jbboehr\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
+                        'collectorType' => 'Mfn\\PHPStanLostInTranslation\\UnusedTranslationStringCollector',
                     ]),
                 ];
                 $this->defaultLevelUsed = false;
@@ -186,7 +186,7 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
                 $this->peakMemoryUsageBytes = 67633152;
                 $this->isResultCacheUsed = true;
                 $this->changedProjectExtensionFilesOutsideOfAnalysedPaths = [
-                    __DIR__ . '/../../src/ErrorFormatter/JsonErrorFormatter.php' => 'jbboehr\\PHPStanLostInTranslation\\ErrorFormatter\\JsonErrorFormatter',
+                    __DIR__ . '/../../src/ErrorFormatter/JsonErrorFormatter.php' => 'Mfn\\PHPStanLostInTranslation\\ErrorFormatter\\JsonErrorFormatter',
                 ];
                 $this->fileSpecificErrors = [
                     \PHPStan\Analyser\Error::__set_state([

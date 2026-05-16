@@ -17,9 +17,9 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests;
+namespace Mfn\PHPStanLostInTranslation\Tests;
 
-use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
+use Mfn\PHPStanLostInTranslation\UsedTranslationRecord;
 
 final class UsedTranslationRecordTest extends \PHPUnit\Framework\TestCase
 {

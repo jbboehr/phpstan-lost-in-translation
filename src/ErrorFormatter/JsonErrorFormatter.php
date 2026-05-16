@@ -17,14 +17,14 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\ErrorFormatter;
+namespace Mfn\PHPStanLostInTranslation\ErrorFormatter;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
-use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule;
-use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
-use jbboehr\PHPStanLostInTranslation\Identifier;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use jbboehr\PHPStanLostInTranslation\Utils;
+use Mfn\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
+use Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule;
+use Mfn\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
+use Mfn\PHPStanLostInTranslation\Identifier;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\Utils;
 use Nette\Utils\Json;
 use PHPStan\Command\AnalysisResult;
 use PHPStan\Command\ErrorFormatter\ErrorFormatter;

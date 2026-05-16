@@ -17,9 +17,9 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
+namespace Mfn\PHPStanLostInTranslation\Tests\CallRule;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use PHPStan\DependencyInjection\Container;
 use PHPStan\DependencyInjection\ParameterNotFoundException;
 use PHPUnit\Framework\TestCase;

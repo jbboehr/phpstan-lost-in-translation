@@ -17,7 +17,7 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation;
+namespace Mfn\PHPStanLostInTranslation;
 
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;

@@ -17,11 +17,11 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Rule;
+namespace Mfn\PHPStanLostInTranslation\Rule;
 
-use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
-use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use Mfn\PHPStanLostInTranslation\LostInTranslationHelper;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;

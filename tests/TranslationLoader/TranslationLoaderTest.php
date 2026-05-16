@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\TranslationLoader;
+namespace Mfn\PHPStanLostInTranslation\Tests\TranslationLoader;
 
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PHPUnit\Framework\TestCase;
 
 final class TranslationLoaderTest extends TestCase

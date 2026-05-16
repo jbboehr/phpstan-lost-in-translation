@@ -20,10 +20,10 @@ declare(strict_types=1);
 namespace Rule;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
-use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule;
-use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
-use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use Mfn\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule;
+use Mfn\PHPStanLostInTranslation\ShouldNotHappenException;
+use Mfn\PHPStanLostInTranslation\Tests\RuleTestCase;
+use Mfn\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;

@@ -59,8 +59,12 @@
         }
     },
     "scripts": {
+        "coverage": "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text",
         "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
         "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",
+        "infection": "infection --no-progress",
+        "infection:ci": "infection --no-progress",
+        "infection:core": "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php",
         "phpcs": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan",
         "phpunit": "./vendor/bin/phpunit"

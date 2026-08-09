@@ -179,7 +179,7 @@ jobs:
               run: composer install --prefer-dist --no-progress
 
             - name: Run test suite with coverage
-              run: composer phpunit -- --coverage-text
+              run: composer coverage
 
             - name: Upload coverage report
               uses: actions/upload-artifact@v7
@@ -187,6 +187,51 @@ jobs:
                   name: coverage-clover
                   path: clover.xml
                   if-no-files-found: error
+
+    mutation:
+        runs-on: ubuntu-latest
+        name: "Mutation testing | PHP 8.4"
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install PHP and Infection
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: pcov
+                  php-version: "8.4"
+                  tools: composer:v2, infection:0.34.2@sha256:ae83bc5151579817c3a6217eb3deceb86a169a399139264534218b723320da3d
+              env:
+                  fail-fast: true
+
+            - name: Get Composer cache directory
+              id: composer-cache-mutation
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - name: Cache Composer packages
+              uses: actions/cache@v5
+              with:
+                  path: ${{ steps.composer-cache-mutation.outputs.dir }}
+                  key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.4-composer-
+                      ${{ runner.os }}-php-
+
+            - name: Install dependencies
+              run: composer install --prefer-dist --no-progress
+
+            - name: Run mutation baseline
+              run: composer infection:ci
+
+            - name: Upload mutation reports
+              if: always()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: infection-reports
+                  path: |
+                      infection.log
+                      infection-summary.log
+                  if-no-files-found: warn
 
     nix:
         runs-on: ubuntu-latest

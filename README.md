@@ -453,6 +453,18 @@ Other nested PHP and JSON layouts are ignored. In particular, Laravel vendor
 overrides such as `vendor/<package>/<locale>/<group>.php` are not currently
 analyzed.
 
+## Development
+
+Mutation testing is available through the PHP 8.4 `mutation` development
+shell. See the [mutation-testing guide](docs/mutation-testing.md) for focused
+and full campaigns and the baseline policy.
+
+Run the PHPUnit suite with PCOV and regenerate the Clover report locally with:
+
+```console
+composer coverage
+```
+
 ## References
 
 This project is based on and inspired by [coding-socks/lost-in-translation](https://github.com/coding-socks/lost-in-translation).

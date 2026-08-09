@@ -361,10 +361,16 @@ not assert search results.
 
 ### PHPUnit configuration schema
 
-The test suite passes but PHPUnit reports that `phpunit.xml.dist` validates
-against a deprecated schema. Because the project supports PHPUnit 9 through 11,
-the migration should verify the chosen configuration remains accepted across
-the full matrix.
+**Status:** Migrated while adding mutation testing. The shared configuration
+now avoids version-specific coverage elements, and CI supplies coverage filters
+and report destinations through PHPUnit's command-line interface.
+
+The project supports PHPUnit 9 through 11, whose XML coverage schemas are not
+mutually compatible. Keep version-specific coverage settings out of the shared
+configuration and verify future changes across the full matrix. The migration
+also removes `beStrictAboutTodoAnnotatedTests`: PHPUnit 11 no longer accepts the
+setting, so PHPUnit 9 and 10 no longer treat `@todo` annotations as risky through
+the shared configuration.
 
 ### Development dependency advisories
 
@@ -379,6 +385,21 @@ Recommended follow-up:
   compatibility fixtures.
 - Continue testing supported maintained Laravel versions separately from the
   PHP 8.1 compatibility baseline.
+
+### Property-based testing with Eris
+
+Evaluate a targeted Eris suite after CR-05 introduces shared locale
+canonicalization. Useful properties include normalization idempotence,
+case/dash/underscore equivalence in flexible mode, and exact preservation in
+strict mode. Generated plain and namespaced keys could also exercise cache and
+lookup order independence.
+
+Keep property tests supplementary to focused examples and use a fixed default
+seed with an override for exploration and replay. Current Eris releases support
+PHP 8.1 but list PHPUnit 10 and newer; validate that constraint against this
+project's declared PHPUnit 9 compatibility before adding it to the main test
+suite. An isolated property-test job is preferable if PHPUnit 9 remains
+supported.
 
 ## Proposed implementation order
 
@@ -411,6 +432,9 @@ so validation and storage cannot diverge again.
 1. CR-10: empty fuzzy-set handling and result assertions.
 2. Migrate the PHPUnit configuration with matrix verification.
 3. Add runtime-only Composer auditing to CI.
+4. Triage the advisory Infection baseline and establish a covered-code MSI
+   threshold.
+5. Evaluate targeted Eris properties after locale canonicalization is stable.
 
 ## Definition of done
 

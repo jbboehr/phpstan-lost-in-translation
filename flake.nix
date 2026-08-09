@@ -15,93 +15,92 @@
 {
   description = "jbboehr/phpstan-lost-in-translation";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     systems.url = "github:nix-systems/default";
     flake-utils = {
       url = "github:numtide/flake-utils";
       inputs.systems.follows = "systems";
     };
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.gitignore.follows = "gitignore";
-    };
-    gitignore = {
-      url = "github:hercules-ci/gitignore.nix";
+    phps.url = "github:fossar/nix-phps";
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    systems,
-    flake-utils,
-    pre-commit-hooks,
-    gitignore,
-  }:
-    flake-utils.lib.eachDefaultSystem (system: let
-      buildEnv = {
-        php,
-        withPcov ? true,
-      }:
-        php.buildEnv {
-          extraConfig = "memory_limit = 2G";
-          extensions = {
-            enabled,
-            all,
+  outputs =
+    {
+      self,
+      nixpkgs,
+      systems,
+      flake-utils,
+      phps,
+      git-hooks,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        buildEnv =
+          {
+            php,
+            withPcov ? true,
           }:
-            enabled ++ (pkgs.lib.optionals withPcov [all.pcov]);
-        };
-      pkgs = nixpkgs.legacyPackages.${system};
-      src = gitignore.lib.gitignoreSource ./.;
+          php.buildEnv {
+            extraConfig = "memory_limit = 2G";
+            extensions =
+              {
+                enabled,
+                all,
+              }:
+              enabled ++ (pkgs.lib.optionals withPcov [ all.pcov ]);
+          };
+        pkgs = nixpkgs.legacyPackages.${system};
+        src = ./.;
 
-      pre-commit-check = pre-commit-hooks.lib.${system}.run {
-        inherit src;
-        hooks = {
-          actionlint.enable = true;
-          alejandra.enable = true;
-          alejandra.excludes = ["\/vendor\/"];
-          # https://github.com/cachix/pre-commit-hooks.nix/pull/344
-          #phpcs.enable = true;
-          shellcheck.enable = true;
+        pre-commit-check = git-hooks.lib.${system}.run {
+          inherit src;
+          hooks = {
+            actionlint.enable = true;
+            nixfmt.enable = true;
+            shellcheck.enable = true;
+          };
         };
-      };
 
-      makeShell = {
-        php,
-        withPcov ? true,
-      }: let
-        php' = buildEnv {inherit php withPcov;};
+        makeShell =
+          {
+            php,
+            withPcov ? true,
+          }:
+          let
+            php' = buildEnv { inherit php withPcov; };
+          in
+          pkgs.mkShell {
+            packages = pre-commit-check.enabledPackages ++ [
+              php'
+              php'.packages.composer
+            ];
+            shellHook = ''
+              ${pre-commit-check.shellHook}
+              export PATH="$PWD/vendor/bin:$PATH"
+              export PHPUNIT_WITH_PCOV="$PHP_WITH_PCOV -d memory_limit=512M -d pcov.directory=$PWD -dpcov.exclude="~vendor~" ./vendor/bin/phpunit"
+            '';
+          };
       in
-        pkgs.mkShell {
-          buildInputs = with pkgs; [
-            actionlint
-            mdl
-            nixpkgs-fmt
-            php'
-            php'.packages.composer
-            pre-commit
-          ];
-          shellHook = ''
-            ${pre-commit-check.shellHook}
-            export PATH="$PWD/vendor/bin:$PATH"
-            export PHPUNIT_WITH_PCOV="$PHP_WITH_PCOV -d memory_limit=512M -d pcov.directory=$PWD -dpcov.exclude="~vendor~" ./vendor/bin/phpunit"
-          '';
+      rec {
+        checks = {
+          inherit pre-commit-check;
         };
-    in rec {
-      checks = {
-        inherit pre-commit-check;
-      };
 
-      devShells = rec {
-        php81 = makeShell {php = pkgs.php81;};
-        php82 = makeShell {php = pkgs.php82;};
-        php83 = makeShell {php = pkgs.php83;};
-        php84 = makeShell {php = pkgs.php84;};
-        default = php81;
-      };
+        devShells = rec {
+          php81 = makeShell { php = phps.packages.${system}.php81; };
+          php82 = makeShell { php = pkgs.php82; };
+          php83 = makeShell { php = pkgs.php83; };
+          php84 = makeShell { php = pkgs.php84; };
+          php85 = makeShell { php = pkgs.php85; };
+          default = php81;
+        };
 
-      formatter = pkgs.alejandra;
-    });
+        formatter = pkgs.nixfmt-tree;
+      }
+    );
 }

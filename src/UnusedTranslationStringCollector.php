@@ -28,8 +28,13 @@ use PHPStan\Collectors\Collector;
  */
 final class UnusedTranslationStringCollector implements Collector
 {
-    /** @phpstan-var list<UsedTranslationRecord> */
-    private array $queued = [];
+    /**
+     * Bladestan analyses compiled templates in a derivative DI container, so
+     * the queue must be shared by collector instances in the same worker.
+     *
+     * @phpstan-var list<UsedTranslationRecord>
+     */
+    private static array $queued = [];
 
     public function __construct(
         private readonly LostInTranslationHelper $helper,
@@ -54,12 +59,12 @@ final class UnusedTranslationStringCollector implements Collector
                 $this->push($call);
             }
 
-            if (count($this->queued) <= 0) {
+            if (count(self::$queued) <= 0) {
                 return null;
             }
 
-            $queued = $this->queued;
-            $this->queued = [];
+            $queued = self::$queued;
+            self::$queued = [];
             return $queued;
         } catch (\Throwable $e) {
             ShouldNotHappenException::rethrow($e);
@@ -86,7 +91,7 @@ final class UnusedTranslationStringCollector implements Collector
 
         foreach ($call->keyType->getConstantStrings() as $keyConstantString) {
             foreach ($possibleLocales as $possibleLocale) {
-                $this->queued[] = new UsedTranslationRecord(
+                self::$queued[] = new UsedTranslationRecord(
                     key: $keyConstantString->getValue(),
                     locale: $possibleLocale,
                     file: $call->file,

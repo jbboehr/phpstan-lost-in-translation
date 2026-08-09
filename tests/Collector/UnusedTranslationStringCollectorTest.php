@@ -21,12 +21,46 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Collector;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
+use PHPStan\Type\Constant\ConstantStringType;
 
 final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\TestCase
 {
+    public function testSharesQueuedRecordsAcrossInstances(): void
+    {
+        $helper = $this->createStub(LostInTranslationHelper::class);
+        $scope = $this->createMock(Scope::class);
+        $scope->method('getFile')
+            ->willReturn('/tmp/example.php');
+        $node = $this->createStub(FuncCall::class);
+
+        $collector = new UnusedTranslationStringCollector($helper);
+        $collector->processNode($node, $scope);
+        $collector->push(new TranslationCall(
+            null,
+            '__',
+            '/tmp/example.blade.php',
+            1,
+            [],
+            new ConstantStringType('messages.example'),
+        ));
+
+        $otherCollector = new UnusedTranslationStringCollector($helper);
+
+        $this->assertEquals([
+            new UsedTranslationRecord(
+                key: 'messages.example',
+                locale: '*',
+                file: '/tmp/example.blade.php',
+                line: 1,
+            ),
+        ], $otherCollector->processNode($node, $scope));
+    }
+
     public function testExceptionConversion(): void
     {
         if (!class_exists(FuncCall::class)) {

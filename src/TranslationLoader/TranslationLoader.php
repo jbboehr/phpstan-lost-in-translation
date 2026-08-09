@@ -45,7 +45,7 @@ class TranslationLoader
 {
     public const IDENTIFIER_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingKey';
 
-    private readonly string $langPath;
+    private readonly ?string $langPath;
 
     /** @var array<non-empty-string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
     private array $data = [];
@@ -79,7 +79,21 @@ class TranslationLoader
         private readonly JsonLoader $jsonLoader = new JsonLoader(),
         ?FuzzyStringSetFactory $fuzzyStringSetFactory = null,
     ) {
-        $this->langPath = realpath($langPath ?? Utils::detectLangPath()) ?: Utils::detectLangPath();
+        $candidateLangPath = $langPath ?? Utils::detectLangPath();
+        $resolvedLangPath = realpath($candidateLangPath);
+
+        if (false === $resolvedLangPath || !is_dir($resolvedLangPath)) {
+            if (null !== $langPath) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Configured language directory %s does not exist or is not a directory',
+                    Utils::e($langPath),
+                ));
+            }
+
+            $this->langPath = null;
+        } else {
+            $this->langPath = $resolvedLangPath;
+        }
         $this->baseLocale = $baseLocale ?? Utils::detectBaseLocale();
 
         if (!$fuzzySearch) {
@@ -266,6 +280,10 @@ class TranslationLoader
 
     private function scan(): void
     {
+        if (null === $this->langPath) {
+            return;
+        }
+
         $files = Finder::create()
             ->in($this->langPath)
             ->name(['*.php', '*.json']);

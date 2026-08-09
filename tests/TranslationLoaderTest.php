@@ -23,6 +23,47 @@ use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 
 final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
 {
+    public function testMissingConfiguredLangPathThrows(): void
+    {
+        $langPath = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(sprintf(
+            'Configured language directory %s does not exist or is not a directory',
+            json_encode($langPath, JSON_THROW_ON_ERROR),
+        ));
+
+        new TranslationLoader(
+            langPath: $langPath,
+            baseLocale: 'en',
+        );
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testMissingDetectedLangPathIsTreatedAsEmpty(): void
+    {
+        $workingDirectory = getcwd();
+        $temporaryDirectory = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+
+        $this->assertIsString($workingDirectory);
+        $this->assertTrue(mkdir($temporaryDirectory));
+
+        try {
+            $this->assertTrue(chdir($temporaryDirectory));
+
+            $loader = new TranslationLoader(baseLocale: 'en');
+
+            $this->assertSame([], $loader->getFoundLocales());
+            $this->assertNull($loader->get('en', 'messages.example'));
+        } finally {
+            chdir($workingDirectory);
+            rmdir($temporaryDirectory);
+        }
+    }
+
     public function testParseKeyWithLeadingDots(): void
     {
         $loader = new TranslationLoader(

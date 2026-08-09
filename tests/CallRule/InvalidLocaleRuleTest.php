@@ -57,6 +57,28 @@ class InvalidLocaleRuleTest extends RuleTestCase
                 'Locale has no available translation strings: pt_BR',
                 7,
             ],
+            [
+                'Locale has no available translation strings: pt_BR',
+                13,
+            ],
+        ]);
+    }
+
+    public function testNamedArguments(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/named-arguments.php',
+        ], [
+            ['Locale has no available translation strings: pt_BR', 3],
+            ['Locale has no available translation strings: pt_BR', 4],
+            ['Locale has no available translation strings: pt_BR', 5],
+            ['Locale has no available translation strings: pt_BR', 6],
+            ['Locale has no available translation strings: pt_BR', 9],
+            ['Locale has no available translation strings: pt_BR', 10],
+            ['Locale has no available translation strings: pt_BR', 11],
+            ['Locale has no available translation strings: pt_BR', 13],
+            ['Locale has no available translation strings: pt_BR', 14],
+            ['Locale has no available translation strings: pt_BR', 15],
         ]);
     }
 }

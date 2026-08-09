@@ -61,6 +61,11 @@ class InvalidReplacementRuleTest extends RuleTestCase
                 7,
                 Utils::formatTipForKeyValue('en', ':foo :FOO', ':foo :FOO'),
             ],
+            [
+                'Unused translation replacement: "named"',
+                10,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
+            ],
         ]);
     }
 }

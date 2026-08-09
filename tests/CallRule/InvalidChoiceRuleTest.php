@@ -91,6 +91,21 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 46,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
+            [
+                'Translation choice does not cover all possible cases for number of type: 3',
+                51,
+                Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
+            ],
+            [
+                'Translation choice does not cover all possible cases for number of type: 3',
+                52,
+                Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
+            ],
+            [
+                'Translation choice does not cover all possible cases for number of type: 3',
+                53,
+                Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
+            ],
         ]);
     }
 }

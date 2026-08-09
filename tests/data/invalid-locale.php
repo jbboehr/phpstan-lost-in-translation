@@ -8,3 +8,6 @@ __('foobar', [], 'pt_BR');
 
 /** This has both translations strings and is a locale identifier (no error) */
 __('foobar', [], 'ja');
+
+/** @var \Illuminate\Translation\Translator $translator */
+$translator->get('exists in all locales', [], 'pt_BR', false);

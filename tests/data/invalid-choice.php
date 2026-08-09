@@ -47,3 +47,7 @@ $translator->choice('{0} There are none|{1} There is one|[2] There are :count', 
 
 /** Make sure we can handle the variant without numbers */
 trans_choice('Singular|Plural', 2, [], 'en');
+
+trans_choice(locale: 'en', key: '{0} There are none|{1} There is one|[2] There are :count', number: 3);
+$translator->choice(number: 3, locale: 'en', key: '{0} There are none|{1} There is one|[2] There are :count');
+\Illuminate\Support\Facades\Lang::choice(key: '{0} There are none|{1} There is one|[2] There are :count', number: 3, locale: 'en');

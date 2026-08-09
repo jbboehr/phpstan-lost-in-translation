@@ -5,3 +5,6 @@ __('exists in all locales', ['foo' => 'bar', 'bar' => 'bat'], 'en');
 
 /* has multiple replacement variants */
 __(':foo :FOO', ['foo' => 'bar'], 'en');
+
+/* reordered named arguments */
+trans(key: 'exists in all locales', locale: 'en', replace: ['named' => 'unused']);

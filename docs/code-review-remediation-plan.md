@@ -124,6 +124,8 @@ unrelated PHP file.
 
 ### CR-03: Named arguments are parsed positionally
 
+**Status:** Implementation and regression coverage complete.
+
 **Location:** `src/LostInTranslationHelper.php:155`
 
 **Current behavior:**

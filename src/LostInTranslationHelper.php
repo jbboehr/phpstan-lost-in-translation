@@ -150,50 +150,10 @@ class LostInTranslationHelper
             return null;
         }
 
-        $key = $number = $locale = $replace = null;
-
-        if ($isChoice) {
-            switch (count($args)) {
-                case 4:
-                    if ($args[3] instanceof Node\Arg) {
-                        $locale = $args[3]->value;
-                    }
-                    // fallthrough
-                case 3:
-                    if ($args[2] instanceof Node\Arg) {
-                        $replace = $args[2]->value;
-                    }
-                    // fallthrough
-                case 2:
-                    if ($args[1] instanceof Node\Arg) {
-                        $number = $args[1]->value;
-                    }
-                    // fallthrough
-                case 1:
-                    if ($args[0] instanceof Node\Arg) {
-                        $key = $args[0]->value;
-                    }
-                    // fallthrough
-            }
-        } else {
-            switch (count($args)) {
-                case 3:
-                    if ($args[2] instanceof Node\Arg) {
-                        $locale = $args[2]->value;
-                    }
-                    // fallthrough
-                case 2:
-                    if ($args[1] instanceof Node\Arg) {
-                        $replace = $args[1]->value;
-                    }
-                    // fallthrough
-                case 1:
-                    if ($args[0] instanceof Node\Arg) {
-                        $key = $args[0]->value;
-                    }
-                    // fallthrough
-            }
-        }
+        $key = self::findArgument($args, 'key', 0);
+        $number = $isChoice ? self::findArgument($args, 'number', 1) : null;
+        $replace = self::findArgument($args, 'replace', $isChoice ? 2 : 1);
+        $locale = self::findArgument($args, 'locale', $isChoice ? 3 : 2);
 
         if ($key === null) {
             return null;
@@ -217,6 +177,29 @@ class LostInTranslationHelper
             numberType: $number !== null ? $scope->getType($number) : null,
             isChoice: $isChoice,
         );
+    }
+
+    /**
+     * @param array<int, Node\Arg|Node\VariadicPlaceholder> $args
+     */
+    private static function findArgument(array $args, string $name, int $position): ?Node\Expr
+    {
+        // PHP forbids positional arguments after named or unpacked arguments,
+        // so an unnamed argument's array index is its parameter position.
+        foreach ($args as $index => $arg) {
+            if (!($arg instanceof Node\Arg) || $arg->unpack) {
+                continue;
+            }
+
+            if (
+                (null !== $arg->name && $name === $arg->name->toString())
+                || (null === $arg->name && $position === $index)
+            ) {
+                return $arg->value;
+            }
+        }
+
+        return null;
     }
 
     /**

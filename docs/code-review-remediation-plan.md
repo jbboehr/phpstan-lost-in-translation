@@ -44,6 +44,9 @@ The main risk areas are:
 
 ### CR-01: Missing language directories crash analysis
 
+**Status:** Implementation complete. Additional relative-path and symlink
+regression coverage remains open.
+
 **Location:** `src/TranslationLoader/TranslationLoader.php:82`,
 `src/TranslationLoader/TranslationLoader.php:270`
 
@@ -83,6 +86,9 @@ the configured path.
 - Existing relative, absolute, and symlinked paths.
 
 ### CR-02: Nonmatching translation paths are processed
+
+**Status:** Remediation steps 1 and 2 are implemented. The vendor-override
+decision and its regression coverage remain open.
 
 **Location:** `src/TranslationLoader/TranslationLoader.php:293`
 

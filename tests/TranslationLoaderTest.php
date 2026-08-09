@@ -73,4 +73,25 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame(['*', '.group.item'], $loader->parseKey('.group.item'));
     }
+
+    public function testOnlySupportedTranslationPathsAreLoaded(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-scanning',
+            baseLocale: 'en',
+        );
+
+        $this->assertSame(['en'], $loader->getFoundLocales());
+        $this->assertSame('Root JSON translation', $loader->get('en', 'root'));
+        $this->assertSame('Grouped PHP translation', $loader->get('en', 'messages.grouped'));
+        $this->assertNull($loader->get('en', 'ignored'));
+        $this->assertSame([], $loader->getErrors());
+        $this->assertSame(
+            [
+                realpath(__DIR__ . '/lang-scanning/en.json'),
+                realpath(__DIR__ . '/lang-scanning/en/messages.php'),
+            ],
+            $loader->getLocaleFiles()['en'],
+        );
+    }
 }

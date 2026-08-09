@@ -444,6 +444,15 @@ parameters:
         unusedTranslationStrings: false
 ```
 
+The translation scanner currently supports these layouts inside `langPath`:
+
+- `<locale>.json`
+- `<locale>/<group>.php`
+
+Other nested PHP and JSON layouts are ignored. In particular, Laravel vendor
+overrides such as `vendor/<package>/<locale>/<group>.php` are not currently
+analyzed.
+
 ## References
 
 This project is based on and inspired by [coding-socks/lost-in-translation](https://github.com/coding-socks/lost-in-translation).

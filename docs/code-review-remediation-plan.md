@@ -167,6 +167,8 @@ missing-translation diagnostics.
 
 ### CR-04: Namespaced keys pollute the plain-key cache
 
+**Status:** Implementation and regression coverage complete.
+
 **Location:** `src/TranslationLoader/TranslationLoader.php:264`
 
 **Current behavior:**

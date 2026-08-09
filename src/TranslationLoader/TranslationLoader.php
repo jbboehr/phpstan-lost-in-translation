@@ -259,6 +259,8 @@ class TranslationLoader
             return $this->parsed[$key];
         }
 
+        $cacheKey = $key;
+
         if (!str_contains($key, '::')) {
             $segments = self::parseBasicSegments($key);
         } else {
@@ -270,12 +272,12 @@ class TranslationLoader
         }
 
         if (is_null($segments[2])) {
-            $key = $segments[1];
+            $normalizedKey = $segments[1];
         } else {
-            $key = $segments[1] . '.' . $segments[2];
+            $normalizedKey = $segments[1] . '.' . $segments[2];
         }
 
-        return $this->parsed[$key] = [$segments[0], $key];
+        return $this->parsed[$cacheKey] = [$segments[0], $normalizedKey];
     }
 
     private function scan(): void

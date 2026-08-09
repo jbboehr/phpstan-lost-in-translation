@@ -74,6 +74,52 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(['*', '.group.item'], $loader->parseKey('.group.item'));
     }
 
+    public function testParseKeyCachesNamespacedAndPlainKeysSeparately(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'en',
+        );
+
+        $this->assertSame(['vendor', 'messages.foo'], $loader->parseKey('vendor::messages.foo'));
+        $this->assertSame(['*', 'messages.foo'], $loader->parseKey('messages.foo'));
+        $this->assertSame(['vendor', 'messages.foo'], $loader->parseKey('vendor::messages.foo'));
+    }
+
+    public function testParseKeyCachesPlainAndNamespacedKeysSeparatelyInReverseOrder(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'en',
+        );
+
+        $this->assertSame(['*', 'messages.foo'], $loader->parseKey('messages.foo'));
+        $this->assertSame(['vendor', 'messages.foo'], $loader->parseKey('vendor::messages.foo'));
+        $this->assertSame(['*', 'messages.foo'], $loader->parseKey('messages.foo'));
+    }
+
+    public function testNamespacedAndPlainTranslationLookupIsIndependentOfInsertionOrder(): void
+    {
+        foreach (
+            [
+                'plain key first' => ['messages.foo' => 'Plain translation', 'vendor::messages.foo' => 'Vendor translation'],
+                'namespaced key first' => ['vendor::messages.foo' => 'Vendor translation', 'messages.foo' => 'Plain translation'],
+            ] as $order => $translations
+        ) {
+            $loader = new TranslationLoader(
+                langPath: __DIR__ . '/lang',
+                baseLocale: 'en',
+            );
+
+            foreach ($translations as $key => $value) {
+                $loader->add('en', $key, $value);
+            }
+
+            $this->assertSame('Plain translation', $loader->get('en', 'messages.foo'), $order);
+            $this->assertSame('Vendor translation', $loader->get('en', 'vendor::messages.foo'), $order);
+        }
+    }
+
     public function testOnlySupportedTranslationPathsAreLoaded(): void
     {
         $loader = new TranslationLoader(

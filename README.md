@@ -334,8 +334,14 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
 
 If an invalid locale is given to a translation function, an error will be emitted. **Enabled by default.**
 
-If `strictLocale` is set, it must match, for example, `pt_BR`.
-Otherwise, it can also match any of `PT_br`, `pt-br`, etc. **Disabled by default.**
+If `strictLocales` is set, locale identifiers used in calls and translation
+paths must match exactly, for example, `pt_BR`. Otherwise, validation and
+translation lookup treat forms such as `PT_br`, `pt-br`, and `pt_BR` as the
+same locale. **Disabled by default.**
+
+If two translation paths resolve to the same flexible locale identifier, the
+scanner reports a conflict and loads the first spelling in deterministic path
+order. Strict mode treats the spellings as separate locales.
 
 ```neon
 parameters:

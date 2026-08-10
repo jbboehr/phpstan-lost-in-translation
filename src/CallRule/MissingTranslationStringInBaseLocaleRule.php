@@ -40,7 +40,7 @@ final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterfac
 
         foreach ($call->possibleTranslations as $key => $items) {
             foreach ($items as [$locale, $value]) {
-                if ($locale === $baseLocale && null === $value && self::isLikelyUntranslated($key)) {
+                if ($this->loader->isBaseLocale($locale) && null === $value && self::isLikelyUntranslated($key)) {
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Likely missing translation string %s for base locale: %s',
                         json_encode($key, JSON_THROW_ON_ERROR),

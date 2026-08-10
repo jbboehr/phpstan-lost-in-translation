@@ -53,4 +53,16 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
             ],
         ]);
     }
+
+    public function testFlexibleLocaleIsComparedToCanonicalBaseLocale(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/flexible-base-locale.php',
+        ], [
+            [
+                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: en",
+                3,
+            ],
+        ]);
+    }
 }

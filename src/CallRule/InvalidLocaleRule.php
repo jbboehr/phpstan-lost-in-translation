@@ -31,7 +31,6 @@ final class InvalidLocaleRule implements CallRuleInterface
 
     public function __construct(
         private readonly TranslationLoader $loader,
-        private readonly bool $strictLocales = false,
     ) {
     }
 
@@ -59,7 +58,7 @@ final class InvalidLocaleRule implements CallRuleInterface
                     ->build();
             }
 
-            if (!Utils::checkLocaleExists($locale, $this->strictLocales)) {
+            if (!$this->loader->isValidLocale($locale)) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Unknown locale: %s',
                     $locale,

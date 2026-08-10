@@ -44,10 +44,11 @@ use function usort;
 class TranslationLoader
 {
     public const IDENTIFIER_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingKey';
+    public const IDENTIFIER_LOCALE_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingLocale';
 
     private readonly ?string $langPath;
 
-    /** @var array<non-empty-string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
+    /** @var array<string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
     private array $data = [];
 
     /** @var list<IdentifierRuleError> */
@@ -59,10 +60,18 @@ class TranslationLoader
     /** @var array<non-empty-string, non-empty-list<string>> */
     private array $localeFiles = [];
 
+    /** @var array<string, non-empty-string> */
+    private array $localeNames = [];
+
+    /** @var array<string, array<non-empty-string, true>> */
+    private array $reportedLocaleConflicts = [];
+
     /** @var array<string, array{string, int}> */
     private array $locations = [];
 
     private readonly string $baseLocale;
+
+    private readonly string $baseLocaleKey;
 
     private readonly FuzzyStringSetFactory $fuzzyStringSetFactory;
 
@@ -78,6 +87,7 @@ class TranslationLoader
         private readonly PhpLoader $phpLoader = new PhpLoader(),
         private readonly JsonLoader $jsonLoader = new JsonLoader(),
         ?FuzzyStringSetFactory $fuzzyStringSetFactory = null,
+        private readonly bool $strictLocales = false,
     ) {
         $candidateLangPath = $langPath ?? Utils::detectLangPath();
         $resolvedLangPath = realpath($candidateLangPath);
@@ -95,6 +105,7 @@ class TranslationLoader
             $this->langPath = $resolvedLangPath;
         }
         $this->baseLocale = $baseLocale ?? Utils::detectBaseLocale();
+        $this->baseLocaleKey = $this->canonicalizeLocale($this->baseLocale);
 
         if (!$fuzzySearch) {
             $this->fuzzyStringSetFactory = new FuzzyStringSetFactory(NullFuzzyStringSet::class, false);
@@ -121,6 +132,7 @@ class TranslationLoader
             return;
         }
 
+        $locale = $this->canonicalizeLocale($locale);
         $this->data[$locale][$namespace][$key] = $value;
 
         $this->searchDatabase->addMany([$key, $value]);
@@ -134,7 +146,19 @@ class TranslationLoader
 
     public function hasLocale(string $locale): bool
     {
-        return $this->baseLocale === $locale || isset($this->data[$locale]);
+        $locale = $this->canonicalizeLocale($locale);
+
+        return $this->baseLocaleKey === $locale || isset($this->data[$locale]);
+    }
+
+    public function isBaseLocale(string $locale): bool
+    {
+        return $this->baseLocaleKey === $this->canonicalizeLocale($locale);
+    }
+
+    public function isValidLocale(string $locale): bool
+    {
+        return Utils::checkLocaleExists($locale, $this->strictLocales);
     }
 
     /**
@@ -161,6 +185,8 @@ class TranslationLoader
             return null;
         }
 
+        $locale = $this->canonicalizeLocale($locale);
+
         return $this->data[$locale][$namespace][$key] ?? null;
     }
 
@@ -182,17 +208,19 @@ class TranslationLoader
         $sets = [];
 
         foreach ($used as $item) {
-            if (isset($sets[$item->locale])) {
-                $set = $sets[$item->locale];
+            $locale = '*' === $item->locale ? '*' : $this->canonicalizeLocale($item->locale);
+
+            if (isset($sets[$locale])) {
+                $set = $sets[$locale];
             } else {
-                $set = $sets[$item->locale] = $this->fuzzyStringSetFactory->createFuzzyStringSet();
+                $set = $sets[$locale] = $this->fuzzyStringSetFactory->createFuzzyStringSet();
             }
 
             if (strlen($item->key) > 0) {
                 $set->add($item->key);
             }
 
-            $usedByKey[$item->locale][$item->key] = true;
+            $usedByKey[$locale][$item->key] = true;
         }
 
         $possiblyUnused = [];
@@ -215,7 +243,7 @@ class TranslationLoader
                     [$f, $l] = $this->locations[$locale . "\0" . $namespace . "\0" . $item] ?? ['unknown', -1];
 
                     $possiblyUnused[] = [
-                        'locale' => $locale,
+                        'locale' => $this->localeNames[$locale] ?? $locale,
                         'key' => $key,
                         'file' => $f,
                         'line' => $l,
@@ -303,7 +331,9 @@ class TranslationLoader
                 return $asc <=> $bsc;
             }
 
-            return strnatcasecmp($a, $b);
+            $comparison = strnatcasecmp($a, $b);
+
+            return 0 !== $comparison ? $comparison : strcmp($a, $b);
         });
 
         $foundLocales = [];
@@ -324,8 +354,30 @@ class TranslationLoader
             //$group = $matches[2] ?? null;
             $namespace = '*';
 
-            $foundLocales[$locale] = true;
             $this->localeFiles[$locale][] = $file->getPathname();
+
+            $localeKey = $this->canonicalizeLocale($locale);
+            $existingLocale = $this->localeNames[$localeKey] ?? null;
+
+            if (null !== $existingLocale && $existingLocale !== $locale) {
+                if (!isset($this->reportedLocaleConflicts[$localeKey][$locale])) {
+                    $this->errors[] = RuleErrorBuilder::message(sprintf(
+                        'Ignoring translation files for locale %s because it resolves to %s, which is already provided by %s',
+                        Utils::e($locale),
+                        Utils::e($localeKey),
+                        Utils::e($existingLocale),
+                    ))
+                        ->identifier(self::IDENTIFIER_LOCALE_CONFLICT)
+                        ->file($file->getPathname())
+                        ->build();
+                    $this->reportedLocaleConflicts[$localeKey][$locale] = true;
+                }
+
+                continue;
+            }
+
+            $this->localeNames[$localeKey] = $locale;
+            $foundLocales[$locale] = true;
 
             $result = match ($file->getExtension()) {
                 'php' => $this->phpLoader->load($file),
@@ -342,7 +394,7 @@ class TranslationLoader
             foreach ($result->translations as $k => $v) {
                 $line = ($result->locations[$k] ?? -1);
 
-                if (isset($this->data[$locale][$namespace][$k])) {
+                if (isset($this->data[$localeKey][$namespace][$k])) {
                     $this->errors[] = RuleErrorBuilder::message(sprintf("Conflicting key: %s", Utils::e($k)))
                         ->identifier(self::IDENTIFIER_CONFLICT)
                         ->file($file->getPathname())
@@ -350,8 +402,8 @@ class TranslationLoader
                         ->build();
                 }
 
-                $this->data[$locale][$namespace][$k] = $v;
-                $this->locations[$locale . "\0" . $namespace . "\0" . $k] = [$file->getRealPath(), $line];
+                $this->data[$localeKey][$namespace][$k] = $v;
+                $this->locations[$localeKey . "\0" . $namespace . "\0" . $k] = [$file->getRealPath(), $line];
             }
         }
 
@@ -361,6 +413,11 @@ class TranslationLoader
         sort($foundLocales, SORT_NATURAL);
 
         $this->foundLocales = $foundLocales;
+    }
+
+    private function canonicalizeLocale(string $locale): string
+    {
+        return Utils::canonicalizeLocale($locale, $this->strictLocales);
     }
 
     private function buildSearchDatabase(): FuzzyStringSetInterface

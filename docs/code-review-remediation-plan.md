@@ -198,11 +198,18 @@ cached value only.
 
 ### CR-05: Flexible locales validate but do not resolve
 
+**Status:** Implementation and regression coverage complete. Flexible mode
+uses canonical locale keys throughout validation, discovery, lookup,
+base-locale comparison, and unused-translation matching. When discovered
+spellings collide, the first spelling in deterministic path order is retained
+and each conflicting alias produces one loader diagnostic; strict mode keeps
+the spellings distinct.
+
 **Location:** `src/Utils.php:62`,
 `src/TranslationLoader/TranslationLoader.php:121`,
 `src/TranslationLoader/TranslationLoader.php:142`
 
-**Current behavior:**
+**Previous behavior:**
 
 With `strictLocales: false`, locale validation normalizes case and replaces
 dashes with underscores. `TranslationLoader::hasLocale()` and `get()` still use

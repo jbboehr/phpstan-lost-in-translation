@@ -81,4 +81,11 @@ class InvalidLocaleRuleTest extends RuleTestCase
             ['Locale has no available translation strings: pt_BR', 15],
         ]);
     }
+
+    public function testFlexibleLocaleResolvesTranslations(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/flexible-locale.php',
+        ], []);
+    }
 }

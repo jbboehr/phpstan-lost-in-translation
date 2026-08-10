@@ -36,13 +36,11 @@ final class MissingTranslationStringRule implements CallRuleInterface
     public function processCall(TranslationCall $call): array
     {
         $errors = [];
-        $baseLocale = $this->loader->getBaseLocale();
-
         foreach ($call->possibleTranslations as $key => $items) {
             $missingInLocales = [];
 
             foreach ($items as [$locale, $value]) {
-                if (null === $value && $locale !== $baseLocale) {
+                if (null === $value && !$this->loader->isBaseLocale($locale)) {
                     $missingInLocales[] = $locale;
                 }
             }

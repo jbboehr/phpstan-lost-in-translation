@@ -10,13 +10,13 @@ services:
       baseLocale: %lostInTranslation.baseLocale%
       langPath: %lostInTranslation.langPath%
       fuzzySearch: %lostInTranslation.fuzzySearch%
+      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
 
 
   - class: jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule
     arguments:
       invalidLocales: %lostInTranslation.invalidLocales%
-      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
     tags: ["phpstan.rules.rule"]
 
@@ -26,8 +26,6 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
-    arguments:
-      strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule

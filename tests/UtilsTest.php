@@ -26,6 +26,30 @@ use Orchestra\Testbench\TestCase;
 
 final class UtilsTest extends TestCase
 {
+    /**
+     * @dataProvider provideFlexibleLocales
+     */
+    public function testCanonicalizeFlexibleLocale(string $locale, string $expected): void
+    {
+        $this->assertSame($expected, Utils::canonicalizeLocale($locale));
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function provideFlexibleLocales(): iterable
+    {
+        yield 'language case' => ['JA', 'ja'];
+        yield 'regional case' => ['PT_br', 'pt_BR'];
+        yield 'regional separator' => ['pt-br', 'pt_BR'];
+        yield 'already canonical' => ['pt_BR', 'pt_BR'];
+    }
+
+    public function testCanonicalizeStrictLocalePreservesInput(): void
+    {
+        $this->assertSame('PT-br', Utils::canonicalizeLocale('PT-br', true));
+    }
+
     public function testEscapeInvalidUnicodeFallback(): void
     {
         $this->assertSame('"\\xc3("', Utils::e("\xc3\x28"));

@@ -61,19 +61,25 @@ final class Utils
 
     public static function checkLocaleExists(string $locale, bool $strict = false): bool
     {
-        if (!$strict) {
-            // Allow specifying it with a dash instead of an underscore and with incorrect cases >.>
-            $locale = str_replace('-', '_', $locale);
-            if (str_contains($locale, '_')) {
-                $parts = explode('_', $locale, 2);
-                assert(count($parts) >= 2);
-                $locale = strtolower($parts[0]) . '_' . strtoupper($parts[1]);
-            } else {
-                $locale = strtolower($locale);
-            }
+        return Locales::exists(self::canonicalizeLocale($locale, $strict));
+    }
+
+    public static function canonicalizeLocale(string $locale, bool $strict = false): string
+    {
+        if ($strict) {
+            return $locale;
         }
 
-        return Locales::exists($locale);
+        // Allow specifying it with a dash instead of an underscore and with incorrect cases >.>
+        $locale = str_replace('-', '_', $locale);
+
+        if (!str_contains($locale, '_')) {
+            return strtolower($locale);
+        }
+
+        [$language, $territory] = explode('_', $locale, 2);
+
+        return strtolower($language) . '_' . strtoupper($territory);
     }
 
     /**

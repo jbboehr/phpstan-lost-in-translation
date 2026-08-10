@@ -37,7 +37,6 @@ final class TranslationLoaderErrorRule implements Rule
     public function __construct(
         private readonly TranslationLoader $loader,
         private readonly bool $invalidLocales = true,
-        private readonly bool $strictLocales = false,
     ) {
     }
 
@@ -53,7 +52,7 @@ final class TranslationLoaderErrorRule implements Rule
 
             if ($this->invalidLocales) {
                 foreach ($this->loader->getLocaleFiles() as $locale => $localeFiles) {
-                    if (!Utils::checkLocaleExists($locale, $this->strictLocales)) {
+                    if (!$this->loader->isValidLocale($locale)) {
                         $file = $localeFiles[0];
 
                         $errors[] = RuleErrorBuilder::message(sprintf(

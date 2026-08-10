@@ -186,4 +186,11 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             ],
         ]);
     }
+
+    public function testFlexibleLocaleResolvesTranslations(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/flexible-locale.php',
+        ], []);
+    }
 }

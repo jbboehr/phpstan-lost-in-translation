@@ -161,7 +161,7 @@ class LostInTranslationHelper
 
         $keyType = $scope->getType($key);
         $localeType = $locale !== null ? $scope->getType($locale) : null;
-        $file = $scope->getFile(); // @TODO this might be getting the compiled blade path...
+        $file = $scope->getFile();
 
         assert(strlen($file) > 0);
 

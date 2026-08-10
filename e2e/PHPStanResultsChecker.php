@@ -52,6 +52,15 @@ final class PHPStanResultsChecker
 
                 $key = sprintf('%s:%d:%s', $filePath, $line, $cleanIdentifier);
 
+                if ('src/blade:3:lostInTranslation.invalidReplacement.unused' === $key) {
+                    $tip = $issue['tip'] ?? null;
+                    $this->assertString($tip, 'Blade translation diagnostic did not preserve its tip');
+
+                    if ('Locale: "en", Key: "exists in all locales"' !== $tip) {
+                        throw new RuntimeException('Unexpected Blade translation diagnostic tip: ' . $tip);
+                    }
+                }
+
                 $expectedResultsKey = array_search($key, $expectedResults, true);
                 if (false === $expectedResultsKey) {
                     $additionalReportedErrors[] = $key;

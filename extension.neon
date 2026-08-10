@@ -12,12 +12,15 @@ services:
       fuzzySearch: %lostInTranslation.fuzzySearch%
       strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
+  - class: jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector
 
 
   - class: jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule
     arguments:
       invalidLocales: %lostInTranslation.invalidLocales%
   - class: jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule
+    arguments:
+      bridgeBladeDiagnostics: %lostInTranslation.bridgeBladeDiagnostics%
     tags: ["phpstan.rules.rule"]
 
 
@@ -33,6 +36,7 @@ services:
 
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule
+  - class: jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticRule
 
 
   errorFormatter.lostInTranslationJson:
@@ -48,11 +52,16 @@ conditionalTags:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
 	jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule:
 		phpstan.rules.rule: %lostInTranslation.unusedTranslationStrings%
+	jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector:
+		phpstan.collector: %lostInTranslation.bridgeBladeDiagnostics%
+	jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticRule:
+		phpstan.rules.rule: %lostInTranslation.bridgeBladeDiagnostics%
 
 parametersSchema:
     lostInTranslation: structure([
         disallowDynamicTranslationStrings: bool(),
         baseLocale: schema(string(), nullable()),
+        bridgeBladeDiagnostics: bool(),
         invalidCharacterEncodings: bool(),
         invalidChoices: bool(),
         invalidLocales: bool(),
@@ -70,6 +79,7 @@ parameters:
     lostInTranslation:
         disallowDynamicTranslationStrings: false
         baseLocale: null
+        bridgeBladeDiagnostics: true
         invalidCharacterEncodings: true
         invalidChoices: true
         invalidLocales: true

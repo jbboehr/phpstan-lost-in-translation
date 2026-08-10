@@ -8,4 +8,6 @@ parameters:
         # this path is relative to the CWD?
         - ./tests/resources
     lostInTranslation:
+        # These tests exercise Bladestan's wrapper directly; e2e tests exercise the diagnostic bridge.
+        bridgeBladeDiagnostics: false
         langPath: tests/lang

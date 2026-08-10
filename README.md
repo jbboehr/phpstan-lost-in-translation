@@ -94,6 +94,13 @@ If [Larastan](https://github.com/larastan/larastan) is installed, there will be 
 [Bladestan](https://github.com/bladestan/bladestan) is installed, it will be possible to inspect blade templates
 (you probably really want this).
 
+Bladestan runs compiled templates through a nested PHPStan analysis. By default,
+this extension bridges its diagnostics back through the outer analysis so error
+identifiers, translation metadata, tips, and Bladestan's template path/line
+metadata are preserved. Set `bridgeBladeDiagnostics: false` only if this
+compatibility bridge conflicts with another extension or a future Bladestan
+release.
+
 ```php
 <?php
 
@@ -427,6 +434,8 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 ```neon
 parameters:
     lostInTranslation:
+        # preserve translation identifiers, metadata, tips, and template locations across Bladestan's nested analysis
+        bridgeBladeDiagnostics: true
         # should translation keys with types not statically known be allowed?
         disallowDynamicTranslationStrings: false
         # strings in the base locale won't be reported as missing, unless they contain a group. May use value set in Laravel if unconfigured.

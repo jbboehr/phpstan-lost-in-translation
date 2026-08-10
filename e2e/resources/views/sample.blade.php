@@ -11,3 +11,5 @@
 @endphp
 
 {{ __('only used in blade') }}
+
+{{ __('exists in all locales', ['bladeUnused' => 'value'], 'en') }}

@@ -526,10 +526,25 @@ plural forms. Do not fold that policy back into `invalidChoice.malformed`.
 
 ### Compiled Blade diagnostic paths
 
-`LostInTranslationHelper` retains a TODO noting that `Scope::getFile()` may be
-a compiled Blade path. Reproduce the behavior through the Blade integration
-before changing path attribution; without a reproducer, the correct source-map
-mechanism is unclear.
+**Status:** A compatibility bridge and regression coverage are implemented.
+
+Bladestan runs compiled templates in a nested PHPStan analysis. Version 0.6
+drops nested identifiers, while version 0.11.7 preserves identifiers but
+replaces translation metadata and drops tips. Both versions embed stable
+`file` and `line` markers in compiled PHP.
+
+The extension now queues its structured diagnostics inside the nested analysis,
+drains them through an outer collector, and rebuilds them after collection. The
+rebuilt error retains the original identifier, translation metadata, and tip,
+adds Bladestan's template path and line metadata, and keeps the outer view-call
+location for compatibility with Bladestan's formatter. The bridge is enabled by
+default and can be disabled with `bridgeBladeDiagnostics: false` if a future
+Bladestan release conflicts with it.
+
+Unit coverage asserts queue sharing, marker resolution, metadata, tips, and
+reconstruction. End-to-end coverage verifies a real Blade replacement error on
+the locked Bladestan 0.6 dependency; an isolated PHP 8.4/Laravel 12 run also
+verified the same behavior against Bladestan 0.11.7.
 
 ### PHP-Parser compatibility aliases
 

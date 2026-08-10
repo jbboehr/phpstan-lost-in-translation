@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Rule;
 
+use jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector;
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
@@ -34,6 +35,8 @@ final class LostInTranslationRule implements Rule
     public function __construct(
         private readonly LostInTranslationHelper $helper,
         private readonly CallRuleCollection $rules,
+        private readonly BladeDiagnosticCollector $bladeDiagnosticCollector = new BladeDiagnosticCollector(),
+        private readonly bool $bridgeBladeDiagnostics = false,
     ) {
     }
 
@@ -55,6 +58,15 @@ final class LostInTranslationRule implements Rule
                         $rule->processCall($call),
                     );
                 }
+            }
+
+            if (
+                $this->bridgeBladeDiagnostics
+                && [] !== $errors
+                && str_contains($scope->getFile(), 'blade-compiled')
+                && $this->bladeDiagnosticCollector->push($errors, $scope->getFile(), $node->getStartLine())
+            ) {
+                return [];
             }
 
             return $errors;

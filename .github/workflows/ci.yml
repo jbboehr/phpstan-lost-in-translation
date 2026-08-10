@@ -69,6 +69,23 @@ jobs:
             - name: phpstan
               run: composer phpstan -- analyze
 
+    audit:
+        runs-on: ubuntu-latest
+        name: "Audit | Runtime dependencies"
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "8.1"
+                  tools: composer:v2
+
+            - name: Audit locked runtime dependencies
+              run: composer audit --locked --no-dev
+
     test:
         runs-on: ubuntu-latest
         name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }}"
@@ -137,7 +154,7 @@ jobs:
               run: composer require --no-update --dev --prefer-dist laravel/framework:^${{ matrix.laravel-version }}
 
             - name: Install dependencies
-              run: composer update --no-progress --prefer-dist
+              run: composer update --no-progress --prefer-dist --no-blocking
 
             - name: Run test suite
               run: composer phpunit -- --no-coverage
@@ -195,14 +212,28 @@ jobs:
         steps:
             - uses: actions/checkout@v6
 
-            - name: Install PHP and Infection
+            - name: Install PHP
               uses: shivammathur/setup-php@v2
               with:
                   coverage: pcov
                   php-version: "8.4"
-                  tools: composer:v2, infection:0.34.2@sha256:ae83bc5151579817c3a6217eb3deceb86a169a399139264534218b723320da3d
+                  tools: composer:v2
               env:
                   fail-fast: true
+
+            - name: Install Infection
+              env:
+                  INFECTION_SHA256: ae83bc5151579817c3a6217eb3deceb86a169a399139264534218b723320da3d
+                  INFECTION_VERSION: 0.34.2
+              run: |
+                  mkdir -p "$RUNNER_TEMP/bin"
+                  curl --fail --location --silent --show-error \
+                      "https://github.com/infection/infection/releases/download/$INFECTION_VERSION/infection.phar" \
+                      --output "$RUNNER_TEMP/bin/infection"
+                  echo "$INFECTION_SHA256  $RUNNER_TEMP/bin/infection" | sha256sum --check --strict
+                  chmod +x "$RUNNER_TEMP/bin/infection"
+                  php "$RUNNER_TEMP/bin/infection" --version
+                  echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
             - name: Get Composer cache directory
               id: composer-cache-mutation

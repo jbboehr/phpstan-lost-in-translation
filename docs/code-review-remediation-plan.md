@@ -374,13 +374,16 @@ the shared configuration.
 
 ### Development dependency advisories
 
+**Status:** CI now audits locked runtime dependencies separately. Compatibility
+matrix updates disable Composer policy blocking only while resolving the
+intentionally retained Laravel 9 through 11 development fixtures.
+
 `composer audit --locked` reports three advisories against the locked Laravel
 10 development baseline. Laravel 10 is retained to exercise PHP 8.1
 compatibility, and `composer audit --locked --no-dev` is clean.
 
-Recommended follow-up:
+Ongoing policy:
 
-- Run `composer audit --locked --no-dev` in CI for distributable dependencies.
 - Document or configure explicit exceptions for unavoidable development-only
   compatibility fixtures.
 - Continue testing supported maintained Laravel versions separately from the

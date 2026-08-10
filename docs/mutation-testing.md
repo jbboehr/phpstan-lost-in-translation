@@ -15,8 +15,8 @@ PHP 8.4 Nix shell with PCOV enabled:
 nix develop .#mutation
 ```
 
-The shell pins Infection 0.34.2 by SHA-256. The mutation CI job installs the
-same version with the same checksum.
+The shell pins Infection 0.34.2 by SHA-256. The mutation CI job downloads the
+same PHAR and verifies the same checksum before adding it to `PATH`.
 
 ## Running Infection
 

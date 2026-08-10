@@ -71,9 +71,16 @@ final class InvalidReplacementRule implements CallRuleInterface
         sort($replaceKeys, SORT_NATURAL);
 
         foreach ($replaceKeys as $search) {
-            $replaceVariantCount = (int) str_contains($value, ':' . self::ucfirst($search))
-                + (int) str_contains($value, ':' . mb_strtoupper($search, 'UTF-8'))
-                + (int) str_contains($value, ':' . $search);
+            $replaceVariants = array_unique([
+                ':' . self::ucfirst($search),
+                ':' . mb_strtoupper($search, 'UTF-8'),
+                ':' . $search,
+            ]);
+            $replaceVariantCount = 0;
+
+            foreach ($replaceVariants as $replaceVariant) {
+                $replaceVariantCount += (int) str_contains($value, $replaceVariant);
+            }
 
             if ($replaceVariantCount === 0) {
                 $errors[] = RuleErrorBuilder::message(sprintf('Unused translation replacement: %s', Utils::e($search)))

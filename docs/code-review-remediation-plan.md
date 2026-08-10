@@ -50,7 +50,7 @@ below so the separate review report is not required to track outstanding work.
 | Review ID | Disposition |
 | --- | --- |
 | RV-01 | Tracked as the script-subtag follow-up to CR-05; implementation and regression coverage complete. |
-| RV-02 | Tracked by CR-08; open. |
+| RV-02 | Tracked by CR-08; implementation and regression coverage complete. |
 | RV-03 | Tracked by CR-09; open. |
 | RV-04 | Source-string fallback for a fileless base locale is intentional and covered in both replacement and choice rule tests. |
 | RV-05 | Tracked by CR-07; complete. |
@@ -355,6 +355,10 @@ runtime.
 
 ### CR-08: Equivalent replacement variants are double-counted
 
+**Status:** Implementation and regression coverage complete. Placeholder
+spellings are deduplicated before the rule counts which variants occur in the
+translation value.
+
 **Location:** `src/CallRule/InvalidReplacementRule.php:74`
 
 **Current behavior:**
@@ -368,7 +372,7 @@ placeholder is counted three times and reported as matching multiple variants.
 - Valid replacement arrays generate false-positive diagnostics.
 - Mixed-case keys such as `Foo` can have the same problem.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 Generate the three placeholder strings, deduplicate them, and then count the
 distinct variants present in the translation value.

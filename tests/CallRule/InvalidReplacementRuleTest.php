@@ -81,4 +81,17 @@ class InvalidReplacementRuleTest extends RuleTestCase
             __DIR__ . '/../data/fileless-base-fallback.php',
         ], []);
     }
+
+    public function testEquivalentReplacementVariantsAreCountedOnce(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/replacement-variant-deduplication.php',
+        ], [
+            [
+                'Replacement string matches multiple variants: "foo"',
+                11,
+                Utils::formatTipForKeyValue('en', ':foo :FOO'),
+            ],
+        ]);
+    }
 }

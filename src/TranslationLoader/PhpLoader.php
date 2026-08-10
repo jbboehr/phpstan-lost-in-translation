@@ -146,7 +146,12 @@ final class PhpLoader
                 $path = $prepend . '.' . $key;
             }
 
-            if (is_array($value) && ! empty($value)) {
+            if (is_array($value)) {
+                // Empty arrays are structural placeholders in Laravel lang files and must not become invalid leaves.
+                if ([] === $value) {
+                    continue;
+                }
+
                 foreach (self::dot($value, $path) as $k2 => $v2) {
                     $results[$k2] = $v2;
                 }

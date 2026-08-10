@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 
@@ -140,6 +141,22 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
             ],
             $loader->getLocaleFiles()['en'],
         );
+    }
+
+    public function testEmptyPhpTranslationGroupsAreIgnored(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-empty-arrays',
+            baseLocale: 'en',
+        );
+
+        $this->assertSame('Still loaded', $loader->get('en', 'messages.nested.translation'));
+        $this->assertNull($loader->get('en', 'messages.empty'));
+        $this->assertNull($loader->get('en', 'messages.nested.empty'));
+
+        $this->assertCount(1, $loader->getErrors());
+        $this->assertSame(PhpLoader::IDENTIFIER, $loader->getErrors()[0]->getIdentifier());
+        $this->assertSame('Invalid value: 1', $loader->getErrors()[0]->getMessage());
     }
 
     public function testFlexibleLocalesUseCanonicalLookupKeys(): void

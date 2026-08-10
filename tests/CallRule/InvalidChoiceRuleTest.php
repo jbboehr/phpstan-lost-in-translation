@@ -107,7 +107,19 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 53,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
+            [
+                'Translation choice has non-numeric value: "3,4"',
+                56,
+                Utils::formatTipForKeyValue('sk', '[2,3,4] There are :count books'),
+            ],
         ]);
+    }
+
+    public function testLaravelCompatibleUnconditionedChoices(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/valid-unconditioned-choice.php',
+        ], []);
     }
 
     public function testSourceStringFallbackWithFilelessBaseLocale(): void

@@ -503,6 +503,27 @@ project's declared PHPUnit 9 compatibility before adding it to the main test
 suite. An isolated property-test job is preferable if PHPUnit 9 remains
 supported.
 
+### Locale-aware plural completeness
+
+**Status:** Deferred as a separate product decision after the BookStack
+integration review.
+
+Laravel accepts one or more unconditioned choice segments. It selects a
+segment using the locale's plural index and legally falls back to the first
+segment when that index is absent. `InvalidChoiceRule` therefore accepts
+single-form locales and locale-specific three-or-more-form translations rather
+than reporting them as malformed. When conditioned and unconditioned segments
+are mixed, the unconditioned plural path is treated as a fallback and suppresses
+explicit-condition `missingCase` diagnostics.
+
+This runtime-compatible syntax policy cannot distinguish an intentional single
+form from a likely missing delimiter, such as the Icelandic BookStack string
+recorded in `docs/development/bookstack-integration-report.md`. If stronger
+translation-quality validation is desired, design it as a separate diagnostic
+with an explicit policy for locale aliases, possible number types, Laravel's
+first-segment fallback, and applications that intentionally provide fewer
+plural forms. Do not fold that policy back into `invalidChoice.malformed`.
+
 ### Compiled Blade diagnostic paths
 
 `LostInTranslationHelper` retains a TODO noting that `Scope::getFile()` may be

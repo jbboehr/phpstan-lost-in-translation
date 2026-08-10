@@ -67,11 +67,13 @@ final class InvalidChoiceRule implements CallRuleInterface
         $segments = explode('|', $value);
         $errors = [];
         $unionType = null;
+        $hasUnconditionedSegment = false;
 
         foreach ($segments as $segment) {
             if (1 !== preg_match('/^[\{\[]([^\[\]\{\}]*)[\}\]](.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
-                if (count($segments) === 2 && 1 !== preg_match('~^[\[{]~', ltrim($segment))) {
-                    // If it has exactly two segments and doesn't start with "{" or "[", it's probably the singular/plural variant
+                if (1 !== preg_match('~^[\[{]~', ltrim($segment))) {
+                    // Laravel accepts one or more unconditioned segments and selects one using the locale's plural index.
+                    $hasUnconditionedSegment = true;
                     continue;
                 }
 
@@ -143,7 +145,7 @@ final class InvalidChoiceRule implements CallRuleInterface
             }
         }
 
-        if (null !== $unionType && !$unionType->accepts($numberType, true)->yes()) {
+        if (!$hasUnconditionedSegment && null !== $unionType && !$unionType->accepts($numberType, true)->yes()) {
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Translation choice does not cover all possible cases for number of type: %s',
                 $numberType->describe(VerbosityLevel::precise()),

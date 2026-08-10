@@ -21,7 +21,6 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Fuzzy;
 
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\AbstractFuzzyStringSetBenchmark;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\FuseFuzzyStringSetBenchmark;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\MyFuzzyStringSetBenchmark;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\NaiveFuzzyStringSetBenchmark;
 use PHPUnit\Framework\TestCase;
@@ -91,7 +90,6 @@ final class FuzzyStringSetTest extends TestCase
     public static function benchmarkProvider(): array
     {
         return [
-            [FuseFuzzyStringSetBenchmark::class],
             [MyFuzzyStringSetBenchmark::class],
             [NaiveFuzzyStringSetBenchmark::class],
         ];

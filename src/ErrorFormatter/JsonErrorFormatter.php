@@ -25,7 +25,6 @@ use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Utils;
-use Nette\Utils\Json;
 use PHPStan\Command\AnalysisResult;
 use PHPStan\Command\ErrorFormatter\ErrorFormatter;
 use PHPStan\Command\Output;
@@ -100,7 +99,14 @@ final class JsonErrorFormatter implements ErrorFormatter
                 }
             }
 
-            $json = Json::encode(array_merge($missing, $other), $this->pretty ? \JSON_PRETTY_PRINT : 0);
+            $json = json_encode(
+                array_merge($missing, $other),
+                \JSON_THROW_ON_ERROR
+                    | \JSON_UNESCAPED_SLASHES
+                    | \JSON_UNESCAPED_UNICODE
+                    | \JSON_PRESERVE_ZERO_FRACTION
+                    | ($this->pretty ? \JSON_PRETTY_PRINT : 0),
+            );
             $output->writeRaw($json);
 
             return $analysisResult->hasErrors() ? 1 : 0;

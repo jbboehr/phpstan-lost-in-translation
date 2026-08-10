@@ -143,13 +143,14 @@ final class Utils
 
         for ($i = 0; $i < strlen($value); $i++) {
             $c = $value[$i];
+            $byte = ord($c);
 
             if ($c === '"') {
                 $buf .= '\"';
-            } elseif (ctype_print($c)) {
+            } elseif ($byte >= 0x20 && $byte <= 0x7e) {
                 $buf .= $c;
             } else {
-                $buf .= sprintf("\x%02x", ord($c));
+                $buf .= sprintf("\x%02x", $byte);
             }
         }
 

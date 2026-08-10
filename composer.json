@@ -29,7 +29,6 @@
         "brick/varexporter": "*",
         "larastan/larastan": "^2.11 || ^3.4",
         "laravel/framework": "^9 || ^10 || ^11 || ^12 || ^13",
-        "loilo/fuse": "^7.1",
         "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3 || ^11.0",
         "phpbench/phpbench": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^1.2.1 || ^2.0",
@@ -68,7 +67,8 @@
         "infection:core": "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php",
         "phpcs": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan",
-        "phpunit": "./vendor/bin/phpunit"
+        "phpunit": "./vendor/bin/phpunit",
+        "runtime-smoke": "@php tests/runtime-smoke/run.php"
     },
     "_comment": [
         "Think not that I am come to send peace on earth: I came not to send peace, but a sword. Matthew 10:34"

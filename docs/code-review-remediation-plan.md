@@ -22,8 +22,6 @@ The main risk areas are:
 2. Valid PHP and Laravel call forms can be silently interpreted incorrectly.
 3. Locale and key normalization are inconsistent across validation, caching,
    and lookup.
-4. Some shipped source code relies on dependencies absent from a production
-   Composer installation.
 
 ## Findings summary
 
@@ -280,11 +278,17 @@ the explicit values.
 
 ### CR-07: Runtime dependencies are incomplete
 
-**Location:** `composer.json:14`,
-`src/ErrorFormatter/JsonErrorFormatter.php:28`,
-`src/Fuzzy/FuseFuzzyStringSet.php:22`, `src/Utils.php:142`
+**Status:** Implementation and regression coverage complete. The JSON error
+formatter now uses native throwing JSON encoding, binary escaping uses an
+ASCII byte-range check instead of `ext-ctype`, and the unusably slow Fuse
+implementation and `loilo/fuse` development dependency have been removed. CI
+now installs runtime dependencies without development packages and exercises
+the registered extension and custom formatter.
 
-**Current behavior:**
+**Location:** `composer.json`, `JsonErrorFormatter::formatErrors()`,
+`Utils::escapeBinary()`, `.github/workflows/ci.yml`
+
+**Previous behavior:**
 
 - The registered JSON error formatter uses `nette/utils`, but the package does
   not require it.
@@ -304,14 +308,13 @@ runtime.
   installation.
 - Invalid-binary diagnostics depend on an undeclared extension.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
-1. Add `nette/utils` and `ext-ctype` to runtime requirements, or remove those
-   dependencies from runtime code.
-2. Either move `loilo/fuse` to runtime requirements or move
-   `FuseFuzzyStringSet` to benchmark/test-only code.
-3. Add a minimal `composer install --no-dev` smoke test that loads all
-   registered services and exercises the custom formatter.
+1. Replaced `nette/utils` and `ext-ctype` usage with native PHP behavior.
+2. Removed the Fuse implementation, benchmark, and `loilo/fuse` dependency.
+3. Added a `composer install --no-dev` smoke test that builds the extension
+   container, produces a real extension diagnostic, validates the formatter's
+   JSON document, and verifies the diagnostic is present.
 
 ### CR-08: Equivalent replacement variants are double-counted
 
@@ -456,8 +459,8 @@ so validation and storage cannot diverge again.
 
 - Every CR item has a focused regression test that fails before its fix.
 - The full PHP and Laravel compatibility matrix remains green.
-- `composer install --no-dev` can load and exercise every registered runtime
-  service.
+- `composer install --no-dev` can build the registered extension services and
+  exercise the custom formatter with a real extension diagnostic.
 - Composer validation, PHPCS, PHPStan, PHPUnit, end-to-end tests, benchmarks,
   actionlint, and `nix flake check -L` pass.
 - No new PHP warnings, deprecations, or ignored static-analysis errors are

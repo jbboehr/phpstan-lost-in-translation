@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) anno Domini nostri Jesu Christi MMXXV John Boehr & contributors
+ * Copyright (c) anno Domini nostri Jesu Christi MMXXVI John Boehr & contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,15 +17,4 @@
  */
 declare(strict_types=1);
 
-namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
-
-use jbboehr\PHPStanLostInTranslation\Fuzzy\FuseFuzzyStringSet;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
-
-final class FuseFuzzyStringSetBenchmark extends AbstractFuzzyStringSetBenchmark
-{
-    public function createFuzzyStringSet(array $strings): FuzzyStringSetInterface
-    {
-        return new FuseFuzzyStringSet($strings);
-    }
-}
+__('messages.runtime_smoke');

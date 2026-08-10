@@ -55,6 +55,11 @@ final class UtilsTest extends TestCase
         $this->assertSame('"\\xc3("', Utils::e("\xc3\x28"));
     }
 
+    public function testEscapeBinaryUsesAsciiPrintableRange(): void
+    {
+        $this->assertSame('printable\\x00\\x7f\\xa0', Utils::escapeBinary("printable\x00\x7f\xa0"));
+    }
+
     public function testFormatTipForKeyValue(): void
     {
         $this->assertStringContainsString('Key: ', Utils::formatTipForKeyValue('locale', 'key'));

@@ -22,7 +22,6 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\ErrorFormatter;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\ErrorFormatter\JsonErrorFormatter;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
-use Nette\Utils\Json;
 use PHPStan\Command\AnalysisResult;
 use PHPStan\Command\Output;
 use PHPStan\Testing\ErrorFormatterTestCase;
@@ -42,7 +41,7 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
         $formatter->formatErrors($analysisResult, $this->getOutput());
 
         /** @phpstan-ignore-next-line phpstanApi.method */
-        $actual = Json::decode($this->getOutputContent(), true);
+        $actual = json_decode($this->getOutputContent(), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertIsArray($actual);
         $this->assertArrayHasKey(MissingTranslationStringRule::IDENTIFIER, $actual);

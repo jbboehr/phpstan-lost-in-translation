@@ -86,6 +86,26 @@ jobs:
             - name: Audit locked runtime dependencies
               run: composer audit --locked --no-dev
 
+    runtime:
+        runs-on: ubuntu-latest
+        name: "Runtime smoke | PHP 8.1"
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@v6
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "8.1"
+                  tools: composer:v2
+
+            - name: Install runtime dependencies
+              run: composer install --no-dev --prefer-dist --no-progress
+
+            - name: Load extension and custom error formatter
+              run: composer runtime-smoke
+
     test:
         runs-on: ubuntu-latest
         name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }}"

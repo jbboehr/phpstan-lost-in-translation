@@ -448,7 +448,7 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
                         ],
                     ]),
                     \PHPStan\Analyser\Error::__set_state([
-                        'message' => 'Invalid character encoding for value "messages.\\xf0(\\x8c\\xbc" in locale "ja"',
+                        'message' => 'Invalid character encoding for value "\\xf0(\\x8c\\xbc" in locale "ja"',
                         'file' => __DIR__ . '/../../e2e/src/invalid-character-encodings.php',
                         'line' => 3,
                         'canBeIgnored' => true,

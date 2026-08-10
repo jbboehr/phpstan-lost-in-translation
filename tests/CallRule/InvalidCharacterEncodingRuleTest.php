@@ -23,8 +23,12 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use jbboehr\PHPStanLostInTranslation\Utils;
+use PHPStan\Rules\MetadataRuleError;
 use PHPStan\Rules\Rule;
+use PHPStan\Type\Constant\ConstantStringType;
 
 /**
  * @extends RuleTestCase<LostInTranslationRule>
@@ -59,9 +63,36 @@ class InvalidCharacterEncodingRuleTest extends RuleTestCase
                 3,
             ],
             [
-                'Invalid character encoding for value "messages.\xf0(\x8c\xbc" in locale "ja"',
+                'Invalid character encoding for value "\xf0(\x8c\xbc" in locale "ja"',
                 3,
             ],
         ]);
+    }
+
+    public function testInvalidValueMessageDoesNotSubstituteAFullSentenceKey(): void
+    {
+        $key = 'A real full sentence with real shit in it.';
+        $value = "\xf0\x28\x8c\xbc";
+        $errors = (new InvalidCharacterEncodingRule())->processCall(new TranslationCall(
+            className: null,
+            functionName: '__',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $key => [['ja', $value]],
+            ],
+            keyType: new ConstantStringType($key),
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(
+            'Invalid character encoding for value "\xf0(\x8c\xbc" in locale "ja"',
+            $errors[0]->getMessage(),
+        );
+        $this->assertInstanceOf(MetadataRuleError::class, $errors[0]);
+        $this->assertSame(
+            Utils::metadata(key: $key, locale: 'ja', value: $value),
+            $errors[0]->getMetadata(),
+        );
     }
 }

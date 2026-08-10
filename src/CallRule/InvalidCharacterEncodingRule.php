@@ -48,7 +48,7 @@ final class InvalidCharacterEncodingRule implements CallRuleInterface
                 if ($value !== null && !mb_check_encoding($value, 'UTF-8')) {
                     $errors[] = RuleErrorBuilder::message(sprintf(
                         'Invalid character encoding for value %s in locale %s',
-                        Utils::e($key),
+                        Utils::e($value),
                         Utils::e($locale),
                     ))
                         ->identifier(self::IDENTIFIER)

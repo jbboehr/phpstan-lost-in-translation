@@ -415,7 +415,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
  ------ --------------------------------------------------------------------------------
   3      Invalid character encoding for key: "messages.\xf0(\x8c\xbc"
          🪪  lostInTranslation.invalidCharacterEncoding
-  3      Invalid character encoding for value: "messages.\xf0(\x8c\xbc"
+  3      Invalid character encoding for value: "\xf0(\x8c\xbc"
          🪪  lostInTranslation.invalidCharacterEncoding
  ------ --------------------------------------------------------------------------------
 
@@ -424,7 +424,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
  ------ ------------------------------------------------------------------------------
   3      Invalid character encoding for key "messages.\xf0(\x8c\xbc"
          🪪  lostInTranslation.invalidCharacterEncoding
-  3      Invalid character encoding for value "messages.\xf0(\x8c\xbc" in locale "ja"
+  3      Invalid character encoding for value "\xf0(\x8c\xbc" in locale "ja"
          🪪  lostInTranslation.invalidCharacterEncoding
  ------ ------------------------------------------------------------------------------
 ```

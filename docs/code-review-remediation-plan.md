@@ -51,14 +51,14 @@ below so the separate review report is not required to track outstanding work.
 | --- | --- |
 | RV-01 | Tracked as the script-subtag follow-up to CR-05; implementation and regression coverage complete. |
 | RV-02 | Tracked by CR-08; implementation and regression coverage complete. |
-| RV-03 | Tracked by CR-09; open. |
+| RV-03 | Tracked by CR-09; implementation and regression coverage complete. |
 | RV-04 | Source-string fallback for a fileless base locale is intentional and covered in both replacement and choice rule tests. |
 | RV-05 | Tracked by CR-07; complete. |
 | RV-06 | The deterministic first-spelling-wins policy is intentional, and the existing diagnostic says that all files for the losing spelling are ignored. |
 | RV-07 | Tracked by CR-02 as a product decision; supported layouts and the vendor-override limitation are documented in the README. |
 | RV-08 | Tracked by CR-10; open. |
-| RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete message defect is tracked by CR-09. |
-| RV-10 | Retained below as an investigation item; it needs a Blade-path reproducer before implementation. |
+| RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete CR-09 message defect is fixed. |
+| RV-10 | The compiled Blade diagnostic bridge and regression coverage are complete. |
 | RV-11 | Tracked by CR-11; open. |
 | RV-12 | Deferred while PHP-Parser 4 and 5 compatibility is required; the compatibility alias is deliberate. |
 | RV-13 | Tracked by CR-12; open. |
@@ -385,18 +385,23 @@ distinct variants present in the translation value.
 
 ### CR-09: Invalid-value diagnostics display the key
 
+**Status:** Implementation and regression coverage complete. Invalid-value
+diagnostics now display the malformed translation value while retaining the
+original key, locale, and value in metadata.
+
 **Location:** `src/CallRule/InvalidCharacterEncodingRule.php:51`
 
-**Current behavior:**
+**Previous behavior:**
 
 When the translation value contains invalid encoding, the diagnostic formats
 `$key` instead of `$value`. The metadata contains the correct value, but the
 human-readable message does not.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
-Pass `$value` to `Utils::e()` and add a fixture whose valid key and invalid
-value differ.
+Pass `$value` to `Utils::e()`. Regression coverage uses a valid full-sentence
+translation key and a distinct malformed value, ensuring sentence keys remain
+unchanged and cannot be substituted into the value diagnostic.
 
 ### CR-10: Empty custom fuzzy sets emit a warning
 

@@ -169,7 +169,7 @@ class LostInTranslationHelper
             className: $className,
             functionName: $name,
             file: $file,
-            line: $node->getLine(),
+            line: $node->getStartLine(),
             possibleTranslations: $this->gatherPossibleTranslations($keyType, $localeType),
             keyType: $keyType,
             replaceType: $replace !== null ? $scope->getType($replace) : null,

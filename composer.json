@@ -32,6 +32,7 @@
         "loilo/fuse": "^7.1",
         "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3 || ^11.0",
         "phpbench/phpbench": "^1.4",
+        "phpstan/phpstan-deprecation-rules": "^1.2.1 || ^2.0",
         "phpstan/phpstan-phpunit": "^1.4.2 || ^2.0.6",
         "phpstan/phpstan-strict-rules": "^1.6.2 || ^2.0.4",
         "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5",

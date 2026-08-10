@@ -28,7 +28,7 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /** @var array<non-empty-string, int> */
     private array $lineNumbers = [];
 
-    /** @var list<Scalar\LNumber|Scalar\String_|"unknown"> */
+    /** @var list<int|string> */
     private array $stack = [];
 
     /**
@@ -37,8 +37,8 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     public function enterNode(Node $node)
     {
         if ($node instanceof Node\Expr\ArrayItem) {
-            if ($node->key instanceof Scalar\LNumber || $node->key instanceof Scalar\String_) {
-                $this->stack[] = $node->key;
+            if ($node->key instanceof Scalar) {
+                $this->stack[] = self::getScalarKeyValue($node->key) ?? 'unknown';
             } else {
                 // Can't really handle lists here unfortunately
                 $this->stack[] = 'unknown';
@@ -54,15 +54,7 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     public function leaveNode(Node $node)
     {
         if ($node instanceof Node\Expr\ArrayItem) {
-            $path = join('.', array_map(static function (Scalar\LNumber|Scalar\String_|string $stackItem): string {
-                if ($stackItem instanceof Scalar\LNumber) {
-                    return sprintf("%d", $stackItem->value); // #yolo
-                } elseif ($stackItem instanceof Scalar\String_) {
-                    return $stackItem->value;
-                } else {
-                    return $stackItem;
-                }
-            }, $this->stack));
+            $path = join('.', $this->stack);
             if (strlen($path) > 0) {
                 $this->lineNumbers[$path] = $node->getStartLine();
             }
@@ -78,5 +70,14 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     public function getLineNumbers(): array
     {
         return $this->lineNumbers;
+    }
+
+    private static function getScalarKeyValue(Scalar $key): int|string|null
+    {
+        // PHP-Parser 4 and 5 use different integer node classes, but both
+        // expose scalar values through NodeAbstract::jsonSerialize().
+        $value = $key->jsonSerialize()['value'] ?? null;
+
+        return is_int($value) || is_string($value) ? $value : null;
     }
 }

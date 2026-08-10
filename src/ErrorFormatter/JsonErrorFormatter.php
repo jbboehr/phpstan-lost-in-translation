@@ -100,7 +100,7 @@ final class JsonErrorFormatter implements ErrorFormatter
                 }
             }
 
-            $json = Json::encode(array_merge($missing, $other), $this->pretty ? Json::PRETTY : 0);
+            $json = Json::encode(array_merge($missing, $other), $this->pretty ? \JSON_PRETTY_PRINT : 0);
             $output->writeRaw($json);
 
             return $analysisResult->hasErrors() ? 1 : 0;

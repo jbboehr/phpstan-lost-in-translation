@@ -43,6 +43,27 @@ final class UtilsTest extends TestCase
         yield 'regional case' => ['PT_br', 'pt_BR'];
         yield 'regional separator' => ['pt-br', 'pt_BR'];
         yield 'already canonical' => ['pt_BR', 'pt_BR'];
+        yield 'script case' => ['ZH-hANS', 'zh_Hans'];
+        yield 'script and region case' => ['SR-lATN-rs', 'sr_Latn_RS'];
+        yield 'numeric region' => ['ES-419', 'es_419'];
+    }
+
+    /**
+     * @dataProvider provideKnownFlexibleLocales
+     */
+    public function testCheckFlexibleLocaleExists(string $locale): void
+    {
+        $this->assertTrue(Utils::checkLocaleExists($locale));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideKnownFlexibleLocales(): iterable
+    {
+        yield 'script' => ['ZH-hANS'];
+        yield 'script and region' => ['SR-lATN-rs'];
+        yield 'numeric region' => ['ES-419'];
     }
 
     public function testCanonicalizeStrictLocalePreservesInput(): void

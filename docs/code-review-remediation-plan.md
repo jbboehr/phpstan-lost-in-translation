@@ -4,7 +4,7 @@ Reviewed against commit `692b6eb4d4d585b2f8447896e60be93a9acda34a` on 2026-08-09
 
 ## Executive summary
 
-The full codebase review found ten reproducible issues:
+The initial full-codebase review found ten reproducible issues:
 
 - 2 high-priority filesystem and startup failures.
 - 6 medium-priority analysis, lookup, and packaging correctness issues.
@@ -23,6 +23,10 @@ The main risk areas are:
 3. Locale and key normalization are inconsistent across validation, caching,
    and lookup.
 
+A follow-up review found an uncovered script-subtag case in CR-05 and three
+small loader-maintenance defects. The complete follow-up triage is recorded
+below so the separate review report is not required to track outstanding work.
+
 ## Findings summary
 
 | ID | Priority | Area | Summary |
@@ -31,12 +35,34 @@ The main risk areas are:
 | CR-02 | P1 | Translation loading | Files whose relative paths do not match the expected pattern are still processed. |
 | CR-03 | P2 | Call parsing | Named arguments are assigned by position rather than parameter name. |
 | CR-04 | P2 | Key parsing | Namespaced keys are cached under their normalized plain key. |
-| CR-05 | P2 | Locale handling | Flexible locale validation is not applied to translation lookup. |
+| CR-05 | P2 | Locale handling | Flexible locale handling diverges between validation and lookup and mishandles script subtags. |
 | CR-06 | P2 | Base locale | The base locale is not analyzed when it has no translation files. |
 | CR-07 | P2 | Packaging | Shipped classes use undeclared or development-only runtime dependencies. |
 | CR-08 | P2 | Replacements | Equivalent placeholder variants are counted more than once. |
 | CR-09 | P3 | Diagnostics | Invalid-value encoding errors display the translation key. |
 | CR-10 | P3 | Fuzzy search | Searching an empty `MyFuzzyStringSet` emits an undefined-key warning. |
+| CR-11 | P3 | Translation loading | JSON line-number parsing leaves its file handle open. |
+| CR-12 | P3 | Types | `PhpLoader::load()` declares `mixed` although it always returns `LoadResult`. |
+| CR-13 | P3 | Locations | Translation locations store `getRealPath()` without guarding against `false`. |
+
+## Follow-up repository-review triage
+
+| Review ID | Disposition |
+| --- | --- |
+| RV-01 | Tracked as the script-subtag follow-up to CR-05; implementation and regression coverage complete. |
+| RV-02 | Tracked by CR-08; open. |
+| RV-03 | Tracked by CR-09; open. |
+| RV-04 | Source-string fallback for a fileless base locale is intentional and covered in both replacement and choice rule tests. |
+| RV-05 | Tracked by CR-07; complete. |
+| RV-06 | The deterministic first-spelling-wins policy is intentional, and the existing diagnostic says that all files for the losing spelling are ignored. |
+| RV-07 | Tracked by CR-02 as a product decision; supported layouts and the vendor-override limitation are documented in the README. |
+| RV-08 | Tracked by CR-10; open. |
+| RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete message defect is tracked by CR-09. |
+| RV-10 | Retained below as an investigation item; it needs a Blade-path reproducer before implementation. |
+| RV-11 | Tracked by CR-11; open. |
+| RV-12 | Deferred while PHP-Parser 4 and 5 compatibility is required; the compatibility alias is deliberate. |
+| RV-13 | Tracked by CR-12; open. |
+| RV-14 | Tracked by CR-13; open. |
 
 ## Detailed findings and remediation
 
@@ -198,10 +224,12 @@ cached value only.
 
 **Status:** Implementation and regression coverage complete. Flexible mode
 uses canonical locale keys throughout validation, discovery, lookup,
-base-locale comparison, and unused-translation matching. When discovered
-spellings collide, the first spelling in deterministic path order is retained
-and each conflicting alias produces one loader diagnostic; strict mode keeps
-the spellings distinct.
+base-locale comparison, and unused-translation matching. Canonicalization is
+subtag-aware: language subtags are lowercase, four-letter script subtags are
+title case, and region/other subtags retain the existing uppercase policy.
+When discovered spellings collide, the first spelling in deterministic path
+order is retained and each conflicting alias produces one loader diagnostic;
+strict mode keeps the spellings distinct.
 
 **Location:** `src/Utils.php:62`,
 `src/TranslationLoader/TranslationLoader.php:121`,
@@ -217,12 +245,18 @@ For example, `JA` passes flexible locale validation, but a call using it emits
 "no available translation strings" and "missing translation" even when the
 `ja` locale contains the requested key.
 
+The initial remediation uppercased everything following the language subtag.
+That made regional identifiers such as `pt-BR` work, but rewrote valid script
+identifiers such as `zh_Hans` and `sr_Latn_RS` to the invalid `zh_HANS` and
+`sr_LATN_RS`. Flexible mode consequently rejected identifiers that strict mode
+accepted.
+
 **Impact:**
 
 - Documented flexible locale forms cause false positives.
 - Base-locale comparisons can also fail because they are exact.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 1. Introduce one locale canonicalization function used by validation,
    discovery, base-locale comparison, `hasLocale()`, and `get()`.
@@ -230,11 +264,14 @@ For example, `JA` passes flexible locale validation, but a call using it emits
    during scanning.
 3. Detect and define behavior for two discovered locale directories that
    canonicalize to the same identifier.
+4. Canonicalize each subtag by role instead of uppercasing the complete suffix.
 
 **Regression tests:**
 
 - Case variants such as `JA` and `ja`.
 - Dash/underscore variants for a regional locale.
+- Script-only and script-plus-region identifiers such as `zh_Hans` and
+  `sr_Latn_RS`.
 - Strict mode continues to require an exact identifier.
 - Canonicalization collisions produce deterministic diagnostics.
 
@@ -373,6 +410,48 @@ Return `null` immediately when the candidate array is empty. Add result-based
 tests for all fuzzy-set implementations; the current benchmark-backed tests do
 not assert search results.
 
+### CR-11: JSON line-number parsing leaks a file handle
+
+**Location:** `src/TranslationLoader/JsonLoader.php:102`
+
+**Current behavior:**
+
+`JsonLoader::buildLineNumberMap()` opens a translation file for streaming but
+does not close the handle after parsing or when parsing throws.
+
+**Proposed remediation:**
+
+Close the handle in a `finally` block and retain the existing error conversion
+in `load()`. Add coverage for successful and failing streaming parses.
+
+### CR-12: `PhpLoader::load()` has an unnecessarily broad return type
+
+**Location:** `src/TranslationLoader/PhpLoader.php:43`
+
+**Current behavior:**
+
+The method declares `mixed`, although every return path constructs a
+`LoadResult` and the PHPDoc already promises that type.
+
+**Proposed remediation:**
+
+Declare `LoadResult` as the native return type and remove the redundant return
+PHPDoc.
+
+### CR-13: Translation locations can retain `false` as a file path
+
+**Location:** `src/TranslationLoader/TranslationLoader.php:443`
+
+**Current behavior:**
+
+`SplFileInfo::getRealPath()` can return `false`, but its result is stored in a
+location shape that promises a string and is later passed to diagnostics.
+
+**Proposed remediation:**
+
+Fall back to `getPathname()` when a real path is unavailable and cover the
+location behavior with a focused loader test where practical.
+
 ## Additional maintenance observations
 
 ### PHPUnit configuration schema
@@ -420,6 +499,20 @@ project's declared PHPUnit 9 compatibility before adding it to the main test
 suite. An isolated property-test job is preferable if PHPUnit 9 remains
 supported.
 
+### Compiled Blade diagnostic paths
+
+`LostInTranslationHelper` retains a TODO noting that `Scope::getFile()` may be
+a compiled Blade path. Reproduce the behavior through the Blade integration
+before changing path attribution; without a reproducer, the correct source-map
+mechanism is unclear.
+
+### PHP-Parser compatibility aliases
+
+`KeyLineNumberVisitor` uses the deprecated `Node\Expr\ArrayItem` alias and
+`jsonSerialize()` to work across PHP-Parser 4 and 5. Keep this compatibility
+path while PHPStan 1 remains supported, then migrate to version-specific typed
+nodes when the supported dependency range permits it.
+
 ## Proposed implementation order
 
 ### Phase 1: Make translation discovery safe
@@ -449,11 +542,14 @@ so validation and storage cannot diverge again.
 ### Phase 4: Harden optional implementations and scaffolding
 
 1. CR-10: empty fuzzy-set handling and result assertions.
-2. Migrate the PHPUnit configuration with matrix verification.
-3. Add runtime-only Composer auditing to CI.
-4. Triage the advisory Infection baseline and establish a covered-code MSI
+2. CR-11: close JSON line-map file handles.
+3. CR-12: tighten the PHP loader return type.
+4. CR-13: guard translation location paths.
+5. Migrate the PHPUnit configuration with matrix verification.
+6. Add runtime-only Composer auditing to CI.
+7. Triage the advisory Infection baseline and establish a covered-code MSI
    threshold.
-5. Evaluate targeted Eris properties after locale canonicalization is stable.
+8. Evaluate targeted Eris properties after locale canonicalization is stable.
 
 ## Definition of done
 

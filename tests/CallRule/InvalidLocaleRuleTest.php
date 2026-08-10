@@ -23,6 +23,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PHPStan\Rules\Rule;
 
 /**
@@ -86,6 +87,19 @@ class InvalidLocaleRuleTest extends RuleTestCase
     {
         $this->analyse([
             __DIR__ . '/../data/flexible-locale.php',
+        ], []);
+    }
+
+    public function testFlexibleScriptLocaleResolvesTranslations(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-script-locales',
+            baseLocale: 'en',
+            fuzzySearch: false,
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/flexible-script-locale.php',
         ], []);
     }
 }

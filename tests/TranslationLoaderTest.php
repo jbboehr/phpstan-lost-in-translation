@@ -160,6 +160,42 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($loader->isValidLocale('PT-br'));
     }
 
+    public function testFlexibleScriptLocalesUseCanonicalLookupKeys(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-script-locales',
+            baseLocale: 'ZH-hANS',
+            fuzzySearch: false,
+        );
+
+        $this->assertSame(['sr_Latn_RS', 'zh_Hans'], $loader->getFoundLocales());
+        $this->assertTrue($loader->hasLocale('ZH-hANS'));
+        $this->assertTrue($loader->isBaseLocale('zh_hans'));
+        $this->assertTrue($loader->isValidLocale('ZH-hANS'));
+        $this->assertSame('Simplified Chinese greeting', $loader->get('zh-hans', 'greeting'));
+        $this->assertTrue($loader->hasLocale('SR-lATN-rs'));
+        $this->assertTrue($loader->isValidLocale('SR-lATN-rs'));
+        $this->assertSame('Serbian Latin greeting', $loader->get('sr-latn-rs', 'messages.greeting'));
+        $this->assertSame([], $loader->getErrors());
+    }
+
+    public function testStrictScriptLocalesRequireExactLookupKeys(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-script-locales',
+            baseLocale: 'zh_Hans',
+            fuzzySearch: false,
+            strictLocales: true,
+        );
+
+        $this->assertTrue($loader->hasLocale('zh_Hans'));
+        $this->assertSame('Simplified Chinese greeting', $loader->get('zh_Hans', 'greeting'));
+        $this->assertFalse($loader->hasLocale('ZH-hANS'));
+        $this->assertNull($loader->get('ZH-hANS', 'greeting'));
+        $this->assertTrue($loader->isValidLocale('zh_Hans'));
+        $this->assertFalse($loader->isValidLocale('ZH-hANS'));
+    }
+
     public function testImplicitLookupLocalesIncludeAndSortFilelessBaseLocale(): void
     {
         $loader = new TranslationLoader(

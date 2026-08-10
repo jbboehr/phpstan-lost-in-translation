@@ -338,7 +338,9 @@ If an invalid locale is given to a translation function, an error will be emitte
 If `strictLocales` is set, locale identifiers used in calls and translation
 paths must match exactly, for example, `pt_BR`. Otherwise, validation and
 translation lookup treat forms such as `PT_br`, `pt-br`, and `pt_BR` as the
-same locale. **Disabled by default.**
+same locale. Script subtags are normalized separately, so forms such as
+`ZH-hANS` and `zh_Hans` also resolve to the same locale. **Disabled by
+default.**
 
 If two translation paths resolve to the same flexible locale identifier, the
 scanner reports a conflict and loads the first spelling in deterministic path

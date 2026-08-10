@@ -73,13 +73,19 @@ final class Utils
         // Allow specifying it with a dash instead of an underscore and with incorrect cases >.>
         $locale = str_replace('-', '_', $locale);
 
-        if (!str_contains($locale, '_')) {
-            return strtolower($locale);
+        $subtags = explode('_', $locale);
+        $language = array_shift($subtags);
+
+        foreach ($subtags as &$subtag) {
+            if (1 === preg_match('/^[A-Za-z]{4}$/D', $subtag)) {
+                $subtag = ucfirst(strtolower($subtag));
+            } else {
+                $subtag = strtoupper($subtag);
+            }
         }
+        unset($subtag);
 
-        [$language, $territory] = explode('_', $locale, 2);
-
-        return strtolower($language) . '_' . strtoupper($territory);
+        return implode('_', [strtolower($language), ...$subtags]);
     }
 
     /**

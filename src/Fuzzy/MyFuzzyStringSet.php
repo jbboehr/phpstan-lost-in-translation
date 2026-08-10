@@ -125,10 +125,14 @@ final class MyFuzzyStringSet implements FuzzyStringSetInterface
             }
         }
 
-        asort($otherIndexDeltas);
+        if ([] === $otherIndexDeltas) {
+            return null;
+        }
 
-        $smallestDelta = $otherIndexDeltas[array_key_first($otherIndexDeltas)];
-        $result = $this->strings[array_key_first($otherIndexDeltas)] ?? null;
+        asort($otherIndexDeltas);
+        $smallestDeltaIndex = array_key_first($otherIndexDeltas);
+        $smallestDelta = $otherIndexDeltas[$smallestDeltaIndex];
+        $result = $this->strings[$smallestDeltaIndex] ?? null;
 
         if ($result === null || $smallestDelta === false) {
             return null;

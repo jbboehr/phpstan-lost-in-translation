@@ -19,6 +19,10 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests\Fuzzy;
 
+use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\MyFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\AbstractFuzzyStringSetBenchmark;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\MyFuzzyStringSetBenchmark;
@@ -85,6 +89,40 @@ final class FuzzyStringSetTest extends TestCase
     }
 
     /**
+     * @dataProvider implementationProvider
+     * @param class-string<FuzzyStringSetInterface> $className
+     */
+    public function testEmptySetReturnsNull(string $className): void
+    {
+        $set = new $className();
+
+        $this->assertNull($set->search('test'));
+    }
+
+    /**
+     * @dataProvider implementationProvider
+     * @param class-string<FuzzyStringSetInterface> $className
+     */
+    public function testSearchReturnsTheClosestCandidateOrNull(string $className): void
+    {
+        $set = new $className();
+        $set->addMany(['test', 'toast']);
+
+        $this->assertSame('test', $set->search('tezt'));
+        $this->assertNull($set->search('zzzz'));
+    }
+
+    public function testMemoizingSetPreservesSearchResults(): void
+    {
+        $set = new MemoizingFuzzyStringSet(new MyFuzzyStringSet(['test', 'toast']));
+
+        $this->assertSame('test', $set->search('tezt'));
+        $this->assertSame('test', $set->search('tezt'));
+        $this->assertNull($set->search('zzzz'));
+        $this->assertNull($set->search('zzzz'));
+    }
+
+    /**
      * @return list<array{class-string<AbstractFuzzyStringSetBenchmark>}>
      */
     public static function benchmarkProvider(): array
@@ -92,6 +130,17 @@ final class FuzzyStringSetTest extends TestCase
         return [
             [MyFuzzyStringSetBenchmark::class],
             [NaiveFuzzyStringSetBenchmark::class],
+        ];
+    }
+
+    /**
+     * @return list<array{class-string<FuzzyStringSetInterface>}>
+     */
+    public static function implementationProvider(): array
+    {
+        return [
+            [MyFuzzyStringSet::class],
+            [NaiveFuzzyStringSet::class],
         ];
     }
 }

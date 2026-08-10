@@ -56,7 +56,7 @@ below so the separate review report is not required to track outstanding work.
 | RV-05 | Tracked by CR-07; complete. |
 | RV-06 | The deterministic first-spelling-wins policy is intentional, and the existing diagnostic says that all files for the losing spelling are ignored. |
 | RV-07 | Tracked by CR-02 as a product decision; supported layouts and the vendor-override limitation are documented in the README. |
-| RV-08 | Tracked by CR-10; open. |
+| RV-08 | Tracked by CR-10; implementation and regression coverage complete. |
 | RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete CR-09 message defect is fixed. |
 | RV-10 | The compiled Blade diagnostic bridge and regression coverage are complete. |
 | RV-11 | Tracked by CR-11; open. |
@@ -405,19 +405,24 @@ unchanged and cannot be substituted into the value diagnostic.
 
 ### CR-10: Empty custom fuzzy sets emit a warning
 
+**Status:** Implementation and regression coverage complete. Empty sets and
+searches with no viable candidates now return `null` without accessing a
+missing array offset.
+
 **Location:** `src/Fuzzy/MyFuzzyStringSet.php:130`
 
-**Current behavior:**
+**Previous behavior:**
 
 After sorting the candidate deltas, the implementation indexes the result of
 `array_key_first()` without checking whether the array is empty. Searching a
 new empty set emits an undefined-array-key warning before returning `null`.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
-Return `null` immediately when the candidate array is empty. Add result-based
-tests for all fuzzy-set implementations; the current benchmark-backed tests do
-not assert search results.
+Return `null` immediately when the candidate array is empty and retain the
+winning index after sorting instead of resolving it twice. Result-based tests
+cover empty sets, close and distant searches for the custom and naive
+implementations, null behavior, and the memoizing wrapper.
 
 ### CR-11: JSON line-number parsing leaks a file handle
 

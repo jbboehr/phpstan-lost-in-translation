@@ -160,6 +160,40 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($loader->isValidLocale('PT-br'));
     }
 
+    public function testImplicitLookupLocalesIncludeAndSortFilelessBaseLocale(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'fr',
+            fuzzySearch: false,
+        );
+
+        $this->assertSame(['en', 'fr', 'ja', 'zh'], $loader->getLocalesForImplicitLookup());
+    }
+
+    public function testImplicitLookupLocalesDeduplicateCanonicalBaseLocale(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'EN',
+            fuzzySearch: false,
+        );
+
+        $this->assertSame(['en', 'ja', 'zh'], $loader->getLocalesForImplicitLookup());
+    }
+
+    public function testImplicitLookupLocalesPreserveStrictBaseLocale(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang',
+            baseLocale: 'EN',
+            fuzzySearch: false,
+            strictLocales: true,
+        );
+
+        $this->assertSame(['EN', 'en', 'ja', 'zh'], $loader->getLocalesForImplicitLookup());
+    }
+
     public function testStrictLocalesUseExactLookupKeys(): void
     {
         $loader = new TranslationLoader(

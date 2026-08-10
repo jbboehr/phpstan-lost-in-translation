@@ -23,6 +23,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PHPStan\Rules\Rule;
 
 /**
@@ -30,6 +31,16 @@ use PHPStan\Rules\Rule;
  */
 class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
 {
+    private string $baseLocale = 'en';
+
+    public function createTranslationLoader(): TranslationLoader
+    {
+        return new TranslationLoader(
+            langPath: __DIR__ . '/../lang',
+            baseLocale: $this->baseLocale,
+        );
+    }
+
     protected function getRule(): Rule
     {
         return new LostInTranslationRule(
@@ -64,5 +75,42 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
                 3,
             ],
         ]);
+    }
+
+    public function testFilelessBaseLocaleIsIncludedInImplicitLookup(): void
+    {
+        $this->baseLocale = 'fr';
+
+        $this->analyse([
+            __DIR__ . '/../data/missing-in-base-locale.php',
+        ], [
+            [
+                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: fr",
+                3,
+            ],
+        ]);
+    }
+
+    public function testCanonicalBaseLocaleAliasIsNotDuplicated(): void
+    {
+        $this->baseLocale = 'EN';
+
+        $this->analyse([
+            __DIR__ . '/../data/missing-in-base-locale.php',
+        ], [
+            [
+                "Likely missing translation string \"messages.in_ja_and_zh\" for base locale: EN",
+                3,
+            ],
+        ]);
+    }
+
+    public function testExplicitLocaleDoesNotIncludeFilelessBaseLocale(): void
+    {
+        $this->baseLocale = 'fr';
+
+        $this->analyse([
+            __DIR__ . '/../data/explicit-locale-with-fileless-base.php',
+        ], []);
     }
 }

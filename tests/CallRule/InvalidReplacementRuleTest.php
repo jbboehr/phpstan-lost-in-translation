@@ -23,6 +23,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\Rule;
 
@@ -67,5 +68,17 @@ class InvalidReplacementRuleTest extends RuleTestCase
                 Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
             ],
         ]);
+    }
+
+    public function testSourceStringFallbackWithFilelessBaseLocale(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang',
+            baseLocale: 'fr',
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/fileless-base-fallback.php',
+        ], []);
     }
 }

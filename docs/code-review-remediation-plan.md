@@ -242,9 +242,15 @@ For example, `JA` passes flexible locale validation, but a call using it emits
 
 ### CR-06: A fileless base locale is excluded
 
-**Location:** `src/LostInTranslationHelper.php:234`
+**Status:** Implementation and regression coverage complete. Implicit locale
+selection now includes the configured base locale, deduplicates a discovered
+base locale using the configured strict/flexible policy, and remains stably
+sorted. Calls with an explicit locale remain limited to their explicit values.
 
-**Current behavior:**
+**Location:** `LostInTranslationHelper::gatherPossibleTranslations()`,
+`TranslationLoader::getLocalesForImplicitLookup()`
+
+**Previous behavior:**
 
 Calls without an explicit locale are checked only against
 `TranslationLoader::getFoundLocales()`. The configured base locale is absent

@@ -57,6 +57,9 @@ class TranslationLoader
     /** @var list<non-empty-string> */
     private array $foundLocales = [];
 
+    /** @var list<string> */
+    private readonly array $implicitLookupLocales;
+
     /** @var array<non-empty-string, non-empty-list<string>> */
     private array $localeFiles = [];
 
@@ -114,6 +117,7 @@ class TranslationLoader
         }
 
         $this->scan();
+        $this->implicitLookupLocales = $this->buildImplicitLookupLocales();
 
         $this->searchDatabase = $this->buildSearchDatabase();
     }
@@ -175,6 +179,39 @@ class TranslationLoader
     public function getFoundLocales(): array
     {
         return $this->foundLocales;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getLocalesForImplicitLookup(): array
+    {
+        return $this->implicitLookupLocales;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function buildImplicitLookupLocales(): array
+    {
+        $locales = $this->foundLocales;
+        $baseLocaleFound = false;
+
+        foreach ($locales as $locale) {
+            if ($this->isBaseLocale($locale)) {
+                $baseLocaleFound = true;
+                break;
+            }
+        }
+
+        if (!$baseLocaleFound) {
+            $locales[] = $this->baseLocale;
+        }
+
+        // Make sure they are stably sorted
+        sort($locales, SORT_NATURAL);
+
+        return $locales;
     }
 
     public function get(string $locale, string $key): ?string

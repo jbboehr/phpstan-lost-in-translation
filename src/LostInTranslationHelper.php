@@ -214,7 +214,7 @@ class LostInTranslationHelper
                 $lookInLocales[] = $localeTypeConstantString->getValue();
             }
         } else {
-            $lookInLocales = $this->translationLoader->getFoundLocales();
+            $lookInLocales = $this->translationLoader->getLocalesForImplicitLookup();
         }
 
         $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {

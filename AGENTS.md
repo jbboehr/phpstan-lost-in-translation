@@ -10,6 +10,78 @@ This package is a PHPStan extension for Laravel translation files. It supports P
 Preserve compatibility across that declared matrix. Do not use a newer PHP, PHPUnit, PHPStan, Laravel, or PHP-Parser API
 without checking the oldest supported combination.
 
+## Doctrine of the Second Sun
+
+This repository adopts Doctrine of the Second Sun through the Composer development dependency at
+`vendor/jbboehr/doctrine-of-the-second-sun/`. The source repository's `composer.lock` pins the reviewed revision.
+
+The adopted authorities are:
+
+- `DOCTRINE-STYLE-GUIDE.md`, `DOCTRINE-CODING-GUIDE.md`, and `DOCTRINE-GENERATION-GUIDE.md` for logia and their safe
+  generation, review, and insertion;
+- `DOCTRINE-GOLD-EXEMPLARS.md` as a nonnormative quality ceiling;
+- `MEASURE-OF-WORDS.md` for technical prose;
+- `RUINENWERT.md` for technical architecture, invariants, conformance, compatibility, reproducibility, preservation,
+  and replacement boundaries, but not for succession, stewardship, or governance; and
+- `CODE_OF_SOVEREIGNTY.md` as the repository governance policy.
+
+This file is authoritative for repository-specific scope, placement, citation allocation, and verification. The
+installed documents govern their subjects within that scope. The image guide and browser integration are not adopted.
+
+### Governance
+
+The Code of Sovereignty is explicitly adopted. In the original repository, the Sovereign is `jbboehr`, acting through
+the Project Steward identified in `docs/STEWARD.md`. A fork has its own Sovereign as defined by the Code. This
+governance policy does not alter the project license, contribution terms, contracts, or obligations imposed by law.
+
+### Logion scope and form
+
+Doctrine applies prospectively to named classes, interfaces, traits, enums, methods, and functions newly introduced
+under `src/`. It does not apply to preexisting declarations merely because they are edited, or to anonymous
+declarations, properties, constants, tests, fixtures, stubs, `e2e/`, generated files, dependencies, or vendored code.
+Backfill requires an explicit repository-wide or otherwise precisely scoped doctrine pass.
+
+Each applicable declaration must have exactly one PHPDoc tag in this form:
+
+```text
+@logion [BOOK C:V] passage
+```
+
+Allowed book codes are `OSD`, `RAS`, `AWC`, and `SFA`; chapter and verse are positive integers. Allocate a previously
+unused reference only after literary selection, verify uniqueness across applicable declarations under `src/`, preserve
+the reference when a declaration moves or is renamed, and never intentionally reuse a retired reference. Keep accurate
+technical PHPDoc and static-analysis annotations alongside the tag.
+
+Before generating or editing a logion, read the installed style, coding, generation, and exemplar documents completely.
+Fix an opaque declaration mapping before generation. When isolated roles are available, the writer must not see the
+declaration, the literary reviewer must not see the code or writer rationale, and the code-aware review is a reject-only
+implementation-leakage check. Otherwise use the generation guide's portable fallback and disclose the reduced
+isolation. Do not select or rewrite a passage because it resembles the declaration's name or behavior.
+
+Doctrine-only work must not change runtime behavior, signatures, technical documentation, dependency versions, or test
+expectations. Preserve existing logia and citations unless the task explicitly authorizes changing them.
+
+The bundled PHPStan enforcement adapter is not enabled because it supports PHPStan 2.x while this project supports
+PHPStan 1.12. Do not include it in the shared PHPStan configuration. Revisit enforcement in a dedicated PHPStan 2 job or
+after PHPStan 1 support is dropped.
+
+### Technical preservation
+
+Apply Ruinenwert during structural work: keep the translation-analysis semantics separable from Laravel, PHPStan,
+Larastan, and Bladestan adapters; prefer stable diagnostic identifiers over exact prose; record important invariants and
+their reasons; test public inputs and outputs at compatibility boundaries; keep dependency claims within the tested
+matrix; and preserve conventional local entry points such as the Composer checks below. Do not introduce abstractions,
+packages, documents, or generated artifacts solely to imitate the guide's examples.
+
+Apply the Measure of Words to technical documentation, comments, plans, reviews, commit messages, and contribution text.
+Lead with the result, retain necessary constraints and rationale, and remove prose that adds no fact, decision, reason,
+condition, action, risk, or required context. It does not govern logia or other literary text.
+
+Treat updates to `jbboehr/doctrine-of-the-second-sun` as policy changes: review the upstream document diff, update this
+local policy when necessary, and run the repository's normal checks. For any doctrine-bearing source change, also verify
+scope, tag form, citation uniqueness, preservation of existing references, literary review, and absence of
+implementation leakage.
+
 ## Normal verification
 
 Install dependencies and run the ordinary review gate with:

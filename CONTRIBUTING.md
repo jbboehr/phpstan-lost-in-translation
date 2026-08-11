@@ -5,6 +5,14 @@ Thank you for considering a contribution to this project.
 Bug reports, feature suggestions, documentation improvements, tests, and code changes are welcome. For substantial
 changes, consider opening an issue first so that the proposed design can be discussed.
 
+## Repository doctrine
+
+This repository adopts selected guidance and governance from Doctrine of the Second Sun. The installed documents are
+available after `composer install` under `vendor/jbboehr/doctrine-of-the-second-sun/`. The authoritative local policy,
+including prospective `src/` declaration coverage, exclusions, citation rules, Ruinenwert boundaries, and the adopted
+Code of Sovereignty, is recorded in [`AGENTS.md`](AGENTS.md#doctrine-of-the-second-sun). Contributors introducing named
+declarations under `src/` should review that policy before submitting them.
+
 ## Pull requests
 
 A pull request should:

@@ -511,6 +511,21 @@ Ongoing policy:
 - Continue testing supported maintained Laravel versions separately from the
   PHP 8.1 compatibility baseline.
 
+### Doctrine of the Second Sun
+
+**Status:** The portable guidance is installed as the Composer development dependency
+`jbboehr/doctrine-of-the-second-sun:dev-master`, with the selected revision pinned in `composer.lock`. Repository-local
+scope, citation, workflow, Ruinenwert, technical-writing, and Code of Sovereignty policy is recorded in `AGENTS.md` and
+linked from `CONTRIBUTING.md`.
+
+Logion coverage is prospective for new named declarations under `src/`; no backfill was performed during adoption.
+Ruinenwert is adopted for technical preservation and replacement boundaries, while its succession and stewardship
+recommendations are excluded. Repository governance instead follows the explicitly adopted Code of Sovereignty.
+
+The bundled enforcement adapter remains disabled because it supports PHPStan 2.x while this package supports PHPStan
+1.12 and 2.x. Reconsider it through a dedicated PHPStan 2 verification job or after PHPStan 1 support is dropped; do not
+include it in the shared analysis configuration before then.
+
 ### Property-based testing with Eris
 
 Evaluate a targeted Eris suite after CR-05 introduces shared locale

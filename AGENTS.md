@@ -28,6 +28,10 @@ The adopted authorities are:
 This file is authoritative for repository-specific scope, placement, citation allocation, and verification. The
 installed documents govern their subjects within that scope. The image guide and browser integration are not adopted.
 
+The Codex writer and reviewer adapters under `.codex/agents/` are reviewed, repository-owned copies of the adapters in
+`vendor/jbboehr/doctrine-of-the-second-sun/integrations/codex/agents/`. Keep them byte-for-byte synchronized with the
+reviewed Composer pin. Installing or updating the dependency does not register or update the local copies automatically.
+
 ### Governance
 
 The Code of Sovereignty is explicitly adopted. In the original repository, the Sovereign is `jbboehr`, acting through
@@ -78,9 +82,9 @@ Lead with the result, retain necessary constraints and rationale, and remove pro
 condition, action, risk, or required context. It does not govern logia or other literary text.
 
 Treat updates to `jbboehr/doctrine-of-the-second-sun` as policy changes: review the upstream document diff, update this
-local policy when necessary, and run the repository's normal checks. For any doctrine-bearing source change, also verify
-scope, tag form, citation uniqueness, preservation of existing references, literary review, and absence of
-implementation leakage.
+local policy and committed Codex adapters when necessary, and run the repository's normal checks. For any
+doctrine-bearing source change, also verify scope, tag form, citation uniqueness, preservation of existing references,
+literary review, and absence of implementation leakage.
 
 ## Normal verification
 

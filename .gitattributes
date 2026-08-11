@@ -1,11 +1,15 @@
-* text=auto
+* text=auto eol=lf
 
 composer.lock linguist-generated
 composer-project.nix linguist-generated
 
+.codex export-ignore
 .editorconfig export-ignore
 .envrc export-ignore
 .gitattributes export-ignore
+AGENTS.md export-ignore
+secrets export-ignore
+/tmp* export-ignore
 
 # we can't export-ignore these or nix build will fail...
 #/tests export-ignore

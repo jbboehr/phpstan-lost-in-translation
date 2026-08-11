@@ -17,6 +17,7 @@
     ],
     "archive": {
         "exclude": [
+            "/.codex",
             "/.codeclimate.json",
             "/.direnv",
             "/.dvc",
@@ -29,6 +30,7 @@
             "/.phpcs.xml.dist",
             "/.phpunit.result.cache",
             "/.pre-commit-config.yaml",
+            "/AGENTS.md",
             "/clover.xml",
             "/composer.lock",
             "/coverage",
@@ -45,8 +47,9 @@
             "/phpstan.neon.dist",
             "/phpunit.xml.dist",
             "/result*",
+            "/secrets",
             "/tests",
-            "/tmp.md",
+            "/tmp*",
             "/tools",
             "/vendor"
         ]

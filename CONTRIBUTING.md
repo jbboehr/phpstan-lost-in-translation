@@ -13,6 +13,8 @@ including prospective `src/` declaration coverage, exclusions, citation rules, R
 Code of Sovereignty, is recorded in [`AGENTS.md`](AGENTS.md#doctrine-of-the-second-sun). Contributors introducing named
 declarations under `src/` should review that policy before submitting them.
 
+Repository governance is published in the [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) entry point.
+
 ## Pull requests
 
 A pull request should:

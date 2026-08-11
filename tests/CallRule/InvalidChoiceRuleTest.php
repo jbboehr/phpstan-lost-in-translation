@@ -115,6 +115,21 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 56,
                 Utils::formatTipForKeyValue('sk', '[2,3,4] There are :count books'),
             ],
+            [
+                'Translation choice has non-numeric value: "a"',
+                59,
+                Utils::formatTipForKeyValue('en', '{a} one|{b} two'),
+            ],
+            [
+                'Translation choice has non-numeric value: "b"',
+                59,
+                Utils::formatTipForKeyValue('en', '{a} one|{b} two'),
+            ],
+            [
+                'Failed to parse translation choice: "  {3 three"',
+                62,
+                Utils::formatTipForKeyValue('en', '  {3 three'),
+            ],
         ]);
     }
 

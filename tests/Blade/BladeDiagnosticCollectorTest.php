@@ -85,6 +85,100 @@ final class BladeDiagnosticCollectorTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse((new BladeDiagnosticCollector())->push([$error], __FILE__, __LINE__));
     }
 
+    public function testQueuesDiagnosticsFromMultipleNestedAnalyses(): void
+    {
+        $firstError = RuleErrorBuilder::message('First diagnostic')
+            ->identifier('lostInTranslation.first')
+            ->build();
+        $secondError = RuleErrorBuilder::message('Second diagnostic')
+            ->identifier('lostInTranslation.second')
+            ->build();
+        $collector = new BladeDiagnosticCollector();
+
+        $this->assertTrue($collector->push(
+            [$firstError],
+            __DIR__ . '/../data/example-blade-compiled.php',
+            4,
+        ));
+        $this->assertTrue($collector->push(
+            [$secondError],
+            __DIR__ . '/../data/example-blade-compiled.php',
+            4,
+        ));
+
+        $outerNode = $this->createStub(FuncCall::class);
+        $outerNode->method('getStartLine')->willReturn(10);
+        $outerScope = $this->createStub(Scope::class);
+        $outerScope->method('getFile')->willReturn('/app/Http/Controllers/BookController.php');
+
+        $diagnostics = $collector->processNode($outerNode, $outerScope);
+
+        $this->assertIsArray($diagnostics);
+        $this->assertSame(
+            ['First diagnostic', 'Second diagnostic'],
+            array_column($diagnostics, 'message'),
+        );
+    }
+
+    public function testUsesTheNearestPrecedingTemplateMarker(): void
+    {
+        $compiledFile = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8)) . '.php';
+        $error = RuleErrorBuilder::message('Example')
+            ->identifier('lostInTranslation.example')
+            ->build();
+        $collector = new BladeDiagnosticCollector();
+
+        try {
+            $this->assertNotFalse(file_put_contents(
+                $compiledFile,
+                "/** file: resources/views/first.blade.php, line: 11 */\n"
+                . "__('first');\n"
+                . "/** file: resources/views/second.blade.php, line: 22 */\n"
+                . "__('second');\n",
+            ));
+            $this->assertTrue($collector->push([$error], $compiledFile, 2));
+            $this->assertTrue($collector->push([$error], $compiledFile, 4));
+
+            $outerNode = $this->createStub(FuncCall::class);
+            $outerNode->method('getStartLine')->willReturn(10);
+            $outerScope = $this->createStub(Scope::class);
+            $outerScope->method('getFile')->willReturn('/app/Http/Controllers/BookController.php');
+
+            $diagnostics = $collector->processNode($outerNode, $outerScope);
+
+            $this->assertIsArray($diagnostics);
+            $this->assertSame(
+                ['resources/views/first.blade.php', 'resources/views/second.blade.php'],
+                array_column(array_column($diagnostics, 'metadata'), 'template_file_path'),
+            );
+            $this->assertSame(
+                [11, 22],
+                array_column(array_column($diagnostics, 'metadata'), 'template_line'),
+            );
+        } finally {
+            if (file_exists($compiledFile)) {
+                unlink($compiledFile);
+            }
+        }
+    }
+
+    public function testRejectsAnEmptyTemplatePath(): void
+    {
+        $compiledFile = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8)) . '.php';
+        $error = RuleErrorBuilder::message('Example')
+            ->identifier('lostInTranslation.example')
+            ->build();
+
+        try {
+            $this->assertNotFalse(file_put_contents($compiledFile, "/** file: , line: 19 */\n__('example');\n"));
+            $this->assertFalse((new BladeDiagnosticCollector())->push([$error], $compiledFile, 2));
+        } finally {
+            if (file_exists($compiledFile)) {
+                unlink($compiledFile);
+            }
+        }
+    }
+
     public function testClearsCompiledFileCacheAfterTheOuterCall(): void
     {
         $compiledFile = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8)) . '.php';

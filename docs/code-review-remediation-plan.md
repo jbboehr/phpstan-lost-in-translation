@@ -513,6 +513,19 @@ Ongoing policy:
 - Continue testing supported maintained Laravel versions separately from the
   PHP 8.1 compatibility baseline.
 
+### Mutation testing baseline
+
+**Status:** Complete. The reviewed PHP 8.4 campaign generates 918 covered
+mutants, kills 756, and records a covered-code MSI of 82.35%. CI now enforces
+an 80-point minimum. Focused tests cover the observable Blade queue, loader
+metadata, choice and replacement edge cases, memoization, formatter exit
+status, and utility boundaries added during triage.
+
+The 162 survivors are classified by component in
+`docs/mutation-testing.md`. Equivalent mutants are documented rather than
+hidden with broad ignore rules; remaining behavioral variants provide a
+prioritized input for future work tied to real diagnostics.
+
 ### Doctrine of the Second Sun
 
 **Status:** The portable guidance is installed as the Composer development dependency
@@ -648,7 +661,8 @@ so validation and storage cannot diverge again.
 5. Migrate the PHPUnit configuration with matrix verification.
 6. Add runtime-only Composer auditing to CI.
 7. Triage the advisory Infection baseline and establish a covered-code MSI
-   threshold.
+   threshold. **Complete:** the reviewed 82.35% baseline now has an enforced
+   80% floor.
 8. Evaluate targeted Eris properties after locale canonicalization is stable.
 
 ## Definition of done

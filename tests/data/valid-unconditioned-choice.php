@@ -14,3 +14,6 @@ trans_choice('{0} None|One|Many', 5, [], 'ru');
 
 /** @var int $number */
 trans_choice('{0} None|One|Many', $number, [], 'ru');
+
+/** Brackets inside ordinary text do not start an explicit condition. */
+trans_choice('A label [with context|Other labels', 2, [], 'en');

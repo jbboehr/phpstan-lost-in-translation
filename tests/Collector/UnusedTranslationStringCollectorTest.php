@@ -42,7 +42,7 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
         $node = $this->createStub(FuncCall::class);
 
         $collector = new UnusedTranslationStringCollector($helper);
-        $collector->processNode($node, $scope);
+        $this->assertNull($collector->processNode($node, $scope));
         $collector->push(new TranslationCall(
             null,
             '__',

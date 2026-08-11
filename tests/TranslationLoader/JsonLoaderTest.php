@@ -23,11 +23,56 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
+use PHPStan\Rules\LineRuleError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Finder\SplFileInfo;
 
 final class JsonLoaderTest extends TestCase
 {
+    public function testLoadsTranslationsWithTheirSourceLines(): void
+    {
+        $path = __DIR__ . '/../lang/en.json';
+        $result = (new JsonLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+        $this->assertSame([
+            'only in en' => 'only in en',
+            'exists in all locales' => 'exists in all locales',
+        ], $result->translations);
+        $this->assertSame([
+            'only in en' => 2,
+            'exists in all locales' => 3,
+        ], $result->locations);
+        $this->assertSame([], $result->errors);
+    }
+
+    public function testReportsInvalidValuesAndDiscardsEmptyStrings(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'phpstan-lost-in-translation-');
+        $this->assertIsString($path);
+
+        try {
+            $this->assertNotFalse(file_put_contents(
+                $path,
+                "{\n  \"valid\": \"translation\",\n  \"empty\": \"\",\n  \"invalid\": 1\n}\n",
+            ));
+
+            $result = (new JsonLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+            $this->assertSame(['valid' => 'translation'], $result->translations);
+            $this->assertSame([
+                'valid' => 2,
+                'empty' => 3,
+                'invalid' => 4,
+            ], $result->locations);
+            $this->assertCount(1, $result->errors);
+            $this->assertSame('Invalid value: 1', $result->errors[0]->getMessage());
+            $this->assertInstanceOf(LineRuleError::class, $result->errors[0]);
+            $this->assertSame(4, $result->errors[0]->getLine());
+        } finally {
+            unlink($path);
+        }
+    }
+
     /**
      * @runInSeparateProcess
      * @preserveGlobalState disabled

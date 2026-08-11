@@ -36,20 +36,35 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
 {
     public function testStuff(): void
     {
-        $formatter = new JsonErrorFormatter(true);
+        $formatter = new JsonErrorFormatter();
 
         $analysisResult = self::makeAnalysisResult();
 
         /** @phpstan-ignore-next-line phpstanApi.method */
-        $formatter->formatErrors($analysisResult, $this->getOutput());
+        $exitCode = $formatter->formatErrors($analysisResult, $this->getOutput());
 
         /** @phpstan-ignore-next-line phpstanApi.method */
-        $actual = json_decode($this->getOutputContent(), true, 512, JSON_THROW_ON_ERROR);
+        $outputContent = $this->getOutputContent();
+        $actual = json_decode($outputContent, true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertIsArray($actual);
+        $this->assertSame(1, $exitCode);
+        $this->assertStringContainsString("\n", $outputContent);
         $this->assertArrayHasKey(MissingTranslationStringRule::IDENTIFIER, $actual);
         $this->assertArrayHasKey('ja', $actual[MissingTranslationStringRule::IDENTIFIER]);
         $this->assertArrayHasKey('missing translation string', $actual[MissingTranslationStringRule::IDENTIFIER]['ja']);
+    }
+
+    public function testReturnsSuccessWhenTheAnalysisHasNoErrors(): void
+    {
+        $analysisResult = self::makeAnalysisResult();
+        $fileSpecificErrors = new \ReflectionProperty($analysisResult, 'fileSpecificErrors');
+        $fileSpecificErrors->setValue($analysisResult, []);
+
+        /** @phpstan-ignore-next-line phpstanApi.method */
+        $exitCode = (new JsonErrorFormatter(false))->formatErrors($analysisResult, $this->getOutput());
+
+        $this->assertSame(0, $exitCode);
     }
 
     public function testExceptionConversion(): void

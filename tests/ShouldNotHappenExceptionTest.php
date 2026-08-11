@@ -34,9 +34,14 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
     public function testRethrow(): void
     {
         $exception = new \Exception('msg');
-        $this->expectExceptionMessage('msg');
-        $this->expectException(ShouldNotHappenException::class);
-        SHouldNotHappenException::rethrow($exception);
+
+        try {
+            ShouldNotHappenException::rethrow($exception);
+        } catch (ShouldNotHappenException $converted) {
+            $this->assertStringContainsString('msg', $converted->getMessage());
+            $this->assertSame(0, $converted->getCode());
+            $this->assertSame($exception, $converted->getPrevious());
+        }
     }
 
     public function testExceptionConversion(): void

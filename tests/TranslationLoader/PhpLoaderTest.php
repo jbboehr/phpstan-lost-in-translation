@@ -24,10 +24,42 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\LoadResult;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
+use PHPStan\Rules\LineRuleError;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Finder\SplFileInfo;
 
 final class PhpLoaderTest extends TestCase
 {
+    public function testLoadsFlattenedTranslationsWithTheirSourceLines(): void
+    {
+        $path = __DIR__ . '/../lang/en/messages.php';
+        $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+        $this->assertSame([
+            'messages.only_in_en' => 'only_in_en',
+            'messages.exists_in_all_locales' => 'exists_in_all_locales',
+        ], $result->translations);
+        $this->assertSame([
+            'messages.only_in_en' => 2,
+            'messages.exists_in_all_locales' => 3,
+        ], $result->locations);
+        $this->assertSame([], $result->errors);
+    }
+
+    public function testIgnoresEmptyArraysAndReportsInvalidLeaves(): void
+    {
+        $path = __DIR__ . '/../lang-empty-arrays/en/messages.php';
+        $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+        $this->assertSame([
+            'messages.nested.translation' => 'Still loaded',
+        ], $result->translations);
+        $this->assertCount(1, $result->errors);
+        $this->assertSame('Invalid value: 1', $result->errors[0]->getMessage());
+        $this->assertInstanceOf(LineRuleError::class, $result->errors[0]);
+        $this->assertSame(7, $result->errors[0]->getLine());
+    }
+
     public function testLoadDeclaresItsConcreteReturnType(): void
     {
         $returnType = (new \ReflectionMethod(PhpLoader::class, 'load'))->getReturnType();

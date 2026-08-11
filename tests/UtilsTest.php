@@ -49,6 +49,7 @@ final class UtilsTest extends TestCase
         yield 'script case' => ['ZH-hANS', 'zh_Hans'];
         yield 'script and region case' => ['SR-lATN-rs', 'sr_Latn_RS'];
         yield 'numeric region' => ['ES-419', 'es_419'];
+        yield 'non-script subtag' => ['en-abcde', 'en_ABCDE'];
     }
 
     /**
@@ -82,6 +83,7 @@ final class UtilsTest extends TestCase
     public function testEscapeBinaryUsesAsciiPrintableRange(): void
     {
         $this->assertSame('printable\\x00\\x7f\\xa0', Utils::escapeBinary("printable\x00\x7f\xa0"));
+        $this->assertSame('space ~', Utils::escapeBinary('space ~'));
     }
 
     public function testFormatTipForKeyValue(): void
@@ -133,6 +135,21 @@ final class UtilsTest extends TestCase
     public function testDetectBaseLocaleWithNoApplication(): void
     {
         $this->assertSame('en', Utils::detectBaseLocale(null));
+    }
+
+    public function testDetectBaseLocaleFromBootedApplication(): void
+    {
+        $app = $this->app;
+        $this->assertNotNull($app);
+        $originalLocale = $app->getLocale();
+
+        try {
+            $app->setLocale('ja');
+
+            $this->assertSame('ja', Utils::detectBaseLocale());
+        } finally {
+            $app->setLocale($originalLocale);
+        }
     }
 
     public function testDetectBaseLocaleWithUnbootedApplication(): void

@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests\Fuzzy;
 
+use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\MyFuzzyStringSet;
@@ -117,12 +118,47 @@ final class FuzzyStringSetTest extends TestCase
 
     public function testMemoizingSetPreservesSearchResults(): void
     {
-        $set = new MemoizingFuzzyStringSet(new MyFuzzyStringSet(['test', 'toast']));
+        $inner = $this->createMock(FuzzyStringSetInterface::class);
+        $inner->expects($this->exactly(2))
+            ->method('search')
+            ->willReturnMap([
+                ['tezt', 'test'],
+                ['zzzz', null],
+            ]);
+        $set = new MemoizingFuzzyStringSet($inner);
 
         $this->assertSame('test', $set->search('tezt'));
         $this->assertSame('test', $set->search('tezt'));
         $this->assertNull($set->search('zzzz'));
         $this->assertNull($set->search('zzzz'));
+    }
+
+    public function testMemoizingSetForwardsAddManyAndInvalidatesCachedResults(): void
+    {
+        $inner = $this->createMock(FuzzyStringSetInterface::class);
+        $inner->expects($this->once())
+            ->method('addMany')
+            ->with(['test']);
+        $inner->expects($this->exactly(2))
+            ->method('search')
+            ->with('tezt')
+            ->willReturnOnConsecutiveCalls(null, 'test');
+        $set = new MemoizingFuzzyStringSet($inner);
+
+        $this->assertNull($set->search('tezt'));
+        $set->addMany(['test']);
+        $this->assertSame('test', $set->search('tezt'));
+    }
+
+    public function testFactoryMemoizesByDefaultAndCanReturnTheSelectedImplementationDirectly(): void
+    {
+        $memoized = (new FuzzyStringSetFactory(MyFuzzyStringSet::class))->createFuzzyStringSet(['test']);
+        $direct = (new FuzzyStringSetFactory(MyFuzzyStringSet::class, false))->createFuzzyStringSet(['test']);
+
+        $this->assertInstanceOf(MemoizingFuzzyStringSet::class, $memoized);
+        $this->assertSame('test', $memoized->search('tezt'));
+        $this->assertInstanceOf(MyFuzzyStringSet::class, $direct);
+        $this->assertSame('test', $direct->search('tezt'));
     }
 
     /**

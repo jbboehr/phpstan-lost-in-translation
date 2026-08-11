@@ -8,3 +8,6 @@ __(':foo :FOO', ['foo' => 'bar'], 'en');
 
 /* reordered named arguments */
 trans(key: 'exists in all locales', locale: 'en', replace: ['named' => 'unused']);
+
+/* unspecified locales are checked independently */
+__('exists in all locales', ['shared' => 'unused']);

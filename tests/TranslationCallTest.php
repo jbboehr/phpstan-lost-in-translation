@@ -38,6 +38,8 @@ final class TranslationCallTest extends \PHPUnit\Framework\TestCase
             new ConstantStringType('baz'),
         );
 
+        $this->assertFalse($call->isChoice);
+
         /** @phpstan-ignore-next-line argument.type */
         $this->assertEquals($call, TranslationCall::fromJsonArray(json_decode(json_encode($call), true)));
     }

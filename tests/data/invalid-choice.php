@@ -54,3 +54,15 @@ $translator->choice(number: 3, locale: 'en', key: '{0} There are none|{1} There 
 
 /** Laravel range conditions accept exactly two comma-separated bounds. */
 trans_choice('[2,3,4] There are :count books', 3, [], 'sk');
+
+/** Each malformed condition is reported independently. */
+trans_choice('{a} one|{b} two', 1, [], 'en');
+
+/** Leading whitespace does not turn a malformed condition into an unconditioned segment. */
+trans_choice('  {3 three', 3, [], 'en');
+
+/** Newlines are valid in the text following an explicit condition. */
+trans_choice("{1} One\ncontinued|{2} Two", 1, [], 'en');
+
+/** Ordinary translation calls are not choice syntax. */
+__('  {3 three');

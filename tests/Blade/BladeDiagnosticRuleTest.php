@@ -50,6 +50,18 @@ final class BladeDiagnosticRuleTest extends \PHPUnit\Framework\TestCase
                 'file' => __FILE__,
                 'line' => 215,
             ],
+            [
+                'message' => 'Missing translation string: "messages.missing"',
+                'identifier' => 'lostInTranslation.missingTranslationString',
+                'metadata' => [
+                    'lostInTranslation::key' => 'messages.missing',
+                    'template_file_path' => 'resources/views/other.blade.php',
+                    'template_line' => 27,
+                ],
+                'tip' => null,
+                'file' => __FILE__,
+                'line' => 216,
+            ],
         ];
 
         $phpStanVersionRange = InstalledVersions::getVersionRanges('phpstan/phpstan');
@@ -70,7 +82,7 @@ final class BladeDiagnosticRuleTest extends \PHPUnit\Framework\TestCase
         $node = (new \ReflectionClass(CollectedDataNode::class))->newInstance($collectedData, false);
         $errors = (new BladeDiagnosticRule())->processNode($node, $this->createStub(Scope::class));
 
-        $this->assertCount(1, $errors);
+        $this->assertCount(2, $errors);
         $error = $errors[0];
         $this->assertSame('lostInTranslation.invalidReplacement.unused', $error->getIdentifier());
         $this->assertSame('Unused translation replacement: "unused"', $error->getMessage());
@@ -86,5 +98,12 @@ final class BladeDiagnosticRuleTest extends \PHPUnit\Framework\TestCase
         $this->assertSame(__FILE__, $error->getFile());
         $this->assertInstanceOf(LineRuleError::class, $error);
         $this->assertSame(215, $error->getLine());
+
+        $secondError = $errors[1];
+        $this->assertSame('lostInTranslation.missingTranslationString', $secondError->getIdentifier());
+        $this->assertSame('Missing translation string: "messages.missing"', $secondError->getMessage());
+        $this->assertNotInstanceOf(TipRuleError::class, $secondError);
+        $this->assertInstanceOf(LineRuleError::class, $secondError);
+        $this->assertSame(216, $secondError->getLine());
     }
 }

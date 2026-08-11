@@ -6,6 +6,7 @@
     },
     timeout: 30,
     threads: 4,
+    minCoveredMsi: 80,
     logs: {
         text: "infection.log",
         summary: "infection-summary.log",

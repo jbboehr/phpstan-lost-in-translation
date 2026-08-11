@@ -70,6 +70,21 @@ class InvalidReplacementRuleTest extends RuleTestCase
                 10,
                 Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
             ],
+            [
+                'Unused translation replacement: "shared"',
+                13,
+                Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales'),
+            ],
+            [
+                'Unused translation replacement: "shared"',
+                13,
+                Utils::formatTipForKeyValue('ja', 'exists in all locales', 'exists in all locales'),
+            ],
+            [
+                'Unused translation replacement: "shared"',
+                13,
+                Utils::formatTipForKeyValue('zh', 'exists in all locales', 'exists in all locales'),
+            ],
         ]);
     }
 

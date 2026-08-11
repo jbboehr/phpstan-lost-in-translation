@@ -317,7 +317,7 @@ jobs:
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress
 
-            - name: Run mutation baseline
+            - name: Enforce mutation score
               run: composer infection:ci
 
             - name: Upload mutation reports

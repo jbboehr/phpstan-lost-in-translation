@@ -55,7 +55,7 @@ below so the separate review report is not required to track outstanding work.
 | RV-04 | Source-string fallback for a fileless base locale is intentional and covered in both replacement and choice rule tests. |
 | RV-05 | Tracked by CR-07; complete. |
 | RV-06 | The deterministic first-spelling-wins policy is intentional, and the existing diagnostic says that all files for the losing spelling are ignored. |
-| RV-07 | Tracked by CR-02 as a product decision; supported layouts and the vendor-override limitation are documented in the README. |
+| RV-07 | Tracked by CR-02; vendor overrides are intentionally unsupported, documented, and covered as ignored paths. |
 | RV-08 | Tracked by CR-10; implementation and regression coverage complete. |
 | RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete CR-09 message defect is fixed. |
 | RV-10 | The compiled Blade diagnostic bridge and regression coverage are complete. |
@@ -113,12 +113,13 @@ the configured path.
 
 ### CR-02: Nonmatching translation paths are processed
 
-**Status:** Remediation steps 1 and 2 are implemented. The vendor-override
-decision and its regression coverage remain open.
+**Status:** Implementation and regression coverage complete. Supported layouts
+are matched exactly; other nested files, including Laravel vendor overrides,
+are intentionally unsupported and ignored.
 
 **Location:** `src/TranslationLoader/TranslationLoader.php:293`
 
-**Current behavior:**
+**Previous behavior:**
 
 The scan loop skips a file only when `preg_match()` returns `false`. A regular
 nonmatch returns `0`, so the code continues, reads an undefined `$matches[1]`,
@@ -135,18 +136,19 @@ unrelated PHP file.
 - Standard nested layouts, including vendor translation overrides, are unsafe.
 - Files can be associated with an empty locale.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 1. Require `preg_match(...) === 1` before reading captures.
 2. Initially skip unsupported paths deterministically.
-3. Separately decide whether Laravel vendor translation overrides should be
-   supported and, if so, parse their namespace, locale, and group explicitly.
+3. Keep Laravel vendor translation overrides unsupported, document that
+   limitation, and ignore them without loading or diagnostics.
 
 **Regression tests:**
 
 - Root JSON locale files and one-level locale PHP files continue to load.
 - Unrelated nested PHP and JSON files are ignored without warnings.
-- Add fixtures for the chosen vendor override behavior.
+- A realistic vendor override that throws if executed is ignored without
+  warnings, loader errors, or locale-file registration.
 
 ### CR-03: Named arguments are parsed positionally
 

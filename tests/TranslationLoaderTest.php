@@ -242,6 +242,27 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testVendorTranslationOverridesAreIgnored(): void
+    {
+        $vendorOverride = realpath(__DIR__ . '/lang-scanning/vendor/acme/en/messages.php');
+        $this->assertIsString($vendorOverride);
+
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-scanning',
+            baseLocale: 'en',
+            fuzzySearch: false,
+        );
+
+        $this->assertNull($loader->get('en', 'acme::messages.vendor_override'));
+        $this->assertSame(['en'], $loader->getFoundLocales());
+        $this->assertArrayNotHasKey('vendor', $loader->getLocaleFiles());
+        $this->assertSame([], $loader->getErrors());
+
+        foreach ($loader->getLocaleFiles() as $localeFiles) {
+            $this->assertNotContains($vendorOverride, $localeFiles);
+        }
+    }
+
     public function testEmptyPhpTranslationGroupsAreIgnored(): void
     {
         $loader = new TranslationLoader(

@@ -47,6 +47,7 @@
             "/result*",
             "/tests",
             "/tmp.md",
+            "/tools",
             "/vendor"
         ]
     },
@@ -118,6 +119,14 @@
         "coverage": "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text",
         "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
         "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",
+        "eris": [
+            "@eris:validate",
+            "@eris:install",
+            "@eris:test"
+        ],
+        "eris:install": "composer --working-dir=tools/eris install --prefer-dist --no-progress",
+        "eris:test": "composer --working-dir=tools/eris test",
+        "eris:validate": "composer --working-dir=tools/eris validate --strict",
         "infection": "infection --no-progress",
         "infection:ci": "infection --no-progress",
         "infection:core": "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php",

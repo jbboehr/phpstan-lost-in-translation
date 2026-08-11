@@ -94,13 +94,18 @@ composer check
 Use `composer check:full` for changes affecting packaging, extension registration, benchmarks, runtime dependency
 boundaries, or end-to-end diagnostics. Run `nix flake check -L` after changing Nix or repository scaffolding.
 
+Run `composer eris` for the isolated property suite after changing locale canonicalization or translation-key parsing.
+The command validates and installs its locked PHPUnit 10 and Eris dependencies under `tools/eris/` before running the
+suite. Set `ERIS_SEED` to override the tracked default when exploring or replaying generated inputs.
+
 During focused iteration, run the narrowest relevant command first. The shared Composer entry points are:
 
 - `composer phpcs` for coding standards;
 - `composer analyse` for PHPStan;
 - `composer test` for PHPUnit;
 - `composer runtime-smoke` for a production-dependency extension load;
-- `composer e2e` for expected diagnostics; and
+- `composer e2e` for expected diagnostics;
+- `composer eris` for isolated locale and translation-key properties; and
 - `composer infection` for optional mutation testing.
 
 ## Architecture boundaries
@@ -124,6 +129,9 @@ and lines where those fields are part of the behavior being changed.
 
 Runtime code may use only packages and PHP extensions declared under `require`. Development-only integrations belong
 under `require-dev` and must not be needed to load the installed extension.
+
+The Eris suite is a separate Composer project because no supported Eris release spans the root PHPUnit 9 through 11
+matrix. Keep its dependencies and lock under `tools/eris/`; do not add Eris to the root development requirements.
 
 Keep `composer.lock` synchronized with dependency-constraint changes. The lowest-dependency CI job is authoritative for
 the lower bounds; the Laravel matrix covers supported framework combinations.

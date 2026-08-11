@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+        beStrictAboutOutputDuringTests="true"
+        beStrictAboutChangesToGlobalState="true"
+        bootstrap="tests/bootstrap.php"
+        cacheResult="false"
+        colors="true"
+        executionOrder="default"
+        failOnRisky="true"
+        failOnWarning="true"
+>
+    <php>
+        <env name="ERIS_SEED" value="20260811" force="false"/>
+    </php>
+    <testsuites>
+        <testsuite name="Property Test Suite">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -271,6 +271,37 @@ jobs:
                   path: clover.xml
                   if-no-files-found: error
 
+    property:
+        runs-on: ubuntu-latest
+        name: "Property testing | PHP 8.1 | PHPUnit 10"
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "8.1"
+                  tools: composer:v2
+
+            - name: Get Composer cache directory
+              id: composer-cache-property
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - name: Cache Composer packages
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.composer-cache-property.outputs.dir }}
+                  key: ${{ runner.os }}-php-8.1-eris-${{ hashFiles('tools/eris/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.1-eris-
+                      ${{ runner.os }}-php-8.1-composer-
+                      ${{ runner.os }}-php-
+
+            - name: Run property tests
+              run: composer eris
+
     mutation:
         runs-on: ubuntu-latest
         name: "Mutation testing | PHP 8.4"

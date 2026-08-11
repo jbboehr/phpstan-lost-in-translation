@@ -543,18 +543,20 @@ include it in the shared analysis configuration before then.
 
 ### Property-based testing with Eris
 
-Evaluate a targeted Eris suite after CR-05 introduces shared locale
-canonicalization. Useful properties include normalization idempotence,
-case/dash/underscore equivalence in flexible mode, and exact preservation in
-strict mode. Generated plain and namespaced keys could also exercise cache and
-lookup order independence.
+**Status:** Complete. The property suite covers flexible locale normalization
+idempotence, case and separator equivalence, strict spelling preservation, and
+plain versus namespaced translation lookup independence across cache insertion
+orders.
 
-Keep property tests supplementary to focused examples and use a fixed default
-seed with an override for exploration and replay. Current Eris releases support
-PHP 8.1 but list PHPUnit 10 and newer; validate that constraint against this
-project's declared PHPUnit 9 compatibility before adding it to the main test
-suite. An isolated property-test job is preferable if PHPUnit 9 remains
-supported.
+No supported Eris release spans this project's PHPUnit 9 through 11 matrix:
+Eris 0.14 targets PHPUnit 8 and 9, while Eris 1.1 targets PHPUnit 10 and newer.
+The suite therefore runs as a locked Composer project under `tools/eris/` with
+Eris 1.1 and PHPUnit 10 on PHP 8.1. A dedicated CI job runs `composer eris`
+without changing root dependency resolution or the package archive.
+
+The tracked default seed is `20260811`; `ERIS_SEED` remains available for
+exploration and replay. Focused example tests remain the primary regression
+suite, with generated properties providing supplementary invariant coverage.
 
 ### Akashi-backed README example verification
 
@@ -664,6 +666,8 @@ so validation and storage cannot diverge again.
    threshold. **Complete:** the reviewed 82.35% baseline now has an enforced
    80% overall and covered-code floor.
 8. Evaluate targeted Eris properties after locale canonicalization is stable.
+   **Complete:** an isolated PHP 8.1/PHPUnit 10 job checks four deterministic
+   locale and translation-key properties with Eris 1.1.
 
 ## Definition of done
 

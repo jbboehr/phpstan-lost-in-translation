@@ -1,0 +1,34 @@
+{
+    "name": "jbboehr/phpstan-lost-in-translation-property-tests",
+    "description": "Isolated property tests for phpstan-lost-in-translation",
+    "type": "project",
+    "license": "AGPL-3.0-only WITH romic-exception",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../..",
+            "options": {
+                "reference": "none",
+                "symlink": true,
+                "versions": {
+                    "jbboehr/phpstan-lost-in-translation": "dev-property-tests"
+                }
+            }
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "giorgiosironi/eris": "^1.1",
+        "jbboehr/phpstan-lost-in-translation": "dev-property-tests",
+        "phpunit/phpunit": "^10.5"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": false,
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit --configuration phpunit.xml.dist"
+    }
+}

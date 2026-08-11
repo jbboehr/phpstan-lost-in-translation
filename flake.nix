@@ -15,6 +15,12 @@
 {
   description = "jbboehr/phpstan-lost-in-translation";
   inputs = {
+    akashi = {
+      url = "github:jbboehr/akashi.php/225cc33f61d5779791112fb6c3b0f473e9c8e5ae";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pre-commit-hooks.follows = "git-hooks";
+    };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     systems.url = "github:nix-systems/default";
     flake-utils = {
@@ -31,6 +37,7 @@
   outputs =
     {
       self,
+      akashi,
       nixpkgs,
       systems,
       flake-utils,
@@ -40,6 +47,11 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
+        agentBadge =
+          if pkgs.stdenv.isLinux then
+            akashi.packages.${system}.agent-badge
+          else
+            akashi.packages.${system}.agent-badge-unwrapped;
         buildEnv =
           {
             php,
@@ -82,6 +94,7 @@
             packages =
               pre-commit-check.enabledPackages
               ++ [
+                agentBadge
                 php'
                 php'.packages.composer
               ]

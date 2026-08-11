@@ -2,7 +2,7 @@
 # phpstan-lost-in-translation
 
 [![ci](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml/badge.svg)](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml)
-[![License: AGPL v3+](https://img.shields.io/badge/License-AGPL_v3%2b-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![License: AGPL-3.0-only WITH romic-exception](https://img.shields.io/badge/license-AGPL--3.0--only%20WITH%20romic--exception-blue.svg)](LICENSE.md)
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
 [![AI burn](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fjbboehr%2F1238801db4d132c97c1f32346be14450%2Fraw%2Fagent-badge.json&cacheSeconds=300)](https://github.com/arlegotin/agent-badge)
 
@@ -490,4 +490,26 @@ This project is based on and inspired by [coding-socks/lost-in-translation](http
 
 ## License
 
-This project is licensed under the [AGPL v3+](https://www.gnu.org/licenses/agpl-3.0) License - see the LICENSE.md file for details.
+phpstan-lost-in-translation is licensed under the **GNU Affero General Public License version 3 with the Romic
+Exception**:
+
+```text
+AGPL-3.0-only WITH romic-exception
+```
+
+The Romic Exception permits phpstan-lost-in-translation to be linked or combined with other code without subjecting
+that other code to the AGPL merely because of the linking or combination. Modifications to the covered project remain
+subject to the Project License, including its source-availability requirements for modified versions made available
+over a computer network.
+
+See [LICENSE.md](LICENSE.md) and [docs/LICENSE_EXCEPTION.md](docs/LICENSE_EXCEPTION.md) for the complete terms.
+
+Contributions are accepted under the terms in [CONTRIBUTING.md](CONTRIBUTING.md). Unless a contributor elects the CLA
+route, each contribution is offered under `AGPL-3.0-only WITH romic-exception OR Apache-2.0`, at each recipient's
+option, while the public project incorporates it under the Project License. The Apache-2.0 alternative applies only to
+the contributor-authored portions and does not make the project as a whole available under Apache-2.0.
+
+A contributor may instead elect [the CLA](docs/CLA-v1.md), keeping the contribution publicly under the Project License
+while granting the [Project Steward](docs/STEWARD.md) the additional rights specified there.
+
+Alternative licenses may be available from the [Project Steward](docs/STEWARD.md).

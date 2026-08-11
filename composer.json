@@ -3,7 +3,7 @@
     "description": "Helps find missing translation strings in Laravel applications",
     "type": "phpstan-extension",
     "keywords": ["laravel", "larastan", "bladestan", "phpstan", "php", "package", "static analysis", "code analysis", "code analyse"],
-    "license": "AGPL-3.0+",
+    "license": "AGPL-3.0-only WITH romic-exception",
     "homepage": "https://github.com/jbboehr/phpstan-lost-in-translation",
     "authors": [
         {

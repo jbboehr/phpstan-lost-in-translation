@@ -517,9 +517,9 @@ Ongoing policy:
 
 **Status:** Complete. The reviewed PHP 8.4 campaign generates 918 covered
 mutants, kills 756, and records a covered-code MSI of 82.35%. CI now enforces
-an 80-point minimum. Focused tests cover the observable Blade queue, loader
-metadata, choice and replacement edge cases, memoization, formatter exit
-status, and utility boundaries added during triage.
+80-point overall and covered-code minimums. Focused tests cover the observable
+Blade queue, loader metadata, choice and replacement edge cases, memoization,
+formatter exit status, and utility boundaries added during triage.
 
 The 162 survivors are classified by component in
 `docs/mutation-testing.md`. Equivalent mutants are documented rather than
@@ -662,7 +662,7 @@ so validation and storage cannot diverge again.
 6. Add runtime-only Composer auditing to CI.
 7. Triage the advisory Infection baseline and establish a covered-code MSI
    threshold. **Complete:** the reviewed 82.35% baseline now has an enforced
-   80% floor.
+   80% overall and covered-code floor.
 8. Evaluate targeted Eris properties after locale canonicalization is stable.
 
 ## Definition of done

@@ -37,6 +37,9 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
 
         try {
             ShouldNotHappenException::rethrow($exception);
+            // Guard the runtime contract even though the declared return type is never.
+            /** @phpstan-ignore-next-line deadCode.unreachable */
+            $this->fail('Expected ShouldNotHappenException to be thrown');
         } catch (ShouldNotHappenException $converted) {
             $this->assertStringContainsString('msg', $converted->getMessage());
             $this->assertSame(0, $converted->getCode());

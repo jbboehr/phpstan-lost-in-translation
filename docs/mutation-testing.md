@@ -38,9 +38,10 @@ ignored by Git and uploaded by CI even if the campaign fails.
 
 ## Baseline policy
 
-CI enforces a covered-code mutation score of 80. Change the threshold only
-after reviewing a complete campaign under the pinned mutation shell. When the
-score changes:
+CI enforces both overall and covered-code mutation scores of 80. The overall
+score prevents a loss of mutation coverage from being hidden by a stable score
+on the code that remains covered. Change either threshold only after reviewing
+a complete campaign under the pinned mutation shell. When a score changes:
 
 1. Add assertions for escaped mutants that change documented behavior.
 2. Ignore or document behaviorally equivalent mutants instead of coupling
@@ -56,8 +57,9 @@ coverage because that process may not load the active mutant.
 
 The complete PHP 8.4 campaign on 2026-08-10 generated 918 mutants. PHPUnit
 killed 756 and 162 escaped, for 100% mutation code coverage and a covered-code
-MSI of 82.35%. The 80-point gate leaves 2.35 percentage points of margin. No
-mutants are hidden by source exclusions or Infection ignore rules.
+MSI of 82.35%. With 100% mutation code coverage, the overall MSI is also
+82.35%. Both 80-point gates leave 2.35 percentage points of margin. No mutants
+are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
 

@@ -115,8 +115,9 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `composer package:check` for the built archive and an isolated PHPStan 1.12 consumer;
 - `composer e2e` for expected diagnostics;
 - `composer eris` for isolated locale and translation-key properties;
-- `composer docs:check` for marked README translation-call examples; and
-- `composer infection` for optional mutation testing.
+- `composer docs:check` for marked README translation-call examples;
+- `composer infection` for optional mutation testing; and
+- `composer bookstack:canary` from the PHP 8.4 shell for the optional pinned real-application integration check.
 
 ## Architecture boundaries
 
@@ -146,6 +147,11 @@ matrix. Keep its dependencies and lock under `tools/eris/`; do not add Eris to t
 The Akashi README suite is a separate Composer project because Akashi requires PHP 8.2 and its PHPStan adapter targets
 PHPStan 2. Keep its dependencies and lock under `tools/akashi/`; do not add Akashi to the root development requirements
 while PHP 8.1 and PHPStan 1.12 remain supported.
+
+The BookStack canary is an external, networked PHP 8.4 check, not part of the normal local or pull-request gate. Keep
+BookStack, BladeStan, Livewire, and core analysis versions pinned in `tools/bookstack/`; preserve its non-symlinked path
+installation from an extracted Composer archive, explicit filtering of non-extension BladeStan diagnostics, curated
+identifier-and-tip assertions, and broad diagnostic-count guard.
 
 Keep `composer.lock` synchronized with dependency-constraint changes. The lowest-dependency CI job is authoritative for
 the lower bounds; the Laravel matrix covers supported framework combinations.

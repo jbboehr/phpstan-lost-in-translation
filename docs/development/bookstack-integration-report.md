@@ -21,6 +21,28 @@ The main findings are:
 
 The recommended order is to fix empty-array loading first, then align choice validation with Laravel. Once those two sources of false positives are addressed, BookStack would be a strong candidate for a repeatable, optional integration smoke test.
 
+## Follow-up automation
+
+**Implemented 2026-08-11.** `composer bookstack:canary` now reproduces the integration against the same BookStack tag and
+commit in a temporary checkout. It builds and extracts this extension's Composer archive before installing the artifact
+without a source symlink. It then verifies the clean stock baseline, the application-only locale-alias result, and a
+BladeStan 0.11.7 pass with curated translation identifiers and preserved bridge tips. Non-extension BladeStan findings
+are filtered by the assertion layer instead of ignored in PHPStan configuration.
+
+Minimal-change dependency resolution preserves BookStack's PHPStan 2.2.6, Larastan 3.10.0, and Laravel 12.64.0 lock
+versions while adding pinned BladeStan 0.11.7 and Livewire 4.4.0. The canary asserts these versions and prints them in
+its result so dependency drift fails separately from diagnostic drift. The temporary dependency graph also lifts
+development-only PHP_CodeSniffer from vulnerable version 4.0.1 to fixed version 4.0.2 without invoking the tool.
+
+The refreshed Blade pass reports 62 extension diagnostics: seven missing-choice cases, two non-numeric choice
+conditions, one unknown application locale, 51 unused replacements, and one missing translation. The former 53
+empty-array loader errors and 35 malformed-choice reports remain absent. This count is recorded for visibility; the
+canary asserts selected stable findings, regression absences, and a broad 40-through-100 count range rather than
+freezing every mixed-confidence diagnostic.
+
+The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
+the normal pull-request or `composer check:full` gate.
+
 ## Objectives
 
 The experiment was designed to answer five questions:

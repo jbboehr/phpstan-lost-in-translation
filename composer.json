@@ -105,6 +105,7 @@
     "scripts": {
         "analyse": "./vendor/bin/phpstan analyse",
         "benchmark:smoke": "./vendor/bin/phpbench run --iterations=1 --revs=1 --warmup=1 --progress=none",
+        "bookstack:canary": "tools/bookstack/run",
         "check": [
             "@composer validate --strict",
             "@check:whitespace",

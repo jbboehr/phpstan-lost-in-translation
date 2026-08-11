@@ -1,0 +1,11 @@
+diff --git a/bootstrap/phpstan.php b/bootstrap/phpstan.php
+index 21f693c..935463c 100644
+--- a/bootstrap/phpstan.php
++++ b/bootstrap/phpstan.php
+@@ -4,3 +4,6 @@
+ config()->set([
+     'filesystems.default' => 'local',
+ ]);
++
++$app = app();
++$app->instance($app::class, $app);

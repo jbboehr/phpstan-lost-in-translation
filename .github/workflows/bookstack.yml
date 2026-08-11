@@ -1,0 +1,47 @@
+name: bookstack-canary
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: bookstack-canary-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    COMPOSER_NO_INTERACTION: "1"
+
+jobs:
+    canary:
+        runs-on: ubuntu-latest
+        name: "BookStack v26.05.3 | PHP 8.4"
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  extensions: curl, dom, fileinfo, gd, intl, mbstring, xml, zip
+                  php-version: "8.4"
+                  tools: composer:v2
+
+            - name: Get Composer cache directory
+              id: composer-cache
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - name: Cache Composer packages
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.composer-cache.outputs.dir }}
+                  key: ${{ runner.os }}-php-8.4-bookstack-v26.05.3-${{ hashFiles('tools/bookstack/**', 'composer.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.4-bookstack-v26.05.3-
+                      ${{ runner.os }}-php-8.4-composer-
+                      ${{ runner.os }}-php-
+
+            - name: Run pinned BookStack canary
+              run: composer bookstack:canary

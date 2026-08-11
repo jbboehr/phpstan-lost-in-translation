@@ -1,0 +1,201 @@
+#!/usr/bin/env bash
+# Copyright (c) anno Domini nostri Jesu Christi MMXXVI John Boehr & contributors
+#
+# SPDX-License-Identifier: AGPL-3.0-only WITH romic-exception
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License version 3,
+# as published by the Free Software Foundation, together with the Romic
+# Exception (an additional permission under section 7 of that license).
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# and the Romic Exception along with this program.  If not, see
+# <http://www.gnu.org/licenses/> and docs/LICENSE_EXCEPTION.md.
+
+set -euo pipefail
+
+readonly bookstack_repository='https://github.com/BookStackApp/BookStack.git'
+readonly bookstack_tag='v26.05.3'
+readonly bookstack_commit='e1cd3229966d939a75a74a2224ff0643d8af337b'
+readonly package_name='jbboehr/phpstan-lost-in-translation'
+readonly package_version='dev-bookstack-canary'
+readonly bladestan_version='0.11.7'
+readonly livewire_version='4.4.0'
+readonly phpcs_version='4.0.2'
+
+script_directory=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+readonly script_directory
+repository_directory=$(cd -- "$script_directory/../.." && pwd -P)
+readonly repository_directory
+temporary_base=$(cd -- "${TMPDIR:-/tmp}" && pwd -P)
+readonly temporary_base
+temporary_directory=''
+
+cleanup() {
+    if [[ -z "$temporary_directory" || ! -d "$temporary_directory" ]]; then
+        return
+    fi
+
+    if [[ "${BOOKSTACK_CANARY_KEEP_TEMP:-0}" == '1' ]]; then
+        echo "BookStack canary files retained at: $temporary_directory" >&2
+        return
+    fi
+
+    if [[ "$(dirname -- "$temporary_directory")" != "$temporary_base" ]] \
+        || [[ "$(basename -- "$temporary_directory")" != phpstan-lost-in-translation-bookstack-* ]]; then
+        echo "Refusing to remove unexpected directory: $temporary_directory" >&2
+        return 1
+    fi
+
+    rm -rf -- "$temporary_directory"
+}
+
+run_analysis() {
+    local mode=$1
+    local expected_exit_code=$2
+    local configuration=$3
+    local output_file="$temporary_directory/$mode.json"
+    local error_file="$temporary_directory/$mode.stderr"
+    local actual_exit_code
+
+    set +e
+    php vendor/phpstan/phpstan/phpstan analyse \
+        --configuration="$configuration" \
+        --error-format=json \
+        --no-progress \
+        --no-ansi \
+        >"$output_file" \
+        2>"$error_file"
+    actual_exit_code=$?
+    set -e
+
+    if [[ "$actual_exit_code" -ne "$expected_exit_code" ]]; then
+        echo "BookStack $mode analysis exited with $actual_exit_code instead of $expected_exit_code." >&2
+        cat "$error_file" >&2
+        cat "$output_file" >&2
+        return 1
+    fi
+
+    php "$script_directory/assert-output.php" "$mode" "$output_file"
+}
+
+trap cleanup EXIT
+
+php_version_id=$(php -r 'echo PHP_VERSION_ID;')
+readonly php_version_id
+
+if [[ "$php_version_id" -lt 80400 || "$php_version_id" -ge 80500 ]]; then
+    echo 'The BookStack canary requires PHP 8.4; use the php84 Nix shell.' >&2
+    exit 1
+fi
+
+for command in composer git php tar; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        echo "Required command is unavailable: $command" >&2
+        exit 1
+    fi
+done
+
+temporary_directory=$(mktemp -d "$temporary_base/phpstan-lost-in-translation-bookstack-XXXXXXXX")
+readonly temporary_directory
+readonly bookstack_directory="$temporary_directory/bookstack"
+readonly package_archive="$temporary_directory/package.tar"
+readonly package_directory="$temporary_directory/package"
+
+composer --working-dir="$repository_directory" archive \
+    --format=tar \
+    --dir="$temporary_directory" \
+    --file=package \
+    --no-interaction
+mkdir "$package_directory"
+tar -xf "$package_archive" -C "$package_directory"
+
+if [[ ! -f "$package_directory/extension.neon" || ! -d "$package_directory/src" ]]; then
+    echo 'The Composer archive is missing required extension assets.' >&2
+    exit 1
+fi
+
+for development_path in .codex .github AGENTS.md composer.lock secrets tests tmp.md tools; do
+    if [[ -e "$package_directory/$development_path" ]]; then
+        echo "The Composer archive contains a development-only path: $development_path" >&2
+        exit 1
+    fi
+done
+
+git clone --depth=1 --branch="$bookstack_tag" "$bookstack_repository" "$bookstack_directory"
+
+actual_bookstack_commit=$(git -C "$bookstack_directory" rev-parse HEAD)
+readonly actual_bookstack_commit
+
+if [[ "$actual_bookstack_commit" != "$bookstack_commit" ]]; then
+    echo "BookStack tag $bookstack_tag resolved to $actual_bookstack_commit instead of $bookstack_commit." >&2
+    exit 1
+fi
+
+composer --working-dir="$bookstack_directory" install \
+    --prefer-dist \
+    --no-interaction \
+    --no-progress \
+    --no-ansi
+
+pushd "$bookstack_directory" >/dev/null
+run_analysis baseline 0 phpstan.neon.dist
+popd >/dev/null
+
+# PHP, rather than the shell, expands $argv in this snippet.
+# shellcheck disable=SC2016
+repository_configuration=$(php -r '
+    echo json_encode([
+        "type" => "path",
+        "url" => $argv[1],
+        "options" => [
+            "symlink" => false,
+            "versions" => [$argv[2] => $argv[3]],
+        ],
+    ], JSON_THROW_ON_ERROR);
+' "$package_directory" "$package_name" "$package_version")
+readonly repository_configuration
+
+composer --working-dir="$bookstack_directory" config \
+    repositories.phpstan-lost-in-translation \
+    "$repository_configuration" \
+    --json
+# BookStack locks vulnerable development-only PHPCS 4.0.1. Upgrade it for audit hygiene; the canary never invokes it.
+composer --working-dir="$bookstack_directory" require \
+    --dev \
+    --with-all-dependencies \
+    --minimal-changes \
+    --prefer-dist \
+    --no-interaction \
+    --no-progress \
+    --no-ansi \
+    "$package_name:$package_version" \
+    "tomasvotruba/bladestan:$bladestan_version" \
+    "livewire/livewire:$livewire_version" \
+    "squizlabs/php_codesniffer:$phpcs_version"
+
+readonly installed_package="$bookstack_directory/vendor/$package_name"
+
+if [[ ! -d "$installed_package" || -L "$installed_package" ]]; then
+    echo 'The extension was not installed as an isolated mirror.' >&2
+    exit 1
+fi
+
+git -C "$bookstack_directory" apply --check "$script_directory/bookstack-bootstrap.patch"
+git -C "$bookstack_directory" apply "$script_directory/bookstack-bootstrap.patch"
+cp "$script_directory/phpstan-application.neon" "$bookstack_directory/phpstan-application-canary.neon"
+cp "$script_directory/phpstan-blade.neon" "$bookstack_directory/phpstan-blade-canary.neon"
+
+pushd "$bookstack_directory" >/dev/null
+run_analysis application 1 phpstan-application-canary.neon
+run_analysis blade 1 phpstan-blade-canary.neon
+composer show --format=json --no-interaction >"$temporary_directory/installed.json"
+php "$script_directory/assert-output.php" versions "$temporary_directory/installed.json"
+popd >/dev/null
+
+echo "BookStack canary passed at $bookstack_tag ($bookstack_commit)."

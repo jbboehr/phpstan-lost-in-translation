@@ -619,6 +619,17 @@ reconstruction. End-to-end coverage verifies a real Blade replacement error on
 the locked Bladestan 0.6 dependency; an isolated PHP 8.4/Laravel 12 run also
 verified the same behavior against Bladestan 0.11.7.
 
+### BookStack external canary
+
+**Status:** Complete as an optional, manually dispatched integration check.
+
+`composer bookstack:canary` clones BookStack `v26.05.3` at its verified commit and installs this extension from an
+extracted Composer archive without a source symlink. Minimal-change resolution preserves the application's locked
+PHPStan 2.2.6, Larastan 3.10.0, and Laravel 12.64.0 versions while adding pinned BladeStan 0.11.7 and Livewire 4.4.0. The
+canary asserts the clean stock baseline and application-only result before filtering BladeStan's unrelated
+compiled-template findings from curated extension identifiers, tips, known regression absences, and a broad diagnostic
+count guard. The networked check remains outside normal pull requests and `composer check:full`.
+
 ### PHP-Parser compatibility aliases
 
 `KeyLineNumberVisitor` uses the deprecated `Node\Expr\ArrayItem` alias and

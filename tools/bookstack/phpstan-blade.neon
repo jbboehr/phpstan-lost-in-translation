@@ -1,0 +1,10 @@
+includes:
+    - vendor/tomasvotruba/bladestan/config/extension.neon
+    - phpstan.neon.dist
+    - vendor/jbboehr/phpstan-lost-in-translation/extension.neon
+
+parameters:
+    lostInTranslation:
+        langPath: lang
+        baseLocale: en
+        fuzzySearch: false

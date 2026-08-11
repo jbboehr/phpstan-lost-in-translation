@@ -48,6 +48,102 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
+    public function testMissingConfiguredRelativeLangPathThrows(): void
+    {
+        $workingDirectory = getcwd();
+        $temporaryDirectory = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $langPath = 'missing-lang';
+
+        $this->assertIsString($workingDirectory);
+        $this->assertTrue(mkdir($temporaryDirectory));
+
+        try {
+            $this->assertTrue(chdir($temporaryDirectory));
+            $this->expectException(\InvalidArgumentException::class);
+            $this->expectExceptionMessage(sprintf(
+                'Configured language directory %s does not exist or is not a directory',
+                json_encode($langPath, JSON_THROW_ON_ERROR),
+            ));
+
+            new TranslationLoader(
+                langPath: $langPath,
+                baseLocale: 'en',
+            );
+        } finally {
+            chdir($workingDirectory);
+            rmdir($temporaryDirectory);
+        }
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testExistingRelativeLangPathLoadsTranslations(): void
+    {
+        $workingDirectory = getcwd();
+        $temporaryDirectory = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $langDirectory = $temporaryDirectory . '/lang';
+        $translationFile = $langDirectory . '/en.json';
+
+        $this->assertIsString($workingDirectory);
+        $this->assertTrue(mkdir($langDirectory, recursive: true));
+
+        try {
+            $this->assertNotFalse(file_put_contents($translationFile, '{"relative":"Relative translation"}'));
+            $this->assertTrue(chdir($temporaryDirectory));
+
+            $loader = new TranslationLoader(
+                langPath: 'lang',
+                baseLocale: 'en',
+                fuzzySearch: false,
+            );
+
+            $this->assertSame('Relative translation', $loader->get('en', 'relative'));
+            $this->assertSame([realpath($translationFile)], $loader->getLocaleFiles()['en']);
+        } finally {
+            chdir($workingDirectory);
+            unlink($translationFile);
+            rmdir($langDirectory);
+            rmdir($temporaryDirectory);
+        }
+    }
+
+    public function testSymlinkedLangPathLoadsTranslations(): void
+    {
+        $temporaryDirectory = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $targetDirectory = $temporaryDirectory . '/language-files';
+        $langPath = $temporaryDirectory . '/lang';
+        $translationFile = $targetDirectory . '/en.json';
+
+        $this->assertTrue(mkdir($targetDirectory, recursive: true));
+
+        try {
+            $this->assertNotFalse(file_put_contents($translationFile, '{"symlink":"Symlinked translation"}'));
+            $this->assertTrue(symlink($targetDirectory, $langPath));
+
+            $loader = new TranslationLoader(
+                langPath: $langPath,
+                baseLocale: 'en',
+                fuzzySearch: false,
+            );
+
+            $this->assertSame('Symlinked translation', $loader->get('en', 'symlink'));
+            $this->assertSame([realpath($translationFile)], $loader->getLocaleFiles()['en']);
+        } finally {
+            if (is_link($langPath)) {
+                unlink($langPath);
+            }
+            unlink($translationFile);
+            rmdir($targetDirectory);
+            rmdir($temporaryDirectory);
+        }
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
     public function testMissingDetectedLangPathIsTreatedAsEmpty(): void
     {
         $workingDirectory = getcwd();

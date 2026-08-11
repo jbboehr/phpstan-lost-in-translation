@@ -61,6 +61,7 @@ final class JsonLoaderTest extends TestCase
             };
             $failingResult = (new JsonLoader())->load($failingFile);
 
+            // The close interceptor throws from finally and replaces the parse exception; this proves cleanup ran.
             $this->assertSame(['hello' => 'world'], $failingResult->translations);
             $this->assertCount(1, $failingResult->errors);
             $this->assertStringEndsWith(

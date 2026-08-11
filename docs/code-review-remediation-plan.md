@@ -68,13 +68,15 @@ below so the separate review report is not required to track outstanding work.
 
 ### CR-01: Missing language directories crash analysis
 
-**Status:** Implementation complete. Additional relative-path and symlink
-regression coverage remains open.
+**Status:** Implementation and regression coverage complete. Explicit missing
+paths produce configuration errors, absent auto-detected paths produce an empty
+translation set, and existing absolute, relative, and symlinked paths load
+normally.
 
 **Location:** `src/TranslationLoader/TranslationLoader.php:82`,
 `src/TranslationLoader/TranslationLoader.php:270`
 
-**Current behavior:**
+**Previous behavior:**
 
 When a configured language path does not exist, `realpath()` returns `false`
 and the constructor silently falls back to the detected default path. The
@@ -92,7 +94,7 @@ the configured path.
 - A misspelled configured path is discarded, obscuring the configuration
   problem.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 1. Preserve an explicitly configured path instead of replacing it after a
    failed `realpath()` call.

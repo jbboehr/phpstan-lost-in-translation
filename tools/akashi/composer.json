@@ -1,0 +1,37 @@
+{
+    "name": "jbboehr/phpstan-lost-in-translation-documentation-tests",
+    "description": "Isolated README verification for phpstan-lost-in-translation",
+    "type": "project",
+    "license": "AGPL-3.0-only WITH romic-exception",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../..",
+            "options": {
+                "reference": "none",
+                "symlink": true,
+                "versions": {
+                    "jbboehr/phpstan-lost-in-translation": "dev-documentation-tests"
+                }
+            }
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "jbboehr/akashi": "dev-master",
+        "jbboehr/phpstan-lost-in-translation": "dev-documentation-tests",
+        "laravel/framework": "^12",
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^11.5"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": false,
+        "sort-packages": true
+    },
+    "scripts": {
+        "analyse": "phpstan analyse --configuration phpstan.neon.dist --no-progress",
+        "test": "phpunit --configuration phpunit.xml.dist"
+    }
+}

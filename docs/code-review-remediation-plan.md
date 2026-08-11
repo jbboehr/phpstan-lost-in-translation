@@ -560,23 +560,21 @@ suite, with generated properties providing supplementary invariant coverage.
 
 ### Akashi-backed README example verification
 
-**Status:** Deferred as a future scaffolding slice.
+**Status:** Complete for README translation-call diagnostics. Seven PHP examples are selected with invisible Akashi
+markers and analyzed against a dedicated language fixture. The harness compares stable extension identifiers from an
+external expectation map together with their code-relative lines, so public snippets contain no tool-only expectation
+comments while diagnostic attribution remains covered.
 
-The README contains PHP, NEON, JSON, and expected-diagnostic examples that would benefit from executable and
-PHPStan-backed verification. Unlike a self-contained library example corpus, many examples depend on Laravel language
-directories, configured locales, replacement data, and deliberately invalid calls. Adding Akashi without modeling those
-inputs would either reject valid documentation or encourage weakening the examples.
+The remaining README fences were classified but intentionally excluded from this initial corpus. Blade examples require
+template compilation, translation-file examples describe loader inputs rather than executable calls, and NEON, JSON,
+console output, installation commands, and type-inference fragments need different execution contracts. Internal plans
+and historical reports remain outside the public documentation corpus.
 
-A future slice should:
-
-1. classify README fences as executable PHP, PHPStan-only examples, configuration fragments, expected output, or prose;
-2. define stable fixture language directories and bootstrap configuration for the examples that require them;
-3. mark expected PHPStan diagnostics without changing the public examples merely to satisfy the harness;
-4. verify both PHPStan 1.12 and 2.x compatibility where Akashi's integration permits it; and
-5. add the focused documentation check to `composer check:full` and CI only after it is deterministic locally.
-
-Keep the initial integration scoped to the README. Expanding into internal planning reports or the BookStack audit would
-mix executable public documentation with historical engineering records.
+Akashi requires PHP 8.2 and its PHPStan integration targets PHPStan 2. The locked harness therefore lives under
+`tools/akashi/` with PHPUnit 11 and PHPStan 2, while existing tests continue to cover PHPStan 1.12 and the PHP 8.1 floor.
+The PHP 8.2 `documentation` shell and dedicated CI job run `composer docs:check`; it is not part of the PHP 8.1
+`composer check:full` gate. The first run also corrected the invalid-locale console output to include the extension's
+simultaneous missing-translation diagnostic.
 
 ### Locale-aware plural completeness
 

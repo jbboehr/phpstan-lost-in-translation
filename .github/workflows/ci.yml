@@ -302,6 +302,37 @@ jobs:
             - name: Run property tests
               run: composer eris
 
+    documentation:
+        runs-on: ubuntu-latest
+        name: "README examples | PHP 8.2 | PHPStan 2"
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "8.2"
+                  tools: composer:v2
+
+            - name: Get Composer cache directory
+              id: composer-cache-documentation
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - name: Cache Composer packages
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.composer-cache-documentation.outputs.dir }}
+                  key: ${{ runner.os }}-php-8.2-akashi-${{ hashFiles('tools/akashi/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.2-akashi-
+                      ${{ runner.os }}-php-8.2-composer-
+                      ${{ runner.os }}-php-
+
+            - name: Verify README examples
+              run: composer docs:check
+
     mutation:
         runs-on: ubuntu-latest
         name: "Mutation testing | PHP 8.4"

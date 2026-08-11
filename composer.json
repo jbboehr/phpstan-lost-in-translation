@@ -117,6 +117,16 @@
         ],
         "check:whitespace": "git diff HEAD --check",
         "coverage": "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text",
+        "docs:check": [
+            "@docs:validate",
+            "@docs:install",
+            "@docs:analyse",
+            "@docs:test"
+        ],
+        "docs:analyse": "composer --working-dir=tools/akashi analyse",
+        "docs:install": "composer --working-dir=tools/akashi install --prefer-dist --no-progress",
+        "docs:test": "composer --working-dir=tools/akashi test",
+        "docs:validate": "composer --working-dir=tools/akashi validate --strict",
         "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
         "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",
         "eris": [

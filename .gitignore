@@ -7,8 +7,10 @@ clover.xml
 result*
 /.pre-commit-config.yaml
 /coverage/
+/tools/akashi/vendor/
 /tools/eris/vendor/
 /vendor/
+/tmp*
 
 # agent-badge:gitignore:start
 .github/agent-badge/state.json

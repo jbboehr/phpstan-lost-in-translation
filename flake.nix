@@ -124,6 +124,7 @@
           php83 = makeShell { php = pkgs.php83; };
           php84 = makeShell { php = pkgs.php84; };
           php85 = makeShell { php = pkgs.php85; };
+          documentation = php82;
           mutation = makeShell {
             php = pkgs.php84;
             withInfection = true;

@@ -75,6 +75,8 @@ parameters:
         missingTranslationStrings: true
 ```
 
+<!-- akashi-example: missing-translation -->
+
 ```php
 <?php
 
@@ -182,6 +184,8 @@ parameters:
         disallowDynamicTranslationStrings: true
 ```
 
+<!-- akashi-example: dynamic-translation -->
+
 ```php
 <?php
 
@@ -219,6 +223,8 @@ parameters:
         missingTranslationStringsInBaseLocale: true
 ```
 
+<!-- akashi-example: missing-base-translation -->
+
 ```php
 <?php
 
@@ -244,6 +250,8 @@ parameters:
     lostInTranslation:
         invalidReplacements: true
 ```
+
+<!-- akashi-example: invalid-replacements -->
 
 ```php
 <?php
@@ -281,6 +289,8 @@ parameters:
     lostInTranslation:
         invalidChoices: true
 ```
+
+<!-- akashi-example: invalid-choice -->
 
 ```php
 <?php
@@ -361,6 +371,8 @@ parameters:
         strictLocales: true
 ```
 
+<!-- akashi-example: invalid-locale -->
+
 ```php
 <?php
 
@@ -381,6 +393,8 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon -v --no-progress e2e/src/
  ------ -----------------------------------------------------------------
   3      Locale has no available translation strings: invalid_locale
          🪪  lostInTranslation.invalidLocale.noTranslations
+  3      Missing translation string "foobar" for locales: invalid_locale
+         🪪  lostInTranslation.missingTranslationString
   3      Unknown locale: invalid_locale
          🪪  lostInTranslation.invalidLocale.unknown
  ------ -----------------------------------------------------------------
@@ -402,6 +416,8 @@ parameters:
 ];
 
 ```
+
+<!-- akashi-example: invalid-character-encoding-call -->
 
 ```php
 <?php
@@ -482,6 +498,12 @@ Run the PHPUnit suite with PCOV and regenerate the Clover report locally with:
 
 ```console
 composer coverage
+```
+
+README translation-call examples are verified with Akashi in the PHP 8.2 documentation shell:
+
+```console
+nix develop .#documentation --command composer docs:check
 ```
 
 ## References

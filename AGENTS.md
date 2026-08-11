@@ -98,6 +98,10 @@ Run `composer eris` for the isolated property suite after changing locale canoni
 The command validates and installs its locked PHPUnit 10 and Eris dependencies under `tools/eris/` before running the
 suite. Set `ERIS_SEED` to override the tracked default when exploring or replaying generated inputs.
 
+Run `composer docs:check` from the PHP 8.2 `documentation` shell after changing marked README translation-call examples
+or their expected diagnostics. Akashi's PHP and PHPStan requirements are intentionally newer than the root compatibility
+floor, so this check has a dedicated CI job rather than running inside the PHP 8.1 `composer check:full` gate.
+
 During focused iteration, run the narrowest relevant command first. The shared Composer entry points are:
 
 - `composer phpcs` for coding standards;
@@ -105,7 +109,8 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `composer test` for PHPUnit;
 - `composer runtime-smoke` for a production-dependency extension load;
 - `composer e2e` for expected diagnostics;
-- `composer eris` for isolated locale and translation-key properties; and
+- `composer eris` for isolated locale and translation-key properties;
+- `composer docs:check` for marked README translation-call examples; and
 - `composer infection` for optional mutation testing.
 
 ## Architecture boundaries
@@ -132,6 +137,10 @@ under `require-dev` and must not be needed to load the installed extension.
 
 The Eris suite is a separate Composer project because no supported Eris release spans the root PHPUnit 9 through 11
 matrix. Keep its dependencies and lock under `tools/eris/`; do not add Eris to the root development requirements.
+
+The Akashi README suite is a separate Composer project because Akashi requires PHP 8.2 and its PHPStan adapter targets
+PHPStan 2. Keep its dependencies and lock under `tools/akashi/`; do not add Akashi to the root development requirements
+while PHP 8.1 and PHPStan 1.12 remain supported.
 
 Keep `composer.lock` synchronized with dependency-constraint changes. The lowest-dependency CI job is authoritative for
 the lower bounds; the Laravel matrix covers supported framework combinations.

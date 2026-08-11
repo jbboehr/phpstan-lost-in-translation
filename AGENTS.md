@@ -112,6 +112,7 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `composer analyse` for PHPStan;
 - `composer test` for PHPUnit;
 - `composer runtime-smoke` for a production-dependency extension load;
+- `composer package:check` for the built archive and an isolated PHPStan 1.12 consumer;
 - `composer e2e` for expected diagnostics;
 - `composer eris` for isolated locale and translation-key properties;
 - `composer docs:check` for marked README translation-call examples; and
@@ -151,6 +152,10 @@ the lower bounds; the Laravel matrix covers supported framework combinations.
 
 The Composer archive policy intentionally retains `src/`, `extension.neon`, README and licensing material while
 excluding development-only fixtures and tooling. Revisit the archive exclusions when adding a new runtime asset.
+`composer package:check` enforces that allowlist, installs the resulting artifact without a source symlink, verifies
+automatic extension discovery, and exercises both standard and custom-formatted diagnostics.
+When changing the shipped file set, update both `composer.json` archive exclusions and the required or allowed paths in
+`inspectPackageArchive()` under `tools/check-package.php`.
 
 ## Documentation and planning
 

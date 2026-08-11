@@ -115,6 +115,7 @@
         "check:full": [
             "@check",
             "@runtime-smoke",
+            "@package:check",
             "@e2e",
             "@benchmark:smoke"
         ],
@@ -143,6 +144,7 @@
         "infection": "infection --no-progress",
         "infection:ci": "infection --no-progress",
         "infection:core": "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php",
+        "package:check": "@php tools/check-package.php",
         "phpcs": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan",
         "phpunit": "./vendor/bin/phpunit",

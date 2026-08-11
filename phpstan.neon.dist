@@ -12,6 +12,7 @@ parameters:
         - e2e
         - src
         - tests
+        - tools/check-package.php
     excludePaths:
         - e2e/src
         - tests/*BladeRuleTest.php

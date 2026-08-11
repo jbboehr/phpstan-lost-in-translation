@@ -2,6 +2,7 @@
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="PHP_CodeSniffer" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
     <file>src</file>
     <file>tests</file>
+    <file>tools/check-package.php</file>
 
     <exclude-pattern>*/.direnv/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
@@ -45,9 +46,11 @@
 
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <exclude-pattern>*/tests/fixtures/*</exclude-pattern>
+        <exclude-pattern>*/tools/check-package.php</exclude-pattern>
     </rule>
 
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>*/tests/fixtures/*</exclude-pattern>
+        <exclude-pattern>*/tools/check-package.php</exclude-pattern>
     </rule>
 </ruleset>

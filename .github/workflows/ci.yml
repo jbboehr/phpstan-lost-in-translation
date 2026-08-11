@@ -134,8 +134,8 @@ jobs:
 
     runtime:
         runs-on: ubuntu-latest
-        name: "Runtime smoke | PHP 8.1"
-        timeout-minutes: 10
+        name: "Runtime and package | PHP 8.1"
+        timeout-minutes: 15
         steps:
             - uses: actions/checkout@v7
 
@@ -151,6 +151,9 @@ jobs:
 
             - name: Load extension and custom error formatter
               run: composer runtime-smoke
+
+            - name: Verify packaged consumer
+              run: composer package:check
 
     test:
         runs-on: ubuntu-latest

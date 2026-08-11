@@ -513,6 +513,26 @@ project's declared PHPUnit 9 compatibility before adding it to the main test
 suite. An isolated property-test job is preferable if PHPUnit 9 remains
 supported.
 
+### Akashi-backed README example verification
+
+**Status:** Deferred as a future scaffolding slice.
+
+The README contains PHP, NEON, JSON, and expected-diagnostic examples that would benefit from executable and
+PHPStan-backed verification. Unlike a self-contained library example corpus, many examples depend on Laravel language
+directories, configured locales, replacement data, and deliberately invalid calls. Adding Akashi without modeling those
+inputs would either reject valid documentation or encourage weakening the examples.
+
+A future slice should:
+
+1. classify README fences as executable PHP, PHPStan-only examples, configuration fragments, expected output, or prose;
+2. define stable fixture language directories and bootstrap configuration for the examples that require them;
+3. mark expected PHPStan diagnostics without changing the public examples merely to satisfy the harness;
+4. verify both PHPStan 1.12 and 2.x compatibility where Akashi's integration permits it; and
+5. add the focused documentation check to `composer check:full` and CI only after it is deterministic locally.
+
+Keep the initial integration scoped to the README. Expanding into internal planning reports or the BookStack audit would
+mix executable public documentation with historical engineering records.
+
 ### Locale-aware plural completeness
 
 **Status:** Deferred as a separate product decision after the BookStack

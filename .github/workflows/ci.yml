@@ -35,7 +35,7 @@ jobs:
                     - "8.4"
                     - "8.5"
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -52,7 +52,7 @@ jobs:
               run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             - name: Cache Composer packages
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.lock') }}
@@ -69,12 +69,58 @@ jobs:
             - name: phpstan
               run: composer phpstan -- analyze
 
+    lowest-dependencies:
+        runs-on: ubuntu-latest
+        name: "Lowest dependencies | PHP 8.1"
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  coverage: "none"
+                  php-version: "8.1"
+                  tools: composer:v2
+
+            - name: Validate composer.json and composer.lock
+              run: composer validate --strict
+
+            - name: Get Composer cache directory
+              id: composer-cache-lowest
+              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+            - name: Cache Composer packages
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.composer-cache-lowest.outputs.dir }}
+                  key: ${{ runner.os }}-php-8.1-composer-lowest-${{ hashFiles('composer.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.1-composer-lowest-
+                      ${{ runner.os }}-php-8.1-composer-
+                      ${{ runner.os }}-php-
+
+            - name: Install lowest supported dependencies
+              run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-progress --no-blocking
+
+            - name: Run PHPStan
+              run: composer analyse -- --error-format=raw
+
+            - name: Run PHPUnit
+              run: composer test -- --colors=never
+
+            - name: Run runtime smoke test
+              run: composer runtime-smoke
+
+            - name: Run end-to-end tests
+              run: composer e2e
+
     audit:
         runs-on: ubuntu-latest
         name: "Audit | Runtime dependencies"
         timeout-minutes: 10
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -91,7 +137,7 @@ jobs:
         name: "Runtime smoke | PHP 8.1"
         timeout-minutes: 10
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -147,7 +193,7 @@ jobs:
                     - php-version: "8.5"
                       laravel-version: "13"
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -161,7 +207,7 @@ jobs:
               run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             - name: Cache Composer packages
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-php-${{ matrix.php-version }}-laravel-${{ matrix.laravel-version }}-composer-${{ hashFiles('composer.lock') }}
@@ -190,7 +236,7 @@ jobs:
         name: "Coverage | PHP 8.4"
         timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -204,7 +250,7 @@ jobs:
               run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             - name: Cache Composer packages
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
@@ -230,7 +276,7 @@ jobs:
         name: "Mutation testing | PHP 8.4"
         timeout-minutes: 30
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
             - name: Install PHP
               uses: shivammathur/setup-php@v2
@@ -260,7 +306,7 @@ jobs:
               run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             - name: Cache Composer packages
-              uses: actions/cache@v5
+              uses: actions/cache@v6
               with:
                   path: ${{ steps.composer-cache-mutation.outputs.dir }}
                   key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
@@ -286,10 +332,22 @@ jobs:
 
     nix:
         runs-on: ubuntu-latest
+        name: Nix
         timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
 
-            - uses: cachix/install-nix-action@v31
+            - name: Install Nix
+              uses: cachix/install-nix-action@v31
+              with:
+                  github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-            - run: nix flake check -L
+            - name: Restore and save Nix store
+              uses: nix-community/cache-nix-action@v7
+              with:
+                  primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+                  restore-prefixes-first-match: nix-${{ runner.os }}-
+                  gc-max-store-size-linux: 2G
+
+            - name: Check flake
+              run: nix flake check -L

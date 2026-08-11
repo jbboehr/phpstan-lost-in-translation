@@ -18,20 +18,17 @@ A pull request should:
 AI-assisted contributions are permitted, but you remain responsible for reviewing the submitted material and ensuring
 that you have the right to license it under these terms.
 
-Install Composer dependencies, then run the checks relevant to the change:
+Install Composer dependencies, then run the ordinary local review gate:
 
 ```shell
 composer install
-composer validate --strict
-composer phpcs
-composer phpstan -- analyse
-composer phpunit
-composer runtime-smoke
-composer e2e
+composer check
 ```
 
-The Nix development shell provides the pinned toolchain. Run `nix flake check` when changing Nix or repository
-scaffolding. Mutation testing and coverage are optional investigative workflows documented under `docs/`.
+Use `composer check:full` for release preparation or changes affecting packaging, extension registration, benchmarks,
+or end-to-end behavior. The Nix development shell provides the pinned toolchain; run `nix flake check` when changing
+Nix or repository scaffolding. Mutation testing and coverage are optional investigative workflows documented under
+`docs/`.
 
 ## Definitions
 

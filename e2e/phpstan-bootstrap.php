@@ -8,7 +8,7 @@ $bladeStanVersion = \Composer\InstalledVersions::getVersion('tomasvotruba/blades
 if (null !== $bladeStanVersion) {
     if (version_compare($bladeStanVersion, '0.7', '>=')) {
         require __DIR__ . '/../vendor/tomasvotruba/bladestan/bootstrap.php';
-        /** @var \Illuminate\Contracts\Foundation\Application $app */
+        /** @var \Illuminate\Foundation\Application $app */
         $app->langPath(__DIR__ . '/lang');
         $app->resourcePath(__DIR__ . '/resources');
         $viewFactory = $app->make(ViewFactory::class);

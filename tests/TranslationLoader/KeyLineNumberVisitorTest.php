@@ -24,6 +24,7 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\KeyLineNumberVisitor;
 use PhpParser\NodeTraverser;
+use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -68,7 +69,18 @@ final class KeyLineNumberVisitorTest extends TestCase
      */
     private static function lineNumbers(string $source): array
     {
-        $statements = (new ParserFactory())->createForHostVersion()->parse($source);
+        $parserFactory = new ParserFactory();
+        $reflection = new \ReflectionObject($parserFactory);
+        $create = $reflection->hasMethod('createForHostVersion')
+            ? $reflection->getMethod('createForHostVersion')
+            : $reflection->getMethod('create');
+        $arguments = 'create' === $create->getName()
+            ? [1] // ParserFactory::PREFER_PHP7 in PHP-Parser 4.
+            : [];
+        $parser = $create->invokeArgs($parserFactory, $arguments);
+        self::assertInstanceOf(Parser::class, $parser);
+
+        $statements = $parser->parse($source);
         self::assertNotNull($statements);
 
         $visitor = new KeyLineNumberVisitor();

@@ -5,12 +5,52 @@
     "keywords": ["laravel", "larastan", "bladestan", "phpstan", "php", "package", "static analysis", "code analysis", "code analyse"],
     "license": "AGPL-3.0-only WITH romic-exception",
     "homepage": "https://github.com/jbboehr/phpstan-lost-in-translation",
+    "support": {
+        "issues": "https://github.com/jbboehr/phpstan-lost-in-translation/issues",
+        "source": "https://github.com/jbboehr/phpstan-lost-in-translation"
+    },
     "authors": [
         {
             "name": "John Boehr",
             "email": "jbboehr@gmail.com"
         }
     ],
+    "archive": {
+        "exclude": [
+            "/.codeclimate.json",
+            "/.direnv",
+            "/.dvc",
+            "/.editorconfig",
+            "/.envrc",
+            "/.gitattributes",
+            "/.github",
+            "/.gitignore",
+            "/.idea",
+            "/.phpcs.xml.dist",
+            "/.phpunit.result.cache",
+            "/.pre-commit-config.yaml",
+            "/AGENTS.md",
+            "/clover.xml",
+            "/composer.lock",
+            "/coverage",
+            "/docs/code-review-remediation-plan.md",
+            "/docs/development",
+            "/docs/mutation-testing.md",
+            "/e2e",
+            "/flake.lock",
+            "/flake.nix",
+            "/infection.json5.dist",
+            "/*.log",
+            "/phpbench.json",
+            "/phpstan-strict-rules.php",
+            "/phpstan.neon.dist",
+            "/phpunit.xml.dist",
+            "/result*",
+            "/tests",
+            "/tmp.md",
+            "/vendor"
+        ]
+    },
     "require": {
         "php": "^8.1",
         "ext-mbstring": "*",
@@ -59,6 +99,22 @@
         }
     },
     "scripts": {
+        "analyse": "./vendor/bin/phpstan analyse",
+        "benchmark:smoke": "./vendor/bin/phpbench run --iterations=1 --revs=1 --warmup=1 --progress=none",
+        "check": [
+            "@composer validate --strict",
+            "@check:whitespace",
+            "@phpcs",
+            "@analyse",
+            "@test"
+        ],
+        "check:full": [
+            "@check",
+            "@runtime-smoke",
+            "@e2e",
+            "@benchmark:smoke"
+        ],
+        "check:whitespace": "git diff --check",
         "coverage": "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text",
         "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
         "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",
@@ -68,7 +124,8 @@
         "phpcs": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan",
         "phpunit": "./vendor/bin/phpunit",
-        "runtime-smoke": "@php tests/runtime-smoke/run.php"
+        "runtime-smoke": "@php tests/runtime-smoke/run.php",
+        "test": "./vendor/bin/phpunit --no-coverage"
     },
     "_comment": [
         "Think not that I am come to send peace on earth: I came not to send peace, but a sword. Matthew 10:34"

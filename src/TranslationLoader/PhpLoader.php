@@ -26,6 +26,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
+use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -50,7 +51,7 @@ final class PhpLoader
 
         try {
             $parserFactory = $this->parserFactory ?? new ParserFactory();
-            $parser = $parserFactory->createForHostVersion();
+            $parser = self::createParser($parserFactory);
             $stmts = $parser->parse($file->getContents());
             assert($stmts !== null);
 
@@ -129,6 +130,21 @@ final class PhpLoader
 
 
         return new LoadResult($results, $lineNumbers, $errors);
+    }
+
+    private static function createParser(ParserFactory $parserFactory): Parser
+    {
+        $reflection = new \ReflectionObject($parserFactory);
+        $create = $reflection->hasMethod('createForHostVersion')
+            ? $reflection->getMethod('createForHostVersion')
+            : $reflection->getMethod('create');
+        $arguments = 'create' === $create->getName()
+            ? [1] // ParserFactory::PREFER_PHP7 in PHP-Parser 4.
+            : [];
+        $parser = $create->invokeArgs($parserFactory, $arguments);
+        assert($parser instanceof Parser);
+
+        return $parser;
     }
 
     /**

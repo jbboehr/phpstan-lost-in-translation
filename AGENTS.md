@@ -41,8 +41,7 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `src/Rule/` integrates collected loader and call diagnostics with PHPStan.
 - `src/Blade/` bridges diagnostics out of Bladestan's nested analysis. Its collector queue is process-local analysis
   plumbing, not Laravel's queue system.
-- `src/Fuzzy/` contains optional suggestion implementations. Empty candidate sets must remain safe and Fuse must remain
-  optional.
+- `src/Fuzzy/` contains swappable suggestion implementations. Empty candidate sets must remain safe.
 - `tests/data/`, `tests/lang*/`, and `e2e/` contain intentionally valid and invalid fixtures. Do not “fix” fixture
   diagnostics without updating the corresponding assertions or expected output.
 

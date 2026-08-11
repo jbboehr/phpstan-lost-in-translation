@@ -114,7 +114,7 @@
             "@e2e",
             "@benchmark:smoke"
         ],
-        "check:whitespace": "git diff --check",
+        "check:whitespace": "git diff HEAD --check",
         "coverage": "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text",
         "e2e": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner",
         "e2e-debug": "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --debug --error-format=blade || true",

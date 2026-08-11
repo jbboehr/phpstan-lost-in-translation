@@ -41,10 +41,7 @@ final class PhpLoader
     ) {
     }
 
-    /**
-     * @return LoadResult
-     */
-    public function load(SplFileInfo $file): mixed
+    public function load(SplFileInfo $file): LoadResult
     {
         $errors = [];
         $group = basename($file->getFilenameWithoutExtension());

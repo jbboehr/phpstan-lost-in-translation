@@ -59,10 +59,10 @@ below so the separate review report is not required to track outstanding work.
 | RV-08 | Tracked by CR-10; implementation and regression coverage complete. |
 | RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete CR-09 message defect is fixed. |
 | RV-10 | The compiled Blade diagnostic bridge and regression coverage are complete. |
-| RV-11 | Tracked by CR-11; open. |
+| RV-11 | Tracked by CR-11; implementation and regression coverage complete. |
 | RV-12 | Deferred while PHP-Parser 4 and 5 compatibility is required; the compatibility alias is deliberate. |
-| RV-13 | Tracked by CR-12; open. |
-| RV-14 | Tracked by CR-13; open. |
+| RV-13 | Tracked by CR-12; implementation and regression coverage complete. |
+| RV-14 | Tracked by CR-13; implementation and regression coverage complete. |
 
 ## Detailed findings and remediation
 
@@ -426,45 +426,56 @@ implementations, null behavior, and the memoizing wrapper.
 
 ### CR-11: JSON line-number parsing leaks a file handle
 
+**Status:** Implementation and regression coverage complete. Streaming handles
+are closed after successful parses and when parsing throws.
+
 **Location:** `src/TranslationLoader/JsonLoader.php:102`
 
-**Current behavior:**
+**Previous behavior:**
 
 `JsonLoader::buildLineNumberMap()` opens a translation file for streaming but
 does not close the handle after parsing or when parsing throws.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 Close the handle in a `finally` block and retain the existing error conversion
-in `load()`. Add coverage for successful and failing streaming parses.
+in `load()`. A separate-process close interceptor proves that cleanup runs for
+both successful and failing streaming parses.
 
 ### CR-12: `PhpLoader::load()` has an unnecessarily broad return type
 
+**Status:** Implementation and regression coverage complete. The native return
+type now matches every implementation path.
+
 **Location:** `src/TranslationLoader/PhpLoader.php:43`
 
-**Current behavior:**
+**Previous behavior:**
 
 The method declares `mixed`, although every return path constructs a
 `LoadResult` and the PHPDoc already promises that type.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
 Declare `LoadResult` as the native return type and remove the redundant return
-PHPDoc.
+PHPDoc. Reflection-based coverage locks in the concrete, non-nullable type.
 
 ### CR-13: Translation locations can retain `false` as a file path
 
+**Status:** Implementation and regression coverage complete. Unresolved real
+paths now fall back to the original pathname.
+
 **Location:** `src/TranslationLoader/TranslationLoader.php:443`
 
-**Current behavior:**
+**Previous behavior:**
 
 `SplFileInfo::getRealPath()` can return `false`, but its result is stored in a
 location shape that promises a string and is later passed to diagnostics.
 
-**Proposed remediation:**
+**Implemented remediation:**
 
-Fall back to `getPathname()` when a real path is unavailable and cover the
-location behavior with a focused loader test where practical.
+Fall back to `getPathname()` when a real path is unavailable. The focused
+loader test uses a temporary PHP translation file that removes itself during
+loading, reproducing the unresolved-real-path case end to end.
 
 ## Additional maintenance observations
 

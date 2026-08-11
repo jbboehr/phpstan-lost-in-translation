@@ -364,4 +364,37 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
             rmdir($temporaryDirectory);
         }
     }
+
+    public function testLocationFallsBackToPathnameWhenTranslationFileDisappearsDuringLoading(): void
+    {
+        $temporaryDirectory = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $localeDirectory = $temporaryDirectory . '/en';
+        $translationFile = $localeDirectory . '/messages.php';
+
+        $this->assertTrue(mkdir($localeDirectory, recursive: true));
+
+        try {
+            $this->assertNotFalse(file_put_contents($translationFile, <<<'PHP'
+                <?php
+                unlink(__FILE__);
+                return ['unused' => 'Translation'];
+                PHP));
+
+            $loader = new TranslationLoader(
+                langPath: $temporaryDirectory,
+                baseLocale: 'en',
+                fuzzySearch: false,
+            );
+            $unused = $loader->diffUsed([]);
+
+            $this->assertCount(1, $unused);
+            $this->assertSame($translationFile, $unused[0]['file']);
+        } finally {
+            if (file_exists($translationFile)) {
+                unlink($translationFile);
+            }
+            rmdir($localeDirectory);
+            rmdir($temporaryDirectory);
+        }
+    }
 }

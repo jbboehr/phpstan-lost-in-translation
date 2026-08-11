@@ -107,9 +107,13 @@ final class JsonLoader
             return [];
         }
 
-        $listener = new StreamingJsonListener();
-        $parser = new Parser($fh, $listener);
-        $parser->parse();
-        return $listener->getLocations();
+        try {
+            $listener = new StreamingJsonListener();
+            $parser = new Parser($fh, $listener);
+            $parser->parse();
+            return $listener->getLocations();
+        } finally {
+            fclose($fh);
+        }
     }
 }

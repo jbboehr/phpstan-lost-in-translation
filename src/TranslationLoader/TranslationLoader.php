@@ -430,6 +430,8 @@ class TranslationLoader
             }
 
             $this->errors = array_merge($this->errors, $result->errors);
+            $realPath = $file->getRealPath();
+            $filePath = false === $realPath ? $file->getPathname() : $realPath;
 
             foreach ($result->translations as $k => $v) {
                 $line = ($result->locations[$k] ?? -1);
@@ -443,7 +445,7 @@ class TranslationLoader
                 }
 
                 $this->data[$localeKey][$namespace][$k] = $v;
-                $this->locations[$localeKey . "\0" . $namespace . "\0" . $k] = [$file->getRealPath(), $line];
+                $this->locations[$localeKey . "\0" . $namespace . "\0" . $k] = [$filePath, $line];
             }
         }
 

@@ -125,7 +125,13 @@ final class BladeDiagnosticCollector implements Collector
             ];
         }
 
-        self::$queued = array_merge(self::$queued, $queued);
+        // BladeStan can repeat one nested analysis for the same outer call. Keep
+        // different template locations or metadata, but queue an exact result once.
+        foreach ($queued as $diagnostic) {
+            if (!in_array($diagnostic, self::$queued, true)) {
+                self::$queued[] = $diagnostic;
+            }
+        }
 
         return true;
     }

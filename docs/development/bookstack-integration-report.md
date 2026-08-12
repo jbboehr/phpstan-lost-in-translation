@@ -34,14 +34,42 @@ versions while adding pinned BladeStan 0.11.7 and Livewire 4.4.0. The canary ass
 its result so dependency drift fails separately from diagnostic drift. The temporary dependency graph also lifts
 development-only PHP_CodeSniffer from vulnerable version 4.0.1 to fixed version 4.0.2 without invoking the tool.
 
-The refreshed Blade pass reports 62 extension diagnostics: seven missing-choice cases, two non-numeric choice
-conditions, one unknown application locale, 51 unused replacements, and one missing translation. The former 53
-empty-array loader errors and 35 malformed-choice reports remain absent. This count is recorded for visibility; the
-canary asserts selected stable findings, regression absences, and a broad 40-through-100 count range rather than
-freezing every mixed-confidence diagnostic.
+The refreshed Blade pass initially reported 62 extension diagnostics. Replacement triage exposed and removed four
+exact duplicate bridge reports, leaving 58: seven missing-choice cases, two non-numeric choice conditions, one unknown
+application locale, 47 unused replacements, and one missing translation. The former 53 empty-array loader errors and
+35 malformed-choice reports remain absent. This count is recorded for visibility; the canary asserts selected stable
+findings, regression absences, exact diagnostic uniqueness, and a broad 40-through-100 count range rather than freezing
+every mixed-confidence diagnostic.
 
 The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
 the normal pull-request or `composer check:full` gate.
+
+## Follow-up replacement triage
+
+**Completed 2026-08-11.** The preserved Blade bridge tips made the 51
+`invalidReplacement.unused` reports attributable by locale, key, replacement, and value. The raw reports reduce to 47
+unique outer call-site diagnostics and 38 unique locale/key/replacement tuples.
+
+| Classification | Unique tuples | Result |
+| --- | ---: | --- |
+| Probable translation placeholder drift | 35 | The localized value misspells, translates, changes the case of, separates, or omits a placeholder that the English value uses. |
+| Plausible locale-specific caller supersets | 3 | Estonian `auth.user_invite_page_text` and Thai and Simplified Chinese `auth.register_confirm` omit the application name while retaining coherent localized wording. |
+| Caller-wide dead arguments | 0 | Every supplied replacement appears in the English value and in other locales for the same key. |
+
+The 35 probable translation defects divide into three observable forms:
+
+| Form | Count | Locale/key examples |
+| --- | ---: | --- |
+| Whitespace, case, or missing-colon drift | 13 | Welsh `auth.register_confirm`; Spanish `entities.books_sort_auto_sort_active`; French `components.image_uploaded_to`; Indonesian `entities.books_delete_explain`; Traditional Chinese `components.image_uploaded_by` |
+| Renamed, translated, or wrong placeholder | 17 | Arabic token and audit strings; Danish, Finnish, and Dutch `entities.shelves_delete_explain`; Portuguese and Ukrainian `settings.webhooks_delete_warning`; Uzbek revision and search strings |
+| Dynamic value omitted or replaced by literal wording | 5 | Greek and Slovak revision labels, Hungarian upload time, Korean import size, and Brazilian Portuguese OpenSearch description |
+
+Four of the 51 raw reports were byte-for-byte duplicate diagnostics from repeated nested analysis of the same image
+view at one outer call. The Blade bridge now deduplicates an identical structured diagnostic while it is queued, and
+unit coverage plus the BookStack canary reject a recurrence. Nine further reports repeat a translation finding at a
+different outer `view()` call: four image findings are reachable from two controller calls and five revision findings
+are reachable from two controller calls. Those remain distinct because the bridge intentionally retains the outer call
+location for BladeStan compatibility.
 
 ## Objectives
 
@@ -251,7 +279,8 @@ Seven `invalidChoice.missingCase` diagnostics remained. At least some appear to 
 
 **Classification:** Triage limitation<br>
 **Impact:** Medium<br>
-**Area:** Replacement diagnostics under BladeStan
+**Area:** Replacement diagnostics under BladeStan<br>
+**Follow-up status:** Triage complete; one exact-duplicate bridge defect fixed
 
 The full Blade pass reported 51 unused replacements. This category likely contains a mixture of:
 
@@ -262,6 +291,11 @@ The full Blade pass reported 51 unused replacements. This category likely contai
 Because BladeStan wrapping drops the extension's locale/key/value metadata, the full set could not be classified reliably from JSON output alone.
 
 **Recommendation:** Resolve BS-EXT-03 before using the count as a quality gate. Then group unused-replacement results by call site, key, and differing locale values so one faulty locale does not look like many unrelated caller defects.
+
+**Follow-up outcome:** The diagnostic bridge restored the original tips and metadata. The complete classification is
+recorded in [Follow-up replacement triage](#follow-up-replacement-triage). No replacement-rule semantic defect was
+found. Repeated nested analysis did expose four exact duplicate bridge reports, which are now deduplicated before
+collection.
 
 ## High-confidence BookStack translation findings
 
@@ -334,7 +368,7 @@ The raw count of 96 Blade translation diagnostics should not be read as 96 BookS
 | 35 malformed choices | Mostly extension false positives from valid one-form and three-form locale behavior, with some genuine malformed strings mixed in |
 | 7 missing choice cases | Mixed confidence; some may be caused by an overly broad `int` domain |
 | 2 non-numeric choice conditions | High-confidence Slovak syntax defects |
-| 51 unused replacements | Mixed; metadata loss prevents efficient locale-by-locale triage |
+| 51 unused replacements | 38 unique locale/key/replacement tuples: 35 probable translation defects, 3 plausible locale-specific caller supersets, and no caller-wide dead argument |
 | 1 missing translation | High-confidence empty Portuguese translation |
 
 Likewise, the 54 application-only diagnostics do not indicate 54 unrelated problems. Fifty-three are the same empty-array loader defect repeated for every locale, and one is the deliberate `de_informal` application locale.
@@ -367,7 +401,7 @@ This workaround belongs in a BookStack-specific PHPStan bootstrap or a more gene
 - Blade coverage is limited to templates reachable through calls that BladeStan can resolve statically. Dynamically selected views may be absent.
 - Installing BladeStan updated BookStack dependencies, so the final pass was not against the exact upstream lock state.
 - The temporary bootstrap binding changes container behavior during PHPStan analysis and may conceal other BookStack bootstrap assumptions.
-- BladeStan's error wrapping prevented complete locale-specific classification of unused replacements and some choice errors.
+- The original BladeStan output lost locale-specific metadata; the follow-up bridge restores it, but outer call-site locations can still repeat one template finding when the same view is reachable from several calls.
 - Timing numbers are coarse observations from a single environment, not performance guarantees.
 - The run did not enable unused-translation-string reporting, so it says nothing about orphaned keys in BookStack's 689 translation files.
 - Only one BookStack release and one PHP/Laravel dependency resolution were tested.
@@ -394,7 +428,9 @@ Create a minimal BladeStan integration fixture before changing production code. 
 
 ### 4. Re-evaluate replacement findings
 
-After metadata is preserved, rerun the 51 unused-replacement results and classify them into caller supersets, single-locale drift, and actual dead arguments.
+**Complete.** The 51 raw reports represent 38 unique translation tuples: 35 probable locale-specific placeholder
+defects, three plausible locale-specific caller supersets, and no caller-wide dead arguments. Exact duplicate nested
+diagnostics are now removed by the bridge; findings attached to distinct outer view calls remain distinct.
 
 ### 5. Consider locale aliases
 

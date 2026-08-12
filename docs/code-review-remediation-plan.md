@@ -630,6 +630,17 @@ canary asserts the clean stock baseline and application-only result before filte
 compiled-template findings from curated extension identifiers, tips, known regression absences, and a broad diagnostic
 count guard. The networked check remains outside normal pull requests and `composer check:full`.
 
+### BookStack replacement triage
+
+**Status:** Complete. The 51 raw unused-replacement reports were classified as 47 unique outer call-site diagnostics
+and 38 unique locale/key/replacement tuples. Thirty-five are probable localized placeholder drift, three are plausible
+locale-specific omissions where the caller necessarily supplies a superset, and none is a caller-wide dead argument.
+
+Four exact duplicate diagnostics came from repeated nested analysis at one Blade call. The bridge now deduplicates
+identical structured diagnostics while preserving findings from distinct outer view calls. Unit coverage locks the
+queue behavior, and the pinned BookStack canary rejects exact duplicate extension diagnostics while retaining curated
+examples of whitespace, case, and locale-specific omission findings.
+
 ### PHP-Parser compatibility aliases
 
 `KeyLineNumberVisitor` uses the deprecated `Node\Expr\ArrayItem` alias and

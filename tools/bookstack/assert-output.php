@@ -183,6 +183,33 @@ function assertBookStackIdentifiersAbsent(array $diagnostics, array $forbiddenId
 }
 
 /**
+ * @param list<array<string, mixed>> $diagnostics
+ */
+function assertBookStackDiagnosticsUnique(array $diagnostics): void
+{
+    $fingerprints = [];
+
+    foreach ($diagnostics as $diagnostic) {
+        $fingerprint = json_encode([
+            $diagnostic['file'] ?? null,
+            $diagnostic['line'] ?? null,
+            $diagnostic['identifier'] ?? null,
+            $diagnostic['message'] ?? null,
+            $diagnostic['tip'] ?? null,
+        ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+        if (isset($fingerprints[$fingerprint])) {
+            throw new RuntimeException(sprintf(
+                'BookStack analysis returned an exact duplicate extension diagnostic: %s',
+                $fingerprint,
+            ));
+        }
+
+        $fingerprints[$fingerprint] = true;
+    }
+}
+
+/**
  * @param array<string, mixed> $output
  */
 function assertBookStackBaseline(array $output): void
@@ -242,6 +269,8 @@ function assertBookStackBlade(array $output): void
     ));
     $extensionDiagnosticCount = count($extensionDiagnostics);
 
+    assertBookStackDiagnosticsUnique($extensionDiagnostics);
+
     if ($extensionDiagnosticCount < 40 || $extensionDiagnosticCount > 100) {
         throw new RuntimeException(sprintf(
             'BookStack Blade analysis returned %d extension diagnostics; expected the broad range 40 through 100.',
@@ -271,6 +300,20 @@ function assertBookStackBlade(array $output): void
         'Unused translation replacement: "bookName"',
         'Locale: "id", Key: "entities.books_delete_explain"',
         '/app/Entities/Controllers/BookController.php',
+    );
+    assertBookStackDiagnostic(
+        $extensionDiagnostics,
+        'lostInTranslation.invalidReplacement.unused',
+        'Unused translation replacement: "pageLink"',
+        'Locale: "fr", Key: "components.image_uploaded_to"',
+        '/app/Uploads/Controllers/ImageController.php',
+    );
+    assertBookStackDiagnostic(
+        $extensionDiagnostics,
+        'lostInTranslation.invalidReplacement.unused',
+        'Unused translation replacement: "appName"',
+        'Locale: "et", Key: "auth.user_invite_page_text"',
+        '/app/Access/Controllers/UserInviteController.php',
     );
     assertBookStackDiagnostic(
         $extensionDiagnostics,

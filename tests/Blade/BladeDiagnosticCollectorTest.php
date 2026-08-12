@@ -120,6 +120,38 @@ final class BladeDiagnosticCollectorTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testDeduplicatesIdenticalDiagnosticsFromRepeatedNestedAnalysis(): void
+    {
+        $error = RuleErrorBuilder::message('Repeated diagnostic')
+            ->identifier('lostInTranslation.repeated')
+            ->metadata(['example' => 'value'])
+            ->addTip('Repeated tip')
+            ->build();
+        $collector = new BladeDiagnosticCollector();
+
+        $this->assertTrue($collector->push(
+            [$error],
+            __DIR__ . '/../data/example-blade-compiled.php',
+            4,
+        ));
+        $this->assertTrue($collector->push(
+            [$error],
+            __DIR__ . '/../data/example-blade-compiled.php',
+            4,
+        ));
+
+        $outerNode = $this->createStub(FuncCall::class);
+        $outerNode->method('getStartLine')->willReturn(10);
+        $outerScope = $this->createStub(Scope::class);
+        $outerScope->method('getFile')->willReturn('/app/Http/Controllers/BookController.php');
+
+        $diagnostics = $collector->processNode($outerNode, $outerScope);
+
+        $this->assertIsArray($diagnostics);
+        $this->assertCount(1, $diagnostics);
+        $this->assertSame('Repeated diagnostic', $diagnostics[0]['message']);
+    }
+
     public function testUsesTheNearestPrecedingTemplateMarker(): void
     {
         $compiledFile = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8)) . '.php';
@@ -201,6 +233,8 @@ final class BladeDiagnosticCollectorTest extends \PHPUnit\Framework\TestCase
 
             $firstDiagnostics = $collector->processNode($outerNode, $outerScope);
             $this->assertIsArray($firstDiagnostics);
+            $this->assertSame('/app/Http/Controllers/BookController.php', $firstDiagnostics[0]['file']);
+            $this->assertSame(10, $firstDiagnostics[0]['line']);
             $this->assertSame(19, $firstDiagnostics[0]['metadata']['template_line']);
 
             $this->assertNotFalse(file_put_contents(
@@ -209,8 +243,15 @@ final class BladeDiagnosticCollectorTest extends \PHPUnit\Framework\TestCase
             ));
             $this->assertTrue($collector->push([$error], $compiledFile, 2));
 
-            $secondDiagnostics = $collector->processNode($outerNode, $outerScope);
+            $secondOuterNode = $this->createStub(FuncCall::class);
+            $secondOuterNode->method('getStartLine')->willReturn(24);
+            $secondOuterScope = $this->createStub(Scope::class);
+            $secondOuterScope->method('getFile')->willReturn('/app/Http/Controllers/PageController.php');
+
+            $secondDiagnostics = $collector->processNode($secondOuterNode, $secondOuterScope);
             $this->assertIsArray($secondDiagnostics);
+            $this->assertSame('/app/Http/Controllers/PageController.php', $secondDiagnostics[0]['file']);
+            $this->assertSame(24, $secondDiagnostics[0]['line']);
             $this->assertSame(37, $secondDiagnostics[0]['metadata']['template_line']);
         } finally {
             if (file_exists($compiledFile)) {

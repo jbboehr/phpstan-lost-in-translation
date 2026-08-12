@@ -400,6 +400,9 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertTrue($loader->isValidLocale('de_informal'));
+        $this->assertSame('de_DE', $loader->resolveValidationLocale('de_informal'));
+        $this->assertSame('de_DE', $loader->resolveValidationLocale('DE-INFORMAL'));
+        $this->assertSame('fr', $loader->resolveValidationLocale('fr'));
         $this->assertTrue($loader->hasLocale('de_informal'));
         $this->assertSame('Informal German greeting', $loader->get('de_informal', 'greeting'));
         $this->assertFalse($loader->hasLocale('de_DE'));
@@ -436,6 +439,8 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->assertTrue($loader->isValidLocale('de_informal'));
+        $this->assertSame('de_DE', $loader->resolveValidationLocale('de_informal'));
+        $this->assertSame('DE_INFORMAL', $loader->resolveValidationLocale('DE_INFORMAL'));
         $this->assertFalse($loader->isValidLocale('DE_INFORMAL'));
     }
 

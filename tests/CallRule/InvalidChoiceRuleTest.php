@@ -26,9 +26,13 @@ use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
+use PHPStan\Rules\MetadataRuleError;
 use PHPStan\Rules\Rule;
+use PHPStan\Type\Constant\ConstantIntegerType;
+use PHPStan\Type\Constant\ConstantStringType;
 
 /**
  * @extends RuleTestCase<LostInTranslationRule>
@@ -37,12 +41,21 @@ class InvalidChoiceRuleTest extends RuleTestCase
 {
     private bool $requireCompleteChoiceCoverage = true;
 
+    private bool $requireCompletePluralForms = false;
+
+    /** @var array<string, string> */
+    private array $localeAliases = [];
+
     protected function getRule(): Rule
     {
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new InvalidChoiceRule($this->requireCompleteChoiceCoverage),
+                new InvalidChoiceRule(
+                    requireCompleteChoiceCoverage: $this->requireCompleteChoiceCoverage,
+                    requireCompletePluralForms: $this->requireCompletePluralForms,
+                    translationLoader: $this->getTranslationLoader(),
+                ),
             ]),
         );
     }
@@ -189,6 +202,168 @@ class InvalidChoiceRuleTest extends RuleTestCase
         $this->analyse([
             __DIR__ . '/../data/valid-unconditioned-choice.php',
         ], []);
+    }
+
+    public function testLocaleAwarePluralCompletenessIsDisabledByDefault(): void
+    {
+        $value = 'Only form';
+        $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $value => [['en', null]],
+            ],
+            keyType: new ConstantStringType($value),
+            numberType: new ConstantIntegerType(2),
+            isChoice: true,
+        ));
+
+        $this->assertSame([], $errors);
+
+        $this->analyse([
+            __DIR__ . '/../data/plural-form-coverage.php',
+        ], []);
+    }
+
+    public function testLocaleAwarePluralCompleteness(): void
+    {
+        $this->requireCompletePluralForms = true;
+        $this->localeAliases = [
+            'application_plural' => 'AR-sa',
+        ];
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang',
+            baseLocale: 'en',
+            localeAliases: $this->localeAliases,
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/plural-form-coverage.php',
+        ], [
+            [
+                'Translation choice provides 1 plural form, but locale "en" can select 2 forms',
+                7,
+                Utils::formatTipForKeyValue('en', 'Only form'),
+            ],
+            [
+                'Translation choice provides 2 plural forms, but locale "ru" can select 3 forms',
+                13,
+                Utils::formatTipForKeyValue('ru', 'One|Many'),
+            ],
+            [
+                'Translation choice provides 4 plural forms, but locale "ar" can select 6 forms',
+                19,
+                Utils::formatTipForKeyValue('ar', 'Zero|One|Two|Other'),
+            ],
+            [
+                'Translation choice provides 1 plural form, but locale "is" can select 2 forms',
+                25,
+                Utils::formatTipForKeyValue('is', 'A revision'),
+            ],
+            [
+                'Translation choice provides 1 plural form, but locale "APPLICATION-PLURAL" can select 6 forms',
+                28,
+                Utils::formatTipForKeyValue('APPLICATION-PLURAL', 'Application form'),
+            ],
+            [
+                'Translation choice provides 3 plural forms, but locale "sl" can select 4 forms',
+                31,
+                Utils::formatTipForKeyValue('sl', 'One|Two|Other'),
+            ],
+        ]);
+    }
+
+    public function testPluralCompletenessChecksAFullSentenceKeyAsTheSourceValue(): void
+    {
+        $key = 'A real full sentence with real shit in it.';
+        $errors = (new InvalidChoiceRule(requireCompletePluralForms: true))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $key => [['en', null]],
+            ],
+            keyType: new ConstantStringType($key),
+            numberType: new ConstantIntegerType(2),
+            isChoice: true,
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_PLURAL_FORM, $errors[0]->getIdentifier());
+        $this->assertInstanceOf(MetadataRuleError::class, $errors[0]);
+        $this->assertSame(
+            Utils::metadata(key: $key, locale: 'en', value: $key),
+            $errors[0]->getMetadata(),
+        );
+    }
+
+    public function testPluralCompletenessKeepsTheKeyAndTranslatedValueSeparate(): void
+    {
+        $key = 'messages.revisions';
+        $value = 'A revision';
+        $errors = (new InvalidChoiceRule(requireCompletePluralForms: true))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $key => [['is', $value]],
+            ],
+            keyType: new ConstantStringType($key),
+            numberType: new ConstantIntegerType(2),
+            isChoice: true,
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_PLURAL_FORM, $errors[0]->getIdentifier());
+        $this->assertInstanceOf(MetadataRuleError::class, $errors[0]);
+        $this->assertSame(
+            Utils::metadata(key: $key, locale: 'is', value: $value),
+            $errors[0]->getMetadata(),
+        );
+    }
+
+    public function testPluralCompletenessDoesNotCascadeFromAMalformedMixedChoice(): void
+    {
+        $value = '{0 None|Other';
+        $errors = (new InvalidChoiceRule(requireCompletePluralForms: true))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $value => [['en', null]],
+            ],
+            keyType: new ConstantStringType($value),
+            numberType: new ConstantIntegerType(2),
+            isChoice: true,
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(InvalidChoiceRule::IDENTIFIER_MALFORMED, $errors[0]->getIdentifier());
+    }
+
+    public function testExplicitOnlyChoicesRemainUnderExplicitCoverage(): void
+    {
+        $value = '{0} None';
+        $errors = (new InvalidChoiceRule(requireCompletePluralForms: true))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $value => [['ar', null]],
+            ],
+            keyType: new ConstantStringType($value),
+            numberType: new ConstantIntegerType(1),
+            isChoice: true,
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_CASE, $errors[0]->getIdentifier());
     }
 
     public function testSourceStringFallbackWithFilelessBaseLocale(): void

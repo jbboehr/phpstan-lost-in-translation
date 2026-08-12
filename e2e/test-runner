@@ -33,6 +33,7 @@ $expectedErrors = [
     'src/invalid-character-encodings:3:lostInTranslation.invalidCharacterEncoding',
     'src/invalid-character-encodings:3:lostInTranslation.invalidCharacterEncoding',
     'src/invalid-choice:3:lostInTranslation.invalidChoice.missingCase',
+    'src/invalid-choice:5:lostInTranslation.invalidChoice.missingPluralForm',
     'src/invalid-locale:3:lostInTranslation.invalidLocale.noTranslations',
     'src/invalid-locale:3:lostInTranslation.invalidLocale.unknown',
     'src/invalid-locale:3:lostInTranslation.missingTranslationString',

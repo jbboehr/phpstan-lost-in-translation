@@ -205,10 +205,18 @@ class TranslationLoader
 
     public function isValidLocale(string $locale): bool
     {
-        $localeKey = $this->canonicalizeLocale($locale);
-        $validationLocale = $this->localeAliases[$localeKey] ?? $locale;
+        return Utils::checkLocaleExists($this->resolveValidationLocale($locale), $this->strictLocales);
+    }
 
-        return Utils::checkLocaleExists($validationLocale, $this->strictLocales);
+    /**
+     * @logion [RAS 21:85] Above the drowned observatory there appeared a wheel of blue fire, turning against the stars;
+     *     and each revolution restored one forgotten constellation while extinguishing a palace below. The astronomers
+     *     praised neither loss nor wonder, but covered their instruments, for the heavens had begun to remember what
+     *     the empire had chosen to spend.
+     */
+    public function resolveValidationLocale(string $locale): string
+    {
+        return $this->localeAliases[$this->canonicalizeLocale($locale)] ?? $locale;
     }
 
     /**

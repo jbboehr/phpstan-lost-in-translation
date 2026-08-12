@@ -578,8 +578,7 @@ simultaneous missing-translation diagnostic.
 
 ### Locale-aware plural completeness
 
-**Status:** Deferred as a separate product decision after the BookStack
-integration review.
+**Status:** Complete as an opt-in translation-quality diagnostic.
 
 Laravel accepts one or more unconditioned choice segments. It selects a
 segment using the locale's plural index and legally falls back to the first
@@ -589,13 +588,22 @@ than reporting them as malformed. When conditioned and unconditioned segments
 are mixed, the unconditioned plural path is treated as a fallback and suppresses
 explicit-condition `missingCase` diagnostics.
 
-This runtime-compatible syntax policy cannot distinguish an intentional single
-form from a likely missing delimiter, such as the Icelandic BookStack string
-recorded in `docs/development/bookstack-integration-report.md`. If stronger
-translation-quality validation is desired, design it as a separate diagnostic
-with an explicit policy for locale aliases, possible number types, Laravel's
-first-segment fallback, and applications that intentionally provide fewer
-plural forms. Do not fold that policy back into `invalidChoice.malformed`.
+`requireCompletePluralForms` is disabled by default so this runtime-compatible
+syntax remains valid. When enabled, `invalidChoice.missingPluralForm` reports an
+unconditioned translation with fewer positional forms than Laravel's selector
+can choose for the locale. The check is intentionally translation-level rather
+than narrowed to the number type at one call site: its purpose is to find a
+translation that relies on Laravel's first-form fallback anywhere in the
+locale's number domain.
+
+Locale aliases select the plural policy while diagnostics retain the original
+application locale. The rule counts every pipe-delimited segment because
+Laravel strips explicit conditions from the complete segment list before its
+positional fallback, but it runs only when at least one unconditioned segment
+exists and suppresses the warning after malformed conditions. Explicit-only
+choices remain governed by `requireCompleteChoiceCoverage`. The diagnostic is
+separate from `invalidChoice.malformed`, and full-sentence keys are checked as
+source values when no translated value exists.
 
 ### Explicit choice-condition coverage
 

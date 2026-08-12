@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
@@ -37,15 +38,110 @@ final class InvalidChoiceRule implements CallRuleInterface
 {
     public const IDENTIFIER_MALFORMED = 'lostInTranslation.invalidChoice.malformed';
     public const IDENTIFIER_MISSING_CASE = 'lostInTranslation.invalidChoice.missingCase';
+    public const IDENTIFIER_MISSING_PLURAL_FORM = 'lostInTranslation.invalidChoice.missingPluralForm';
     public const IDENTIFIER_NON_NUMERIC = 'lostInTranslation.invalidChoice.nonNumeric';
+
+    /**
+     * The number of positional forms Laravel's selector can choose for each language; unlisted languages use one.
+     *
+     * @see \Illuminate\Translation\MessageSelector::getPluralIndex()
+     * @license https://github.com/laravel/framework/blob/13.x/LICENSE.md
+     * @var array<non-empty-string, 2|3|4|6>
+     */
+    private const PLURAL_FORM_COUNTS = [
+        'af' => 2,
+        'am' => 2,
+        'ar' => 6,
+        'be' => 3,
+        'bg' => 2,
+        'bh' => 2,
+        'bn' => 2,
+        'bs' => 3,
+        'ca' => 2,
+        'cs' => 3,
+        'cy' => 4,
+        'da' => 2,
+        'de' => 2,
+        'el' => 2,
+        'en' => 2,
+        'eo' => 2,
+        'es' => 2,
+        'et' => 2,
+        'eu' => 2,
+        'fa' => 2,
+        'fi' => 2,
+        'fil' => 2,
+        'fo' => 2,
+        'fr' => 2,
+        'fur' => 2,
+        'fy' => 2,
+        'ga' => 3,
+        'gl' => 2,
+        'gu' => 2,
+        'gun' => 2,
+        'ha' => 2,
+        'he' => 2,
+        'hi' => 2,
+        'hr' => 3,
+        'hu' => 2,
+        'hy' => 2,
+        'is' => 2,
+        'it' => 2,
+        'ku' => 2,
+        'lb' => 2,
+        'ln' => 2,
+        'lt' => 3,
+        'lv' => 3,
+        'mg' => 2,
+        'mk' => 2,
+        'ml' => 2,
+        'mn' => 2,
+        'mr' => 2,
+        'mt' => 4,
+        'nah' => 2,
+        'nb' => 2,
+        'ne' => 2,
+        'nl' => 2,
+        'nn' => 2,
+        'no' => 2,
+        'nso' => 2,
+        'om' => 2,
+        'or' => 2,
+        'pa' => 2,
+        'pap' => 2,
+        'pl' => 3,
+        'ps' => 2,
+        'pt' => 2,
+        'ro' => 3,
+        'ru' => 3,
+        'sk' => 3,
+        'sl' => 4,
+        'so' => 2,
+        'sq' => 2,
+        'sr' => 3,
+        'sv' => 2,
+        'sw' => 2,
+        'ta' => 2,
+        'te' => 2,
+        'ti' => 2,
+        'tk' => 2,
+        'uk' => 3,
+        'ur' => 2,
+        'wa' => 2,
+        'xbr' => 2,
+        'zu' => 2,
+    ];
 
     /**
      * @logion [RAS 1:1] I beheld the red moon descend behind the glass mountains, yet its reflection remained above
      *     them. The pilgrims knelt before the brighter image, but the eldest broke the frozen lake with her staff; and
      *     from the dark water rose the true moon, bearing every forgotten season upon its face.
      */
-    public function __construct(private readonly bool $requireCompleteChoiceCoverage = true)
-    {
+    public function __construct(
+        private readonly bool $requireCompleteChoiceCoverage = true,
+        private readonly bool $requireCompletePluralForms = false,
+        private readonly ?TranslationLoader $translationLoader = null,
+    ) {
     }
 
     public function processCall(TranslationCall $call): array
@@ -232,6 +328,29 @@ final class InvalidChoiceRule implements CallRuleInterface
                 ->line($call->line)
                 ->file($call->file)
                 ->build();
+        }
+
+        if ($this->requireCompletePluralForms && $hasUnconditionedSegment && !$hasInvalidCondition) {
+            $pluralLocale = $this->translationLoader?->resolveValidationLocale($locale) ?? $locale;
+            $language = strtolower(explode('_', str_replace('-', '_', $pluralLocale), 2)[0]);
+            $requiredFormCount = self::PLURAL_FORM_COUNTS[$language] ?? 1;
+            $providedFormCount = count($segments);
+
+            if ($providedFormCount < $requiredFormCount) {
+                $errors[] = RuleErrorBuilder::message(sprintf(
+                    'Translation choice provides %d plural %s, but locale %s can select %d forms',
+                    $providedFormCount,
+                    1 === $providedFormCount ? 'form' : 'forms',
+                    Utils::e($locale),
+                    $requiredFormCount,
+                ))
+                    ->identifier(self::IDENTIFIER_MISSING_PLURAL_FORM)
+                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
+                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                    ->line($call->line)
+                    ->file($call->file)
+                    ->build();
+            }
         }
 
         return $errors;

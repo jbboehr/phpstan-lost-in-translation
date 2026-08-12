@@ -283,14 +283,21 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 ### Analyze choices
 
 Choices will be analyzed for potentially invalid options. Syntax validation and explicit-condition completeness checking
-are **enabled by default**. Disable only the completeness warning with `requireCompleteChoiceCoverage: false`; malformed
-conditions and invalid bounds will still be reported while `invalidChoices` remains enabled.
+are **enabled by default**. Disable only the explicit-condition warning with `requireCompleteChoiceCoverage: false`;
+malformed conditions and invalid bounds will still be reported while `invalidChoices` remains enabled.
+
+For stricter translation-quality checking, enable `requireCompletePluralForms`. This opt-in warning reports an
+unconditioned choice when it provides fewer positional forms than the locale can select. It uses `localeAliases` for the
+plural policy, retains the application's locale in the diagnostic, and checks a full-sentence key as the source value
+when no separate translation value exists. Laravel's valid first-form fallback remains accepted when the option is off.
+The diagnostic identifier is `lostInTranslation.invalidChoice.missingPluralForm`.
 
 ```neon
 parameters:
     lostInTranslation:
         invalidChoices: true
         requireCompleteChoiceCoverage: true
+        requireCompletePluralForms: false
 ```
 
 <!-- akashi-example: invalid-choice -->
@@ -480,6 +487,8 @@ parameters:
         invalidChoices: true
         # require explicit choice conditions to cover every possible value of the inferred number type?
         requireCompleteChoiceCoverage: true
+        # require unconditioned choices to provide every positional plural form the locale can select?
+        requireCompletePluralForms: false
         # warn on locales that have no translation strings or are invalid locale identifiers
         invalidLocales: true
         # should we analyze translation replacements for invalid values?

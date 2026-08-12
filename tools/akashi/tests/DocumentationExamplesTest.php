@@ -83,7 +83,7 @@ final class DocumentationExamplesTest extends RuleTestCase
             CallRuleCollection::createFromArray([
                 new DynamicTranslationStringRule(),
                 new InvalidCharacterEncodingRule(),
-                new InvalidChoiceRule(),
+                new InvalidChoiceRule(translationLoader: $loader),
                 new InvalidLocaleRule($loader),
                 new InvalidReplacementRule(),
                 new MissingTranslationStringInBaseLocaleRule($loader),

@@ -14,6 +14,7 @@ parameters:
         langPath: ./e2e/lang
         localeAliases:
             de_informal: de_DE
+        requireCompletePluralForms: true
         unusedTranslationStrings: true
 
 includes:

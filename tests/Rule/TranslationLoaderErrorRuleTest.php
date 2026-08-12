@@ -111,6 +111,22 @@ class TranslationLoaderErrorRuleTest extends RuleTestCase
         ]);
     }
 
+    public function testConfiguredLocaleAliasSuppressesTheLoaderLocaleDiagnostic(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => 'de_DE',
+            ],
+        );
+
+        $this->analyse([
+            __DIR__ . '/data/translation-loader-error.php',
+        ], []);
+    }
+
     public function getCollectors(): array
     {
         return array_merge(parent::getCollectors(), [

@@ -69,6 +69,9 @@ class TranslationLoader
     /** @var array<string, non-empty-string> */
     private array $localeNames = [];
 
+    /** @var array<string, non-empty-string> */
+    private readonly array $localeAliases;
+
     /** @var array<string, array<non-empty-string, true>> */
     private array $reportedLocaleConflicts = [];
 
@@ -86,6 +89,9 @@ class TranslationLoader
     /** @var array<non-empty-string, array{non-empty-string, non-empty-string}>  */
     private array $parsed = [];
 
+    /**
+     * @param array<array-key, mixed> $localeAliases
+     */
     public function __construct(
         ?string $langPath = null,
         ?string $baseLocale = null,
@@ -94,7 +100,41 @@ class TranslationLoader
         private readonly JsonLoader $jsonLoader = new JsonLoader(),
         ?FuzzyStringSetFactory $fuzzyStringSetFactory = null,
         private readonly bool $strictLocales = false,
+        array $localeAliases = [],
     ) {
+        $normalizedLocaleAliases = [];
+        $localeAliasNames = [];
+
+        foreach ($localeAliases as $alias => $target) {
+            if (!is_string($alias) || !is_string($target) || '' === $alias || '' === $target) {
+                throw new \InvalidArgumentException('Locale aliases and their targets must be non-empty strings');
+            }
+
+            if (!Utils::checkLocaleExists($target, $this->strictLocales)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Locale alias target %s for %s is not known to Symfony Intl',
+                    Utils::e($target),
+                    Utils::e($alias),
+                ));
+            }
+
+            $aliasKey = $this->canonicalizeLocale($alias);
+
+            if (isset($localeAliasNames[$aliasKey])) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Locale aliases %s and %s both resolve to %s',
+                    Utils::e($localeAliasNames[$aliasKey]),
+                    Utils::e($alias),
+                    Utils::e($aliasKey),
+                ));
+            }
+
+            $normalizedLocaleAliases[$aliasKey] = $target;
+            $localeAliasNames[$aliasKey] = $alias;
+        }
+
+        $this->localeAliases = $normalizedLocaleAliases;
+
         $candidateLangPath = $langPath ?? Utils::detectLangPath();
         $resolvedLangPath = realpath($candidateLangPath);
 
@@ -165,7 +205,10 @@ class TranslationLoader
 
     public function isValidLocale(string $locale): bool
     {
-        return Utils::checkLocaleExists($locale, $this->strictLocales);
+        $localeKey = $this->canonicalizeLocale($locale);
+        $validationLocale = $this->localeAliases[$localeKey] ?? $locale;
+
+        return Utils::checkLocaleExists($validationLocale, $this->strictLocales);
     }
 
     /**

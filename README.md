@@ -367,10 +367,20 @@ If two translation paths resolve to the same flexible locale identifier, the
 scanner reports a conflict and loads the first spelling in deterministic path
 order. Strict mode treats the spellings as separate locales.
 
+Application-specific locale names can be mapped to a locale known by Symfony
+Intl for validation. The alias does not redirect translation lookup: language
+files and calls continue to use the application locale key. Alias keys follow
+the same flexible or strict matching policy as other locale identifiers. Each
+target must be a locale known directly to Symfony Intl; targets are not
+resolved through other aliases, and two keys may not resolve to the same
+flexible locale identifier.
+
 ```neon
 parameters:
     lostInTranslation:
         invalidLocales: true
+        localeAliases:
+            de_informal: de_DE
         strictLocales: true
 ```
 
@@ -462,6 +472,8 @@ parameters:
         baseLocale: null
         # the path to your language directory if not `./lang`. May use value set in Laravel if unconfigured.
         langPath: null
+        # validate application-specific locale keys through locales known by Symfony Intl without changing lookup keys
+        localeAliases: []
         # issue errors for invalid character encodings
         invalidCharacterEncodings: true
         # should we analyze choices for invalid values?

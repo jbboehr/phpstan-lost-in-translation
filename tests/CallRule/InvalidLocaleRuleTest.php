@@ -105,4 +105,20 @@ class InvalidLocaleRuleTest extends RuleTestCase
             __DIR__ . '/../data/flexible-script-locale.php',
         ], []);
     }
+
+    public function testConfiguredLocaleAliasUsesItsTargetForValidation(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => 'de_DE',
+            ],
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/locale-alias.php',
+        ], []);
+    }
 }

@@ -192,7 +192,7 @@ cp "$script_directory/phpstan-application.neon" "$bookstack_directory/phpstan-ap
 cp "$script_directory/phpstan-blade.neon" "$bookstack_directory/phpstan-blade-canary.neon"
 
 pushd "$bookstack_directory" >/dev/null
-run_analysis application 1 phpstan-application-canary.neon
+run_analysis application 0 phpstan-application-canary.neon
 run_analysis blade 1 phpstan-blade-canary.neon
 composer show --format=json --no-interaction >"$temporary_directory/installed.json"
 php "$script_directory/assert-output.php" versions "$temporary_directory/installed.json"

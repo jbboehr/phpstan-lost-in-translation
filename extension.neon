@@ -10,6 +10,7 @@ services:
       baseLocale: %lostInTranslation.baseLocale%
       langPath: %lostInTranslation.langPath%
       fuzzySearch: %lostInTranslation.fuzzySearch%
+      localeAliases: %lostInTranslation.localeAliases%
       strictLocales: %lostInTranslation.strictLocales%
   - class: jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector
   - class: jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector
@@ -70,6 +71,7 @@ parametersSchema:
         invalidReplacements: bool(),
         fuzzySearch: bool(),
         langPath: schema(string(), nullable()),
+        localeAliases: arrayOf(string()),
         missingTranslationStringsInBaseLocale: bool(),
         missingTranslationStrings: bool(),
         requireCompleteChoiceCoverage: bool(),
@@ -89,6 +91,7 @@ parameters:
         invalidReplacements: true
         fuzzySearch: true
         langPath: null
+        localeAliases: []
         missingTranslationStringsInBaseLocale: true
         missingTranslationStrings: true
         requireCompleteChoiceCoverage: true

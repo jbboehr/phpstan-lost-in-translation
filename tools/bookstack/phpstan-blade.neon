@@ -8,3 +8,5 @@ parameters:
         langPath: lang
         baseLocale: en
         fuzzySearch: false
+        localeAliases:
+            de_informal: de_DE

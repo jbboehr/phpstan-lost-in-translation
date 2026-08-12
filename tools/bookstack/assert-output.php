@@ -235,24 +235,14 @@ function assertBookStackApplication(array $output): void
     assertNoBookStackGlobalErrors($output, 'application');
     $diagnostics = getBookStackFileDiagnostics($output);
 
-    if (count($diagnostics) !== 1) {
+    if ([] !== $diagnostics) {
         throw new RuntimeException(sprintf(
-            'Application-only analysis expected one locale-alias diagnostic, observed: %s',
+            'Application-only translation analysis is no longer clean: %s',
             json_encode(countBookStackIdentifiers($diagnostics), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         ));
     }
 
-    assertBookStackDiagnostic(
-        $diagnostics,
-        'lostInTranslation.invalidLocale.unknown',
-        'Unknown locale: de_informal',
-        fileSuffix: '/lang/de_informal/activities.php',
-    );
-    assertBookStackIdentifiersAbsent($diagnostics, [
-        'lostInTranslation.translationLoaderError',
-    ]);
-
-    fwrite(STDOUT, "BookStack application analysis: expected locale alias diagnostic only.\n");
+    fwrite(STDOUT, "BookStack application translation analysis: clean with configured locale alias.\n");
 }
 
 /**
@@ -280,14 +270,9 @@ function assertBookStackBlade(array $output): void
 
     assertBookStackIdentifiersAbsent($extensionDiagnostics, [
         'lostInTranslation.invalidChoice.malformed',
+        'lostInTranslation.invalidLocale.unknown',
         'lostInTranslation.translationLoaderError',
     ]);
-    assertBookStackDiagnostic(
-        $extensionDiagnostics,
-        'lostInTranslation.invalidLocale.unknown',
-        'Unknown locale: de_informal',
-        fileSuffix: '/lang/de_informal/activities.php',
-    );
     assertBookStackDiagnostic(
         $extensionDiagnostics,
         'lostInTranslation.invalidChoice.missingCase',

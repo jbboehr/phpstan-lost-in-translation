@@ -42,9 +42,14 @@ findings, regression absences, exact diagnostic uniqueness, and a broad 40-throu
 every mixed-confidence diagnostic.
 
 The explicit-coverage follow-up then removed the two cascading missing-case reports attached to malformed Slovak
-ranges. The current canary retains 56 extension diagnostics: five missing-choice cases, two non-numeric choice
+ranges. At that stage the canary retained 56 extension diagnostics: five missing-choice cases, two non-numeric choice
 conditions, one unknown application locale, 47 unused replacements, and one missing translation. It also asserts one
 real Czech explicit-coverage gap and the clearer Slovak two-bound range suggestion.
+
+Configurable locale aliases then removed the known `de_informal` validation false positive without changing BookStack's
+translation lookup key. The current canary retains 55 extension diagnostics: five missing-choice cases, two non-numeric
+choice conditions, 47 unused replacements, and one missing translation. Application-only translation analysis is now
+clean, and the Blade pass rejects any recurrence of the unknown-locale diagnostic.
 
 The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
 the normal pull-request or `composer check:full` gate.
@@ -258,7 +263,8 @@ This is consistent with the Blade-path concern previously recorded as RV-10, but
 
 **Classification:** Product gap, not necessarily a defect<br>
 **Impact:** Low to medium depending on application<br>
-**Area:** Locale validation
+**Area:** Locale validation<br>
+**Follow-up status:** Complete
 
 BookStack intentionally uses `de_informal`. Its application maps that identifier to `de_DE`, and its locale handling explicitly accommodates non-standard application locales. Symfony Intl does not recognize `de_informal`, so this extension reports:
 
@@ -268,7 +274,12 @@ lostInTranslation.invalidLocale.unknown
 
 The diagnostic is consistent with the extension's current contract: locale validation asks Symfony Intl whether the identifier is known. It is nevertheless noisy for applications that deliberately define aliases or variants.
 
-**Recommendation:** Treat configurable locale aliases as an optional future feature. A mapping such as `de_informal: de_DE` could allow plural and locale validation to use the canonical target while preserving the application's lookup key. Until then, BookStack can disable invalid-locale diagnostics if it wants to keep this identifier.
+The `localeAliases` configuration now maps an application-specific key to a locale known by Symfony Intl for validation.
+Translation discovery and lookup deliberately retain the application's key, so BookStack continues loading
+`lang/de_informal` while validating it through `de_DE`. Flexible alias keys use the normal locale canonicalization;
+strict mode requires the configured spelling exactly. Targets must be locales known directly to Symfony Intl, and
+invalid, empty, non-string, or canonically colliding entries fail during configuration. The pinned canary configures
+`de_informal: de_DE` and rejects a recurrence of the unknown-locale diagnostic.
 
 ### BS-EXT-05: explicit choice coverage must use the inferred integer domain
 
@@ -446,9 +457,11 @@ Create a minimal BladeStan integration fixture before changing production code. 
 defects, three plausible locale-specific caller supersets, and no caller-wide dead arguments. Exact duplicate nested
 diagnostics are now removed by the bridge; findings attached to distinct outer view calls remain distinct.
 
-### 5. Consider locale aliases
+### 5. Configure locale aliases
 
-Design only if real applications beyond BookStack need it. Any alias feature should define how lookup, Symfony locale validation, and plural selection interact.
+**Complete.** Alias targets affect Symfony locale validation while lookup preserves the application-specific key. The
+BookStack canary covers `de_informal: de_DE`; locale-aware plural validation can reuse the target if that separate
+feature is implemented later.
 
 ### 6. Add an optional real-application canary
 
@@ -477,7 +490,7 @@ The canary should:
 | Invalid range-list syntax | yes | yes | yes |
 | Blade template source attribution | no | yes | yes |
 | Locale/key/value metadata preservation | no | yes | yes |
-| Application locale alias | yes, if implemented | yes | BookStack `de_informal` |
+| Application locale alias | yes | yes | BookStack `de_informal` |
 | Fuzzy-search timing guard | no | optional benchmark | observational |
 
 ## Reproduction outline

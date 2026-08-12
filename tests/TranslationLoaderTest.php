@@ -388,6 +388,120 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($loader->isValidLocale('PT-br'));
     }
 
+    public function testLocaleAliasesOnlyAffectValidation(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'DE-INFORMAL' => 'de_DE',
+            ],
+        );
+
+        $this->assertTrue($loader->isValidLocale('de_informal'));
+        $this->assertTrue($loader->hasLocale('de_informal'));
+        $this->assertSame('Informal German greeting', $loader->get('de_informal', 'greeting'));
+        $this->assertFalse($loader->hasLocale('de_DE'));
+        $this->assertNull($loader->get('de_DE', 'greeting'));
+    }
+
+    public function testLocaleAliasTargetsMustBeKnownLocales(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Locale alias target "also_invalid" for "de_informal" is not known to Symfony Intl',
+        );
+
+        new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => 'also_invalid',
+            ],
+        );
+    }
+
+    public function testStrictLocaleAliasesRequireExactApplicationKeys(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            strictLocales: true,
+            localeAliases: [
+                'de_informal' => 'de_DE',
+            ],
+        );
+
+        $this->assertTrue($loader->isValidLocale('de_informal'));
+        $this->assertFalse($loader->isValidLocale('DE_INFORMAL'));
+    }
+
+    public function testLocaleAliasesMustBeNonEmpty(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Locale aliases and their targets must be non-empty strings');
+
+        new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => '',
+            ],
+        );
+    }
+
+    public function testLocaleAliasKeysMustBeStrings(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Locale aliases and their targets must be non-empty strings');
+
+        new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                123 => 'de_DE',
+            ],
+        );
+    }
+
+    public function testLocaleAliasTargetsMustBeStrings(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Locale aliases and their targets must be non-empty strings');
+
+        new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => 123,
+            ],
+        );
+    }
+
+    public function testFlexibleLocaleAliasesMustHaveDistinctCanonicalKeys(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(
+            'Locale aliases "de_informal" and "DE-INFORMAL" both resolve to "de_INFORMAL"',
+        );
+
+        new TranslationLoader(
+            langPath: __DIR__ . '/lang-locale-aliases',
+            baseLocale: 'en',
+            fuzzySearch: false,
+            localeAliases: [
+                'de_informal' => 'de_DE',
+                'DE-INFORMAL' => 'de_AT',
+            ],
+        );
+    }
+
     public function testFlexibleLocaleAliasesAreMatchedWhenDiffingUsedTranslations(): void
     {
         $loader = new TranslationLoader(

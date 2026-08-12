@@ -12,6 +12,8 @@ parameters:
         disallowDynamicTranslationStrings: true
         # relative to CWD?
         langPath: ./e2e/lang
+        localeAliases:
+            de_informal: de_DE
         unusedTranslationStrings: true
 
 includes:

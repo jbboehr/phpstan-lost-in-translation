@@ -611,6 +611,20 @@ default and can disable this check without disabling malformed-choice and
 invalid-bound diagnostics. Numeric comma lists remain invalid Laravel range
 syntax; contiguous lists receive a two-bound range suggestion.
 
+### Application-specific locale aliases
+
+**Status:** Complete after the BookStack integration follow-up.
+
+`localeAliases` maps an application locale key to a Symfony Intl locale for
+validation without redirecting translation discovery or lookup. Alias keys
+respect `strictLocales`; flexible mode canonicalizes their spelling in the
+same way as call and path locales. Focused tests cover loader diagnostics,
+call-site validation, lookup isolation, invalid targets, and empty mappings.
+Invalid targets, non-string or empty entries, and colliding canonical keys fail
+as configuration errors; alias targets are not chained.
+The pinned BookStack canary validates `de_informal` through `de_DE`, leaving
+the application-only translation pass clean.
+
 ### Compiled Blade diagnostic paths
 
 **Status:** A compatibility bridge and regression coverage are implemented.

@@ -483,7 +483,7 @@ final class JsonErrorFormatterTest extends ErrorFormatterTestCase
                         ],
                     ]),
                     \PHPStan\Analyser\Error::__set_state([
-                        'message' => 'Translation choice does not cover all possible cases for number of type: 3',
+                        'message' => 'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                         'file' => __DIR__ . '/../../e2e/src/invalid-choice.php',
                         'line' => 3,
                         'canBeIgnored' => true,

@@ -12,7 +12,7 @@ that artifact, installs it as a copied Composer path package, and runs three ana
 BladeStan's own diagnostics and ordinary diagnostics from compiled templates are still generated. The assertion layer
 filters them from this extension's canary contract instead of adding broad PHPStan ignores. Curated signatures provide
 the behavioral contract; a broad range of 40 through 100 extension diagnostics catches major disappearance or flooding
-without freezing the complete mixed-confidence histogram, currently 58.
+without freezing the complete mixed-confidence histogram, currently 56.
 
 The check requires network access, Git, Composer, `tar`, and PHP 8.4. Run it from the repository root with:
 

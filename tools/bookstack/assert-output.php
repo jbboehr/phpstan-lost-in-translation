@@ -290,8 +290,14 @@ function assertBookStackBlade(array $output): void
     );
     assertBookStackDiagnostic(
         $extensionDiagnostics,
+        'lostInTranslation.invalidChoice.missingCase',
+        'Explicit translation choice conditions do not cover all possible cases for number of type: int',
+        'Locale: "cs", Key: "entities.search_total_results_found"',
+    );
+    assertBookStackDiagnostic(
+        $extensionDiagnostics,
         'lostInTranslation.invalidChoice.nonNumeric',
-        'Translation choice has non-numeric value: "3,4"',
+        'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
         'Locale: "sk", Key: "entities.x_books"',
     );
     assertBookStackDiagnostic(

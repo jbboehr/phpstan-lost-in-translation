@@ -282,12 +282,15 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 
 ### Analyze choices
 
-Choices will be analyzed for potentially invalid options. **Enabled by default.**
+Choices will be analyzed for potentially invalid options. Syntax validation and explicit-condition completeness checking
+are **enabled by default**. Disable only the completeness warning with `requireCompleteChoiceCoverage: false`; malformed
+conditions and invalid bounds will still be reported while `invalidChoices` remains enabled.
 
 ```neon
 parameters:
     lostInTranslation:
         invalidChoices: true
+        requireCompleteChoiceCoverage: true
 ```
 
 <!-- akashi-example: invalid-choice -->
@@ -303,7 +306,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
  ------ ------------------------------------------------------------------------------------------------------------------
   Line   invalid-choice.php
  ------ ------------------------------------------------------------------------------------------------------------------
-  3      Translation choice does not cover all possible cases for number of type: 3
+  3      Explicit translation choice conditions do not cover all possible cases for number of type: 3
          🪪  lostInTranslation.invalidChoice.missingCase
          💡 Locale: "en", Key: "{0} There are none|{1} There is one|[2] There are :count", Value: "{0} There are none|{1}
             There is one|[2] There are :count"
@@ -463,6 +466,8 @@ parameters:
         invalidCharacterEncodings: true
         # should we analyze choices for invalid values?
         invalidChoices: true
+        # require explicit choice conditions to cover every possible value of the inferred number type?
+        requireCompleteChoiceCoverage: true
         # warn on locales that have no translation strings or are invalid locale identifiers
         invalidLocales: true
         # should we analyze translation replacements for invalid values?

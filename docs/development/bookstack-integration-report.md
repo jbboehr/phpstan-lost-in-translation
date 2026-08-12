@@ -41,6 +41,11 @@ application locale, 47 unused replacements, and one missing translation. The for
 findings, regression absences, exact diagnostic uniqueness, and a broad 40-through-100 count range rather than freezing
 every mixed-confidence diagnostic.
 
+The explicit-coverage follow-up then removed the two cascading missing-case reports attached to malformed Slovak
+ranges. The current canary retains 56 extension diagnostics: five missing-choice cases, two non-numeric choice
+conditions, one unknown application locale, 47 unused replacements, and one missing translation. It also asserts one
+real Czech explicit-coverage gap and the clearer Slovak two-bound range suggestion.
+
 The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
 the normal pull-request or `composer check:full` gate.
 
@@ -265,15 +270,24 @@ The diagnostic is consistent with the extension's current contract: locale valid
 
 **Recommendation:** Treat configurable locale aliases as an optional future feature. A mapping such as `de_informal: de_DE` could allow plural and locale validation to use the canonical target while preserving the application's lookup key. Until then, BookStack can disable invalid-locale diagnostics if it wants to keep this identifier.
 
-### BS-EXT-05: `invalidChoice.missingCase` may over-approximate integer inputs
+### BS-EXT-05: explicit choice coverage must use the inferred integer domain
 
-**Classification:** Requires focused reproduction<br>
+**Classification:** Mixed real findings and annotation imprecision<br>
 **Impact:** Medium confidence<br>
-**Area:** `src/CallRule/InvalidChoiceRule.php`
+**Area:** `src/CallRule/InvalidChoiceRule.php`<br>
+**Follow-up status:** Complete
 
-Seven `invalidChoice.missingCase` diagnostics remained. At least some appear to result from PHPStan representing a count as unrestricted `int` while the application domain guarantees a non-negative count. If the rule checks negative integers as possible values, it can report a missing case that is unreachable at runtime.
+The seven remaining `invalidChoice.missingCase` diagnostics had three causes. Four Czech profile diagnostics use
+conditions that cover every non-negative integer, but BookStack annotates their count as unrestricted `int`, so only
+negative integers are uncovered. One Czech search string omits an explicit zero case as well as negative integers. The
+two Slovak diagnostics accompany invalid `[2,3,4]` syntax, so their computed coverage is unreliable and the additional
+missing-case message is only a cascade.
 
-**Recommendation:** Preserve these examples before changing the rule. Determine whether PHPStan can infer a non-negative integer from the source or whether the rule needs a deliberately bounded policy. Do not suppress all missing-case findings: explicit choice ranges can still contain genuine gaps.
+The rule now compares conditions with PHPStan's inferred domain. A fully covered `non-negative-int` is accepted, while
+the same conditions still warn for unrestricted `int`. Malformed or non-numeric conditions suppress the secondary
+coverage diagnostic. The diagnostic now says "explicit translation choice conditions" to distinguish this stricter
+quality check from Laravel's runtime fallback behavior, and `requireCompleteChoiceCoverage: false` can disable only this
+check. Completeness remains enabled by default because detecting genuine gaps is a core feature.
 
 ### BS-EXT-06: Unused replacement results need locale-preserving output
 
@@ -340,7 +354,7 @@ Several Slovak strings use a condition shaped like:
 [2,3,4]
 ```
 
-Laravel's choice range parser treats a bracketed comma expression as a two-ended range. Splitting the example produces a lower bound of `2` and an upper value of `3,4`, which is not numeric. The extension emitted two reachable `invalidChoice.nonNumeric` diagnostics in the Blade pass.
+Laravel's choice range parser treats a bracketed comma expression as a two-ended range. Splitting the example produces a lower bound of `2` and an upper value of `3,4`, which is not numeric. The extension emitted two reachable `invalidChoice.nonNumeric` diagnostics in the Blade pass. It now explains that a range accepts exactly two bounds and suggests `[2,4]` for this contiguous list without adding a cascading coverage warning.
 
 **Likely fix:** If the intent is the inclusive range two through four, use `[2,4]`. Each affected string should be checked against the intended Slovak grammar before making an upstream change.
 

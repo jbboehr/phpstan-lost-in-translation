@@ -35,12 +35,14 @@ use PHPStan\Rules\Rule;
  */
 class InvalidChoiceRuleTest extends RuleTestCase
 {
+    private bool $requireCompleteChoiceCoverage = true;
+
     protected function getRule(): Rule
     {
         return new LostInTranslationRule(
             $this->getLostInTranslationHelper(),
             CallRuleCollection::createFromArray([
-                new InvalidChoiceRule(),
+                new InvalidChoiceRule($this->requireCompleteChoiceCoverage),
             ]),
         );
     }
@@ -51,22 +53,22 @@ class InvalidChoiceRuleTest extends RuleTestCase
             __DIR__ . '/../data/invalid-choice.php',
         ], [
             [
-                'Translation choice does not cover all possible cases for number of type: 3',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                 7,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 2',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 2',
                 10,
                 Utils::formatTipForKeyValue('en', '{4,*} There are many|{3} There are three'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: int',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int',
                 15,
                 Utils::formatTipForKeyValue('en', '{4,*} There are many|{3} There are three'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: int<2, 4>',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int<2, 4>',
                 29,
                 Utils::formatTipForKeyValue('en', '{2} There are two|{3} There are three'),
             ],
@@ -86,32 +88,32 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 Utils::formatTipForKeyValue('en', '{2} two|{3 three'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 4',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 4',
                 42,
                 Utils::formatTipForKeyValue('en', '{1,3} two'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 3',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                 46,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 3',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                 51,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 3',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                 52,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
             [
-                'Translation choice does not cover all possible cases for number of type: 3',
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 3',
                 53,
                 Utils::formatTipForKeyValue('en', '{0} There are none|{1} There is one|[2] There are :count'),
             ],
             [
-                'Translation choice has non-numeric value: "3,4"',
+                'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
                 56,
                 Utils::formatTipForKeyValue('sk', '[2,3,4] There are :count books'),
             ],
@@ -129,6 +131,55 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 'Failed to parse translation choice: "  {3 three"',
                 62,
                 Utils::formatTipForKeyValue('en', '  {3 three'),
+            ],
+        ]);
+    }
+
+    public function testCompleteChoiceCoverageUsesTheInferredNumberDomain(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/choice-coverage.php',
+        ], [
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int<0, max>',
+                7,
+                Utils::formatTipForKeyValue('en', '{1} There is one|[2,*] There are :count'),
+            ],
+            [
+                'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
+                10,
+                Utils::formatTipForKeyValue(
+                    'sk',
+                    '{0} Nie sú žiadne|{1} Je jedna|[2,3,4] Sú :count|[5,*] Je ich :count',
+                ),
+            ],
+            [
+                'Translation choice range must contain exactly two bounds; use "{2,4}" instead of "{2,3,4}" for contiguous values',
+                13,
+                Utils::formatTipForKeyValue('en', '{2,3,4} There are :count'),
+            ],
+        ]);
+    }
+
+    public function testCompleteChoiceCoverageCanBeDisabledIndependently(): void
+    {
+        $this->requireCompleteChoiceCoverage = false;
+
+        $this->analyse([
+            __DIR__ . '/../data/choice-coverage.php',
+        ], [
+            [
+                'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
+                10,
+                Utils::formatTipForKeyValue(
+                    'sk',
+                    '{0} Nie sú žiadne|{1} Je jedna|[2,3,4] Sú :count|[5,*] Je ich :count',
+                ),
+            ],
+            [
+                'Translation choice range must contain exactly two bounds; use "{2,4}" instead of "{2,3,4}" for contiguous values',
+                13,
+                Utils::formatTipForKeyValue('en', '{2,3,4} There are :count'),
             ],
         ]);
     }

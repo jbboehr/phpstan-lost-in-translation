@@ -597,6 +597,20 @@ with an explicit policy for locale aliases, possible number types, Laravel's
 first-segment fallback, and applications that intentionally provide fewer
 plural forms. Do not fold that policy back into `invalidChoice.malformed`.
 
+### Explicit choice-condition coverage
+
+**Status:** Complete after focused BookStack triage.
+
+Explicit conditions continue to be checked against the complete PHPStan number
+domain because finding translation strings with incomplete coverage is a core
+feature. The rule now handles `non-negative-int` as `int<0, max>`, suppresses
+secondary coverage findings when malformed conditions make the union
+unreliable, and describes the diagnostic as an explicit-condition gap rather
+than a Laravel runtime failure. `requireCompleteChoiceCoverage` is enabled by
+default and can disable this check without disabling malformed-choice and
+invalid-bound diagnostics. Numeric comma lists remain invalid Laravel range
+syntax; contiguous lists receive a two-bound range suggestion.
+
 ### Compiled Blade diagnostic paths
 
 **Status:** A compatibility bridge and regression coverage are implemented.

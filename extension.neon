@@ -28,6 +28,8 @@ services:
   - class: jbboehr\PHPStanLostInTranslation\CallRule\DynamicTranslationStringRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule
+    arguments:
+      requireCompleteChoiceCoverage: %lostInTranslation.requireCompleteChoiceCoverage%
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule
@@ -70,6 +72,7 @@ parametersSchema:
         langPath: schema(string(), nullable()),
         missingTranslationStringsInBaseLocale: bool(),
         missingTranslationStrings: bool(),
+        requireCompleteChoiceCoverage: bool(),
         strictLocales: bool(),
         translationLoaderErrors: bool(),
         unusedTranslationStrings: bool()
@@ -88,6 +91,7 @@ parameters:
         langPath: null
         missingTranslationStringsInBaseLocale: true
         missingTranslationStrings: true
+        requireCompleteChoiceCoverage: true
         strictLocales: false
         translationLoaderErrors: true
         unusedTranslationStrings: false

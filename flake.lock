@@ -1,11 +1,36 @@
 {
   "nodes": {
-    "akashi": {
+    "agent-badge": {
       "inputs": {
         "flake-utils": [
           "flake-utils"
         ],
         "gitignore": "gitignore",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786503253,
+        "narHash": "sha256-z2RfLBtLSNw5VzV+cA+/YXtgg2Hoxvd+P89aAO5Ts+c=",
+        "owner": "jbboehr",
+        "repo": "agent-badge.ts",
+        "rev": "4e8f892f443245cf9a32583034d3a155e9fdcb48",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jbboehr",
+        "repo": "agent-badge.ts",
+        "rev": "4e8f892f443245cf9a32583034d3a155e9fdcb48",
+        "type": "github"
+      }
+    },
+    "akashi": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "gitignore": "gitignore_2",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -105,6 +130,27 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
+          "agent-badge",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762808025,
+        "narHash": "sha256-XmjITeZNMTQXGhhww6ed/Wacy2KzD6svioyCX7pkUu4=",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "rev": "cb5e3fdca1de58ccbc3ef53de65bd372b48f567c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
+    "gitignore_2": {
+      "inputs": {
+        "nixpkgs": [
           "akashi",
           "nixpkgs"
         ]
@@ -177,6 +223,7 @@
     },
     "root": {
       "inputs": {
+        "agent-badge": "agent-badge",
         "akashi": "akashi",
         "flake-utils": "flake-utils",
         "git-hooks": "git-hooks",

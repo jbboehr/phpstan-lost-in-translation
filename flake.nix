@@ -24,6 +24,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.pre-commit-hooks.follows = "git-hooks";
     };
+    agent-badge = {
+      url = "github:jbboehr/agent-badge.ts/4e8f892f443245cf9a32583034d3a155e9fdcb48";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     systems.url = "github:nix-systems/default";
     flake-utils = {
@@ -41,6 +46,7 @@
     {
       self,
       akashi,
+      agent-badge,
       nixpkgs,
       systems,
       flake-utils,
@@ -52,9 +58,9 @@
       let
         agentBadge =
           if pkgs.stdenv.isLinux then
-            akashi.packages.${system}.agent-badge
+            agent-badge.packages.${system}.agent-badge
           else
-            akashi.packages.${system}.agent-badge-unwrapped;
+            agent-badge.packages.${system}.agent-badge-unwrapped;
         buildEnv =
           {
             php,

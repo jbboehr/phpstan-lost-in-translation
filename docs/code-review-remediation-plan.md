@@ -694,8 +694,16 @@ keys therefore remain governed by the missing-translation diagnostics until a tr
 secondary `invalidChoice.missingPluralForm` based on the key text. Full-sentence keys still act as source values and
 retain plural-form analysis. Both rules share the grouped-key classifier so their fallback boundary cannot diverge.
 
-The remaining issue #6 slice removes fuzzy suggestions identical to the missing key. The separate lower-priority
-invalid-input diagnostic observation also remains unaddressed.
+### Exact-key fuzzy suggestion suppression
+
+**Status:** Complete for item 6 of GitHub issue #6.
+
+Missing-translation diagnostics no longer suggest the requested key itself when that key exists in another locale.
+The generic fuzzy-set contract still permits exact nearest-neighbor matches; the diagnostic layer suppresses the tip
+because only it knows that repeating a locale-missing key is not actionable. Genuine typo suggestions remain enabled.
+
+This completed all six reported issue #6 items. The separate lower-priority invalid-input diagnostic observation
+remains unaddressed.
 
 ### Compiled Blade diagnostic paths
 

@@ -62,7 +62,7 @@ final class MissingTranslationStringRule implements CallRuleInterface
                 if (strlen($key) > 0) {
                     $similarKey = $this->loader->searchForSimilarKeys($key);
 
-                    if (null !== $similarKey) {
+                    if (null !== $similarKey && $similarKey !== $key) {
                         $builder->addTip(sprintf("Did you mean this similar key: %s", Utils::e($similarKey)));
                     }
                 }

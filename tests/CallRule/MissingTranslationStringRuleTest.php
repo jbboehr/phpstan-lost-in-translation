@@ -156,12 +156,10 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             [
                 'Missing translation string "other::messages.shared" for locales: ja',
                 4,
-                'Did you mean this similar key: "other::messages.shared"',
             ],
             [
                 'Missing translation string "acme::messages.only_in_en" for locales: ja',
                 5,
-                'Did you mean this similar key: "acme::messages.only_in_en"',
             ],
         ]);
     }

@@ -511,10 +511,11 @@ The translation scanner currently supports these layouts inside `langPath`:
 
 - `<locale>.json`
 - `<locale>/<group>.php`
+- `vendor/<namespace>/<locale>/<group>.php`
 
-Other nested PHP and JSON layouts are ignored. In particular, Laravel vendor
-overrides such as `vendor/<package>/<locale>/<group>.php` are intentionally
-unsupported and ignored.
+Other nested PHP and JSON layouts are ignored. Vendor JSON catalogues and PHP
+files nested below the group level are not part of Laravel's vendor override
+layout and remain unsupported.
 
 ## Development
 

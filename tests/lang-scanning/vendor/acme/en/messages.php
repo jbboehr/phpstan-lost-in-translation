@@ -1,3 +1,6 @@
 <?php
 
-throw new RuntimeException('Unsupported vendor translation override was executed');
+return [
+    'shared' => 'Shared vendor translation',
+    'only_in_en' => 'English vendor translation',
+];

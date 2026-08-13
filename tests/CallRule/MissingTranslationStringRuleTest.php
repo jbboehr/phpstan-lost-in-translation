@@ -27,6 +27,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 
@@ -138,6 +139,29 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             [
                 'Missing translation string "namespaced mixed-case trans" for locales: ja, zh',
                 8,
+            ],
+        ]);
+    }
+
+    public function testVendorNamespacedTranslationsAreLoadedPerLocale(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-scanning',
+            baseLocale: 'en',
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/vendor-translation-functions.php',
+        ], [
+            [
+                'Missing translation string "other::messages.shared" for locales: ja',
+                4,
+                'Did you mean this similar key: "other::messages.shared"',
+            ],
+            [
+                'Missing translation string "acme::messages.only_in_en" for locales: ja',
+                5,
+                'Did you mean this similar key: "acme::messages.only_in_en"',
             ],
         ]);
     }

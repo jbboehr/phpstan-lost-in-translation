@@ -182,7 +182,8 @@ class TranslationLoader
         $locale = $this->canonicalizeLocale($locale);
         $this->data[$locale][$namespace][$key] = $value;
 
-        $this->searchDatabase->addMany([$key, $value]);
+        $searchKey = '*' === $namespace ? $key : $namespace . '::' . $key;
+        $this->searchDatabase->addMany([$searchKey, $value]);
     }
 
 
@@ -430,20 +431,30 @@ class TranslationLoader
         $foundLocales = [];
 
         foreach ($files as $file) {
+            $relativePathname = $file->getRelativePathname();
+
             if (
-                1 !== preg_match(
+                1 === preg_match(
+                    '~^vendor/([^/]+)/([\w-]{2,})/([^/]+)\.php$~',
+                    $relativePathname,
+                    $matches,
+                )
+            ) {
+                $namespace = $matches[1];
+                $locale = $matches[2];
+            } elseif (
+                1 === preg_match(
                     '~^([\w-]{2,})(?:\.json|/([^/]+)\.php)$~',
-                    $file->getRelativePathname(),
+                    $relativePathname,
                     $matches,
                     PREG_UNMATCHED_AS_NULL,
                 )
             ) {
+                $locale = $matches[1];
+                $namespace = '*';
+            } else {
                 continue;
             }
-
-            $locale = $matches[1];
-            //$group = $matches[2] ?? null;
-            $namespace = '*';
 
             $this->localeFiles[$locale][] = $file->getPathname();
 
@@ -518,9 +529,10 @@ class TranslationLoader
         $arr = [];
 
         foreach ($this->data as $localeItems) {
-            foreach ($localeItems as $namespaceItems) {
+            foreach ($localeItems as $namespace => $namespaceItems) {
                 foreach ($namespaceItems as $key => $value) {
-                    $arr[$key] = true;
+                    $searchKey = '*' === $namespace ? $key : $namespace . '::' . $key;
+                    $arr[$searchKey] = true;
                     $arr[$value] = true;
                 }
             }

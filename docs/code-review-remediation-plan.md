@@ -55,7 +55,7 @@ below so the separate review report is not required to track outstanding work.
 | RV-04 | Source-string fallback for a fileless base locale is intentional and covered in both replacement and choice rule tests. |
 | RV-05 | Tracked by CR-07; complete. |
 | RV-06 | The deterministic first-spelling-wins policy is intentional, and the existing diagnostic says that all files for the losing spelling are ignored. |
-| RV-07 | Tracked by CR-02; vendor overrides are intentionally unsupported, documented, and covered as ignored paths. |
+| RV-07 | Complete. Laravel vendor override discovery, namespaced lookup, diagnostics, metadata, and documentation are covered. |
 | RV-08 | Tracked by CR-10; implementation and regression coverage complete. |
 | RV-09 | Load-time and call-time encoding checks cover different diagnostic paths; the concrete CR-09 message defect is fixed. |
 | RV-10 | The compiled Blade diagnostic bridge and regression coverage are complete. |
@@ -113,9 +113,9 @@ the configured path.
 
 ### CR-02: Nonmatching translation paths are processed
 
-**Status:** Implementation and regression coverage complete. Supported layouts
-are matched exactly; other nested files, including Laravel vendor overrides,
-are intentionally unsupported and ignored.
+**Status:** Implementation and regression coverage complete. Root JSON,
+one-level locale PHP, and Laravel vendor override layouts are matched exactly;
+other nested files are ignored.
 
 **Location:** `src/TranslationLoader/TranslationLoader.php:293`
 
@@ -133,22 +133,22 @@ unrelated PHP file.
 **Impact:**
 
 - Analysis can terminate while loading an unrelated or nested file.
-- Standard nested layouts, including vendor translation overrides, are unsafe.
+- Nested layouts were unsafe until each supported shape received an exact match.
 - Files can be associated with an empty locale.
 
 **Implemented remediation:**
 
 1. Require `preg_match(...) === 1` before reading captures.
 2. Initially skip unsupported paths deterministically.
-3. Keep Laravel vendor translation overrides unsupported, document that
-   limitation, and ignore them without loading or diagnostics.
+3. Add an exact `vendor/<namespace>/<locale>/<group>.php` match and preserve
+   the namespace through lookup, fuzzy candidates, diagnostics, and metadata.
 
 **Regression tests:**
 
-- Root JSON locale files and one-level locale PHP files continue to load.
+- Root JSON locale files, one-level locale PHP files, and Laravel vendor
+  override files load under distinct key spaces.
 - Unrelated nested PHP and JSON files are ignored without warnings.
-- A realistic vendor override that throws if executed is ignored without
-  warnings, loader errors, or locale-file registration.
+- Vendor JSON and unsupported deeper vendor paths remain ignored.
 
 ### CR-03: Named arguments are parsed positionally
 
@@ -658,9 +658,23 @@ conversion preserves non-countable union members, so valid counted inputs no lon
 collection still requires every possible count. Rule coverage includes fixed-size, empty, non-empty, and general lists,
 `Countable`, an `ArrayAccess&Countable` intersection, and a union of counted and numeric inputs.
 
-The remaining issue #6 slices are Laravel vendor-namespace loading, nested base-locale key classification, suppression
-of plural-form diagnostics for missing grouped keys, and removal of identical fuzzy suggestions. The issue's separate,
-lower-priority observation about redundant coverage errors for inputs rejected by PHPStan remains unaddressed.
+This completed the second of the six reported items. The issue's separate, lower-priority observation about redundant
+coverage errors for inputs rejected by PHPStan remains unaddressed.
+
+### Laravel vendor translation namespaces
+
+**Status:** Complete for item 3 of GitHub issue #6.
+
+Translation discovery now recognizes Laravel's `vendor/<namespace>/<locale>/<group>.php` layout and stores each file
+under its captured namespace. Namespaced keys remain isolated from ordinary groups and from other vendor namespaces;
+locale discovery, fuzzy candidates, missing-translation checks, unused-key reconstruction, source files, source lines,
+and deterministic file ordering use the same callable key. Unsupported vendor JSON and deeper nested paths remain
+outside the loader's contract. Tests cover two namespaces, two locales, a per-locale missing key, and an unused
+namespaced key.
+
+The remaining issue #6 slices are nested base-locale key classification, suppression of plural-form diagnostics for
+missing grouped keys, and removal of identical fuzzy suggestions. The separate lower-priority invalid-input diagnostic
+observation also remains unaddressed.
 
 ### Compiled Blade diagnostic paths
 

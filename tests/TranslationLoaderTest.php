@@ -218,6 +218,7 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
 
             $this->assertSame('Plain translation', $loader->get('en', 'messages.foo'), $order);
             $this->assertSame('Vendor translation', $loader->get('en', 'vendor::messages.foo'), $order);
+            $this->assertSame('vendor::messages.foo', $loader->searchForSimilarKeys('vendor::messages.foo'), $order);
         }
     }
 
@@ -228,21 +229,40 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
             baseLocale: 'en',
         );
 
-        $this->assertSame(['en'], $loader->getFoundLocales());
+        $this->assertSame(['en', 'ja'], $loader->getFoundLocales());
         $this->assertSame('Root JSON translation', $loader->get('en', 'root'));
         $this->assertSame('Grouped PHP translation', $loader->get('en', 'messages.grouped'));
+        $this->assertSame(
+            'Shared vendor translation',
+            $loader->get('en', 'acme::messages.shared'),
+        );
+        $this->assertSame(
+            'Shared Japanese vendor translation',
+            $loader->get('ja', 'acme::messages.shared'),
+        );
+        $this->assertSame('Other vendor translation', $loader->get('en', 'other::messages.shared'));
+        $this->assertSame(
+            'acme::messages.only_in_en',
+            $loader->searchForSimilarKeys('acme::messages.only_in_enn'),
+        );
         $this->assertNull($loader->get('en', 'ignored'));
         $this->assertSame([], $loader->getErrors());
         $this->assertSame(
             [
                 realpath(__DIR__ . '/lang-scanning/en.json'),
                 realpath(__DIR__ . '/lang-scanning/en/messages.php'),
+                realpath(__DIR__ . '/lang-scanning/vendor/acme/en/messages.php'),
+                realpath(__DIR__ . '/lang-scanning/vendor/other/en/messages.php'),
             ],
             $loader->getLocaleFiles()['en'],
         );
+        $this->assertSame(
+            [realpath(__DIR__ . '/lang-scanning/vendor/acme/ja/messages.php')],
+            $loader->getLocaleFiles()['ja'],
+        );
     }
 
-    public function testVendorTranslationOverridesAreIgnored(): void
+    public function testVendorTranslationOverridesRetainNamespaceAndLocation(): void
     {
         $vendorOverride = realpath(__DIR__ . '/lang-scanning/vendor/acme/en/messages.php');
         $this->assertIsString($vendorOverride);
@@ -253,14 +273,25 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
             fuzzySearch: false,
         );
 
-        $this->assertNull($loader->get('en', 'acme::messages.vendor_override'));
-        $this->assertSame(['en'], $loader->getFoundLocales());
-        $this->assertArrayNotHasKey('vendor', $loader->getLocaleFiles());
+        $this->assertSame('Shared vendor translation', $loader->get('en', 'acme::messages.shared'));
+        $this->assertSame('English vendor translation', $loader->get('en', 'acme::messages.only_in_en'));
+        $this->assertSame('Other vendor translation', $loader->get('en', 'other::messages.shared'));
         $this->assertSame([], $loader->getErrors());
-
-        foreach ($loader->getLocaleFiles() as $localeFiles) {
-            $this->assertNotContains($vendorOverride, $localeFiles);
-        }
+        $this->assertContains($vendorOverride, $loader->getLocaleFiles()['en']);
+        $this->assertSame([
+            [
+                'locale' => 'en',
+                'key' => 'acme::messages.only_in_en',
+                'file' => $vendorOverride,
+                'line' => 5,
+                'candidate' => null,
+            ],
+        ], $loader->diffUsed([
+            new UsedTranslationRecord('root', '*', __FILE__, __LINE__),
+            new UsedTranslationRecord('messages.grouped', '*', __FILE__, __LINE__),
+            new UsedTranslationRecord('acme::messages.shared', '*', __FILE__, __LINE__),
+            new UsedTranslationRecord('other::messages.shared', '*', __FILE__, __LINE__),
+        ]));
     }
 
     public function testEmptyPhpTranslationGroupsAreIgnored(): void

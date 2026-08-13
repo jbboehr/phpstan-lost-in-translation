@@ -5,8 +5,9 @@ analyzes each example with PHPStan 2 and the extension's dedicated language fixt
 identifiers and their code-relative lines are compared with the external expectation map in the test; tool-only
 annotations are not added to public code snippets.
 
-Akashi requires PHP 8.2 and its PHPStan integration targets PHPStan 2, while the main project retains PHP 8.1, PHPStan
-1.12, and PHPUnit 9 compatibility. Keep these dependencies isolated from the root development requirements.
+This harness deliberately uses PHP 8.2, PHPStan 2, PHPUnit 11, and Laravel 12, while the main project retains PHP 8.1,
+PHPStan 1.12, and PHPUnit 9 compatibility. Keep this fixed documentation-test stack isolated from the root development
+requirements.
 
 Run the check from the repository root with:
 

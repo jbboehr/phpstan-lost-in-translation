@@ -156,7 +156,7 @@ final class DocumentationExamplesTest extends RuleTestCase
                 self::assertSame([], $unexpectedDiagnostics, sprintf(
                     'README example %s at README.md:%d produced unrelated PHPStan diagnostics',
                     $marker,
-                    $example->location->firstCodeLine,
+                    $example->codeOrigin()->firstCodeLine,
                 ));
 
                 $expectedDiagnostics = self::EXPECTED_DIAGNOSTICS[$marker];
@@ -166,7 +166,7 @@ final class DocumentationExamplesTest extends RuleTestCase
                 self::assertSame($expectedDiagnostics, $extensionDiagnostics, sprintf(
                     'README example %s at README.md:%d produced different extension diagnostics',
                     $marker,
-                    $example->location->firstCodeLine,
+                    $example->codeOrigin()->firstCodeLine,
                 ));
             }
         } finally {

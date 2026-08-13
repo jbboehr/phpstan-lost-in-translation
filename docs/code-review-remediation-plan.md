@@ -570,11 +570,12 @@ template compilation, translation-file examples describe loader inputs rather th
 console output, installation commands, and type-inference fragments need different execution contracts. Internal plans
 and historical reports remain outside the public documentation corpus.
 
-Akashi requires PHP 8.2 and its PHPStan integration targets PHPStan 2. The locked harness therefore lives under
-`tools/akashi/` with PHPUnit 11 and PHPStan 2, while existing tests continue to cover PHPStan 1.12 and the PHP 8.1 floor.
-The PHP 8.2 `documentation` shell and dedicated CI job run `composer docs:check`; it is not part of the PHP 8.1
-`composer check:full` gate. The first run also corrected the invalid-locale console output to include the extension's
-simultaneous missing-translation diagnostic.
+The locked harness deliberately lives under `tools/akashi/` with Laravel 12, PHPUnit 11, and PHPStan 2, while existing
+tests continue to cover PHPStan 1.12 and the PHP 8.1 floor. Akashi now supports PHP 8.1 and PHPStan 1.12, but keeping the
+documentation stack isolated prevents it from changing the root compatibility resolution. The PHP 8.2 `documentation`
+shell and dedicated CI job run `composer docs:check`; it is not part of the PHP 8.1 `composer check:full` gate. The first
+run also corrected the invalid-locale console output to include the extension's simultaneous missing-translation
+diagnostic.
 
 ### Locale-aware plural completeness
 

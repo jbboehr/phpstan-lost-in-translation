@@ -103,8 +103,9 @@ The command validates and installs its locked PHPUnit 10 and Eris dependencies u
 suite. Set `ERIS_SEED` to override the tracked default when exploring or replaying generated inputs.
 
 Run `composer docs:check` from the PHP 8.2 `documentation` shell after changing marked README translation-call examples
-or their expected diagnostics. Akashi's PHP and PHPStan requirements are intentionally newer than the root compatibility
-floor, so this check has a dedicated CI job rather than running inside the PHP 8.1 `composer check:full` gate.
+or their expected diagnostics. The isolated harness deliberately uses PHPStan 2, PHPUnit 11, and Laravel 12 independently
+of the root compatibility matrix, so this check has a dedicated CI job rather than running inside the PHP 8.1
+`composer check:full` gate.
 
 During focused iteration, run the narrowest relevant command first. The shared Composer entry points are:
 
@@ -144,9 +145,10 @@ under `require-dev` and must not be needed to load the installed extension.
 The Eris suite is a separate Composer project because no supported Eris release spans the root PHPUnit 9 through 11
 matrix. Keep its dependencies and lock under `tools/eris/`; do not add Eris to the root development requirements.
 
-The Akashi README suite is a separate Composer project because Akashi requires PHP 8.2 and its PHPStan adapter targets
-PHPStan 2. Keep its dependencies and lock under `tools/akashi/`; do not add Akashi to the root development requirements
-while PHP 8.1 and PHPStan 1.12 remain supported.
+The Akashi README suite is a separate Composer project so its fixed PHPStan 2, PHPUnit 11, and Laravel 12 verification
+stack does not alter the root PHP 8.1 and PHPStan 1.12 dependency resolution. Keep its dependencies and lock under
+`tools/akashi/` while the root compatibility matrix spans both PHPStan major versions. Akashi intentionally tracks
+`dev-master`; the isolated lock pins the reviewed revision, and upstream API changes must be reviewed when updating it.
 
 The BookStack canary is an external, networked PHP 8.4 check, not part of the normal local or pull-request gate. Keep
 BookStack, BladeStan, Livewire, and core analysis versions pinned in `tools/bookstack/`; preserve its non-symlinked path

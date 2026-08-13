@@ -42,6 +42,10 @@ $expectedErrors = [
     'src/invalid-replacement:4:lostInTranslation.invalidReplacement.unused',
     'src/missing-translation-string:3:lostInTranslation.missingTranslationString',
     'src/missing-translation-string-in-base-locale:3:lostInTranslation.missingBaseLocaleTranslationString',
+    'src/namespaced-translation-functions:5:lostInTranslation.missingTranslationString',
+    'src/namespaced-translation-functions:6:lostInTranslation.missingTranslationString',
+    'src/namespaced-translation-functions:7:lostInTranslation.missingTranslationString',
+    'src/namespaced-translation-functions:8:lostInTranslation.missingTranslationString',
 ];
 
 $expectedErrors = array_merge($expectedErrors, [

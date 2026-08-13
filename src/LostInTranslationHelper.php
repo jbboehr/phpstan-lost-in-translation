@@ -25,6 +25,7 @@ namespace jbboehr\PHPStanLostInTranslation;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
@@ -47,6 +48,7 @@ class LostInTranslationHelper
 
     public function __construct(
         private readonly TranslationLoader $translationLoader,
+        private readonly ReflectionProvider $reflectionProvider,
     ) {
         $this->translatorType = new ObjectType(\Illuminate\Contracts\Translation\Translator::class);
         $this->cache = new \WeakMap();
@@ -133,12 +135,22 @@ class LostInTranslationHelper
 
             $args = $node->args;
         } elseif ($node instanceof Node\Expr\FuncCall) {
-            if (!$node->name instanceof Node\Name\FullyQualified) {
+            if (!$node->name instanceof Node\Name) {
                 return null;
             }
 
             $className = null;
-            $name = $node->name->toLowerString();
+            $name = $this->reflectionProvider->resolveFunctionName($node->name, $scope);
+
+            if (null === $name) {
+                if (!($node->name instanceof Node\Name\FullyQualified) && !$node->name->isUnqualified()) {
+                    return null;
+                }
+
+                $name = $node->name->toString();
+            }
+
+            $name = strtolower($name);
 
             if ($name === '__' || $name === 'trans') {
                 $isChoice = false;

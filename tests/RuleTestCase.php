@@ -25,6 +25,7 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase as BaseRuleTestCase;
 
@@ -68,7 +69,10 @@ abstract class RuleTestCase extends BaseRuleTestCase
 
     public function createLostInTranslationHelper(): LostInTranslationHelper
     {
-        return new LostInTranslationHelper($this->getTranslationLoader());
+        return new LostInTranslationHelper(
+            $this->getTranslationLoader(),
+            self::getContainer()->getByType(ReflectionProvider::class),
+        );
     }
 
     public function getLostInTranslationHelper(): LostInTranslationHelper

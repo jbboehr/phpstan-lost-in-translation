@@ -34,6 +34,7 @@ use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 use PHPStan\Testing\RuleTestCase;
 
@@ -79,7 +80,10 @@ final class DocumentationExamplesTest extends RuleTestCase
         $loader = $this->getTranslationLoader();
 
         return new LostInTranslationRule(
-            new LostInTranslationHelper($loader),
+            new LostInTranslationHelper(
+                $loader,
+                self::getContainer()->getByType(ReflectionProvider::class),
+            ),
             CallRuleCollection::createFromArray([
                 new DynamicTranslationStringRule(),
                 new InvalidCharacterEncodingRule(),

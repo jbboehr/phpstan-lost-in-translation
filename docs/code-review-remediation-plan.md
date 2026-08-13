@@ -635,6 +635,20 @@ as configuration errors; alias targets are not chained.
 The pinned BookStack canary validates `de_informal` through `de_DE`, leaving
 the application-only translation pass clean.
 
+### Namespaced translation helper resolution
+
+**Status:** Complete for item 1 of GitHub issue #6.
+
+`LostInTranslationHelper` now resolves static function-call names through PHPStan's `ReflectionProvider`. Ordinary
+unqualified `__()`, `trans()`, and `trans_choice()` calls inside a namespace therefore follow PHP's global-function
+fallback and reach every call rule and collector. Calls that resolve to a function actually declared in the namespace
+remain outside the Laravel-helper contract. Unit coverage locks the global fallback, while the end-to-end fixture also
+locks the namespaced-override boundary in a complete PHPStan process.
+
+The remaining issue #6 slices are countable choice-input normalization, Laravel vendor-namespace loading, nested
+base-locale key classification, suppression of plural-form diagnostics for missing grouped keys, and removal of
+identical fuzzy suggestions.
+
 ### Compiled Blade diagnostic paths
 
 **Status:** A compatibility bridge and regression coverage are implemented.

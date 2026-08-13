@@ -24,8 +24,10 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
+use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
+use PHPStan\Reflection\ReflectionProvider;
 use PHPStan\Rules\Rule;
 
 /**
@@ -81,6 +83,61 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             [
                 'Missing translation string "trans function" for locales: ja, zh',
                 4,
+            ],
+        ]);
+    }
+
+    public function testNamespacedTranslationFunctionsResolveToGlobalHelpers(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/namespaced-translation-functions.php',
+        ], [
+            [
+                'Missing translation string "namespaced double underscore" for locales: ja, zh',
+                5,
+            ],
+            [
+                'Missing translation string "namespaced trans" for locales: ja, zh',
+                6,
+            ],
+            [
+                'Missing translation string "namespaced trans choice" for locales: ja, zh',
+                7,
+            ],
+            [
+                'Missing translation string "namespaced mixed-case trans" for locales: ja, zh',
+                8,
+            ],
+        ]);
+    }
+
+    public function testUnresolvedTranslationFunctionsFallBackWithoutMatchingImportedAliases(): void
+    {
+        $reflectionProvider = $this->createMock(ReflectionProvider::class);
+        $reflectionProvider->method('resolveFunctionName')->willReturn(null);
+        $this->lostInTranslationHelper = new LostInTranslationHelper(
+            $this->getTranslationLoader(),
+            $reflectionProvider,
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/namespaced-translation-functions.php',
+        ], [
+            [
+                'Missing translation string "namespaced double underscore" for locales: ja, zh',
+                5,
+            ],
+            [
+                'Missing translation string "namespaced trans" for locales: ja, zh',
+                6,
+            ],
+            [
+                'Missing translation string "namespaced trans choice" for locales: ja, zh',
+                7,
+            ],
+            [
+                'Missing translation string "namespaced mixed-case trans" for locales: ja, zh',
+                8,
             ],
         ]);
     }

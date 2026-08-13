@@ -683,9 +683,19 @@ vendor-namespaced keys. Nested keys such as `validation.custom.email.required` t
 remain outside the heuristic. Focused coverage locks ordinary nested keys, hyphenated and underscored segments, vendor
 namespaces, sentences, and malformed separators.
 
-The remaining issue #6 slices are suppression of plural-form diagnostics for missing grouped keys and removal of
-identical fuzzy suggestions. The separate lower-priority invalid-input diagnostic observation also remains
-unaddressed.
+This completed the fourth of the six reported items.
+
+### Missing grouped choice fallback suppression
+
+**Status:** Complete for item 5 of GitHub issue #6.
+
+`InvalidChoiceRule` no longer treats a missing grouped key as plural content. Ordinary, nested, and vendor-namespaced
+keys therefore remain governed by the missing-translation diagnostics until a translation value exists, avoiding a
+secondary `invalidChoice.missingPluralForm` based on the key text. Full-sentence keys still act as source values and
+retain plural-form analysis. Both rules share the grouped-key classifier so their fallback boundary cannot diverge.
+
+The remaining issue #6 slice removes fuzzy suggestions identical to the missing key. The separate lower-priority
+invalid-input diagnostic observation also remains unaddressed.
 
 ### Compiled Blade diagnostic paths
 

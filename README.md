@@ -290,9 +290,10 @@ malformed conditions and invalid bounds will still be reported while `invalidCho
 For stricter translation-quality checking, enable `requireCompletePluralForms`. This opt-in warning reports an
 unconditioned choice when it provides fewer positional forms than the locale can select. It uses the configured
 `localeAliases` target for the plural policy, retains the application's locale in the diagnostic, and checks a
-full-sentence key as the source value when no separate translation value exists. Locale spelling is matched exactly as
-Laravel matches it; an unaliased locale absent from Laravel's selector table uses the first form only. Laravel's valid
-first-form fallback remains accepted when the option is off. The diagnostic identifier is
+full-sentence key as the source value when no separate translation value exists. Missing grouped keys are left to the
+missing-translation diagnostics because the key is not plural content. Locale spelling is matched exactly as Laravel
+matches it; an unaliased locale absent from Laravel's selector table uses the first form only. Laravel's valid first-form
+fallback remains accepted when the option is off. The diagnostic identifier is
 `lostInTranslation.invalidChoice.missingPluralForm`.
 
 ```neon

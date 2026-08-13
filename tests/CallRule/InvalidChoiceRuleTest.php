@@ -381,6 +381,32 @@ class InvalidChoiceRuleTest extends RuleTestCase
         );
     }
 
+    public function testPluralCompletenessSkipsMissingGroupedKeys(): void
+    {
+        foreach (
+            [
+                'messages.revisions',
+                'messages.nested.revisions',
+                'acme::messages.nested.revisions',
+            ] as $key
+        ) {
+            $errors = (new InvalidChoiceRule(requireCompletePluralForms: true))->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $key => [['en', null]],
+                ],
+                keyType: new ConstantStringType($key),
+                numberType: new ConstantIntegerType(2),
+                isChoice: true,
+            ));
+
+            $this->assertSame([], $errors, $key);
+        }
+    }
+
     public function testPluralCompletenessDoesNotCascadeFromAMalformedMixedChoice(): void
     {
         $value = '{0 None|Other';

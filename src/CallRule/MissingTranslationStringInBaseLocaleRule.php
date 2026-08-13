@@ -63,7 +63,7 @@ final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterfac
 
     private const GROUP_REGEX = '~^(.+::)?(?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*(?:\.(?:[\w][\w\d]*)(?:[_-](?:[\w][\w\d]*))*)+$~';
 
-    private static function isLikelyUntranslated(string $key): bool
+    public static function isLikelyUntranslated(string $key): bool
     {
         return 1 === preg_match(self::GROUP_REGEX, $key);
     }

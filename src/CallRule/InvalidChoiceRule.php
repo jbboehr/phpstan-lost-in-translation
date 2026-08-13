@@ -164,6 +164,10 @@ final class InvalidChoiceRule implements CallRuleInterface
 
         foreach ($call->possibleTranslations as $key => $items) {
             foreach ($items as [$locale, $value]) {
+                if (null === $value && MissingTranslationStringInBaseLocaleRule::isLikelyUntranslated($key)) {
+                    continue;
+                }
+
                 $errors = array_merge(
                     $errors,
                     $this->analyzeChoices($call, $locale, $key, $value ?? $key),

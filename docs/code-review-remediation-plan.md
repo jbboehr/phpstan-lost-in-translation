@@ -672,9 +672,19 @@ and deterministic file ordering use the same callable key. Unsupported vendor JS
 outside the loader's contract. Tests cover two namespaces, two locales, a per-locale missing key, and an unused
 namespaced key.
 
-The remaining issue #6 slices are nested base-locale key classification, suppression of plural-form diagnostics for
-missing grouped keys, and removal of identical fuzzy suggestions. The separate lower-priority invalid-input diagnostic
-observation also remains unaddressed.
+### Nested base-locale key classification
+
+**Status:** Complete for item 4 of GitHub issue #6.
+
+The base-locale heuristic now recognizes grouped keys with one or more dot-separated identifier segments, including
+vendor-namespaced keys. Nested keys such as `validation.custom.email.required` therefore receive the same
+`missingBaseLocaleTranslationString` diagnostic as a one-level key. Sentence-like JSON keys and malformed grouped keys
+remain outside the heuristic. Focused coverage locks ordinary nested keys, hyphenated and underscored segments, vendor
+namespaces, sentences, and malformed separators.
+
+The remaining issue #6 slices are suppression of plural-form diagnostics for missing grouped keys and removal of
+identical fuzzy suggestions. The separate lower-priority invalid-input diagnostic observation also remains
+unaddressed.
 
 ### Compiled Blade diagnostic paths
 

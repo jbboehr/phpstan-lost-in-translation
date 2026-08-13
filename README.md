@@ -212,10 +212,11 @@ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/dy
 ### Find strings untranslated in the base locale
 
 Missing translation strings in the base locale are not reported as missing. However, some translation
-strings may still need to be specified even in the base locale. Currently, this check reports untranslated
-strings in the base locale where the group and translation key are identifiers, where an identifier matches
-`[\w][\w\d]*(?:[_-][\w][\w\d]*)*`. For example: `group-name.translation-key`. Calls without an explicit
-locale include the configured base locale even when it has no translation file. **Enabled by default**
+strings may still need to be specified even in the base locale. This check reports untranslated strings where
+the group and every dot-separated key segment are identifiers matching `[\w][\w\d]*(?:[_-][\w][\w\d]*)*`.
+For example: `group-name.translation-key`, `validation.custom.email.required`, or
+`package::group.nested.translation-key`. Calls without an explicit locale include the configured base locale
+even when it has no translation file. **Enabled by default**
 
 ```neon
 parameters:

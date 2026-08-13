@@ -68,6 +68,26 @@ class MissingTranslationStringInBaseLocaleRuleTest extends RuleTestCase
         ]);
     }
 
+    public function testNestedGroupedKeysAreClassifiedWithoutMatchingSentencesOrMalformedKeys(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/nested-missing-in-base-locale.php',
+        ], [
+            [
+                'Likely missing translation string "messages.nested.absent" for base locale: en',
+                3,
+            ],
+            [
+                'Likely missing translation string "messages.first_level.second-level.third_level" for base locale: en',
+                4,
+            ],
+            [
+                'Likely missing translation string "acme::messages.nested.absent" for base locale: en',
+                5,
+            ],
+        ]);
+    }
+
     public function testFlexibleLocaleIsComparedToCanonicalBaseLocale(): void
     {
         $this->analyse([

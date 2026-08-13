@@ -31,7 +31,9 @@ use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\NeverType;
+use PHPStan\Type\ObjectType;
 use PHPStan\Type\TypeCombinator;
+use PHPStan\Type\UnionType;
 use PHPStan\Type\VerbosityLevel;
 
 final class InvalidChoiceRule implements CallRuleInterface
@@ -184,6 +186,26 @@ final class InvalidChoiceRule implements CallRuleInterface
         if (null === $numberType) {
             return [];
         }
+
+        // Laravel counts arrays and Countable objects before passing the number to its message selector.
+        $countableType = new ObjectType(\Countable::class);
+        $normalizedNumberTypes = [];
+
+        foreach ($numberType instanceof UnionType ? $numberType->getTypes() : [$numberType] as $candidateType) {
+            if ($candidateType->isArray()->yes()) {
+                $normalizedNumberTypes[] = $candidateType->getArraySize();
+                continue;
+            }
+
+            if ($countableType->isSuperTypeOf($candidateType)->yes()) {
+                $normalizedNumberTypes[] = IntegerRangeType::fromInterval(0, null);
+                continue;
+            }
+
+            $normalizedNumberTypes[] = $candidateType;
+        }
+
+        $numberType = TypeCombinator::union(...$normalizedNumberTypes);
 
         $segments = explode('|', $value);
         $errors = [];

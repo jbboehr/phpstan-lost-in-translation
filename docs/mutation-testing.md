@@ -55,10 +55,10 @@ coverage because that process may not load the active mutant.
 
 ## Reviewed baseline
 
-The complete PHP 8.4 campaign on 2026-08-12 generated 1,013 mutants. PHPUnit
-killed 836 and 177 escaped, for 100% mutation code coverage and a covered-code
-MSI of 82.53%. With 100% mutation code coverage, the overall MSI is also
-82.53%. Both 80-point gates leave 2.53 percentage points of margin. No mutants
+The complete PHP 8.4 campaign on 2026-08-12 generated 1,023 mutants. PHPUnit
+killed 846 and 177 escaped, for 100% mutation code coverage and a covered-code
+MSI of 82.70%. With 100% mutation code coverage, the overall MSI is also
+82.70%. Both 80-point gates leave 2.70 percentage points of margin. No mutants
 are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
@@ -70,7 +70,8 @@ The review added focused assertions for these observable contracts:
   invalid-value diagnostics;
 - choice parsing distinguishes malformed conditions from ordinary text,
   reports multiple bad conditions, accepts multiline text, and optionally
-  reports incomplete locale-specific plural forms;
+  reports incomplete locale-specific plural forms; choice coverage also
+  normalizes counted inputs without discarding other union members;
 - replacement validation checks every locale and applies Unicode-aware title
   casing;
 - namespaced and mixed-case translation helper calls follow PHP function

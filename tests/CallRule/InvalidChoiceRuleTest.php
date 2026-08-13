@@ -31,8 +31,12 @@ use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\MetadataRuleError;
 use PHPStan\Rules\Rule;
+use PHPStan\Type\ArrayType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
+use PHPStan\Type\MixedType;
+use PHPStan\Type\ObjectType;
+use PHPStan\Type\UnionType;
 
 /**
  * @extends RuleTestCase<LostInTranslationRule>
@@ -171,6 +175,21 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 13,
                 Utils::formatTipForKeyValue('en', '{2,3,4} There are :count'),
             ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int<0, max>',
+                33,
+                Utils::formatTipForKeyValue('en', '{1} There is one|[2,*] There are :count'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 2',
+                42,
+                Utils::formatTipForKeyValue('en', '{1} There is one'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int<0, max>',
+                46,
+                Utils::formatTipForKeyValue('en', '[1,*] There are :count'),
+            ],
         ]);
     }
 
@@ -195,6 +214,37 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 Utils::formatTipForKeyValue('en', '{2,3,4} There are :count'),
             ],
         ]);
+    }
+
+    public function testCountableNormalizationPreservesOtherUnionMembers(): void
+    {
+        $value = '{0} There are none|[1,*] There are :count';
+
+        foreach (
+            [
+                new ArrayType(new MixedType(), new MixedType()),
+                new ObjectType(\Countable::class),
+            ] as $countedType
+        ) {
+            $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $value => [['en', null]],
+                ],
+                keyType: new ConstantStringType($value),
+                numberType: new UnionType([
+                    $countedType,
+                    new ConstantIntegerType(-1),
+                ]),
+                isChoice: true,
+            ));
+
+            $this->assertCount(1, $errors);
+            $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_CASE, $errors[0]->getIdentifier());
+        }
     }
 
     public function testLaravelCompatibleUnconditionedChoices(): void

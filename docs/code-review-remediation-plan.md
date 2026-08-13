@@ -645,9 +645,22 @@ fallback and reach every call rule and collector. Calls that resolve to a functi
 remain outside the Laravel-helper contract. Unit coverage locks the global fallback, while the end-to-end fixture also
 locks the namespaced-override boundary in a complete PHPStan process.
 
-The remaining issue #6 slices are countable choice-input normalization, Laravel vendor-namespace loading, nested
-base-locale key classification, suppression of plural-form diagnostics for missing grouped keys, and removal of
-identical fuzzy suggestions.
+This completed the first of the six reported items.
+
+### Countable translation choice inputs
+
+**Status:** Complete for item 2 of GitHub issue #6.
+
+`InvalidChoiceRule` now mirrors Laravel's `Translator::choice()` boundary by converting array and `Countable` members
+of the inferred number type to their possible counts before checking explicit condition coverage. Arrays retain
+PHPStan's inferred size, including exact and non-empty bounds; other `Countable` objects use `int<0, max>`. The
+conversion preserves non-countable union members, so valid counted inputs no longer emit `missingCase` while a counted
+collection still requires every possible count. Rule coverage includes fixed-size, empty, non-empty, and general lists,
+`Countable`, an `ArrayAccess&Countable` intersection, and a union of counted and numeric inputs.
+
+The remaining issue #6 slices are Laravel vendor-namespace loading, nested base-locale key classification, suppression
+of plural-form diagnostics for missing grouped keys, and removal of identical fuzzy suggestions. The issue's separate,
+lower-priority observation about redundant coverage errors for inputs rejected by PHPStan remains unaddressed.
 
 ### Compiled Blade diagnostic paths
 

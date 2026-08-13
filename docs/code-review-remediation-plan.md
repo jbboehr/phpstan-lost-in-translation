@@ -515,13 +515,13 @@ Ongoing policy:
 
 ### Mutation testing baseline
 
-**Status:** Complete. The reviewed PHP 8.4 campaign generates 918 covered
-mutants, kills 756, and records a covered-code MSI of 82.35%. CI now enforces
+**Status:** Complete. The reviewed PHP 8.4 campaign generates 1,011 covered
+mutants, kills 834, and records a covered-code MSI of 82.49%. CI now enforces
 80-point overall and covered-code minimums. Focused tests cover the observable
 Blade queue, loader metadata, choice and replacement edge cases, memoization,
 formatter exit status, and utility boundaries added during triage.
 
-The 162 survivors are classified by component in
+The 177 survivors are classified by component in
 `docs/mutation-testing.md`. Equivalent mutants are documented rather than
 hidden with broad ignore rules; remaining behavioral variants provide a
 prioritized input for future work tied to real diagnostics.
@@ -597,7 +597,9 @@ translation that relies on Laravel's first-form fallback anywhere in the
 locale's number domain.
 
 Locale aliases select the plural policy while diagnostics retain the original
-application locale. The rule counts every pipe-delimited segment because
+application locale. After resolving an alias, the rule exact-matches Laravel's
+case-sensitive, underscore-sensitive selector table and treats unlisted locale
+variants as one-form locales, matching Laravel's default. The rule counts every pipe-delimited segment because
 Laravel strips explicit conditions from the complete segment list before its
 positional fallback, but it runs only when at least one unconditioned segment
 exists and suppresses the warning after malformed conditions. Explicit-only
@@ -664,7 +666,9 @@ extracted Composer archive without a source symlink. Minimal-change resolution p
 PHPStan 2.2.6, Larastan 3.10.0, and Laravel 12.64.0 versions while adding pinned BladeStan 0.11.7 and Livewire 4.4.0. The
 canary asserts the clean stock baseline and application-only result before filtering BladeStan's unrelated
 compiled-template findings from curated extension identifiers, tips, known regression absences, and a broad diagnostic
-count guard. The networked check remains outside normal pull requests and `composer check:full`.
+count guard. Its opt-in plural-completeness pass separately observes 89 findings within a 70-through-110 range,
+including curated assertions for the Icelandic missing delimiter and validation of `de_informal` through its configured
+alias. The networked check remains outside normal pull requests and `composer check:full`.
 
 ### BookStack replacement triage
 
@@ -719,7 +723,7 @@ so validation and storage cannot diverge again.
 5. Migrate the PHPUnit configuration with matrix verification.
 6. Add runtime-only Composer auditing to CI.
 7. Triage the advisory Infection baseline and establish a covered-code MSI
-   threshold. **Complete:** the reviewed 82.35% baseline now has an enforced
+   threshold. **Complete:** the reviewed 82.49% baseline now has an enforced
    80% overall and covered-code floor.
 8. Evaluate targeted Eris properties after locale canonicalization is stable.
    **Complete:** an isolated PHP 8.1/PHPUnit 10 job checks four deterministic

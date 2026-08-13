@@ -242,7 +242,10 @@ function assertBookStackApplication(array $output): void
         ));
     }
 
-    fwrite(STDOUT, "BookStack application translation analysis: clean with configured locale alias.\n");
+    fwrite(
+        STDOUT,
+        "BookStack application translation analysis: clean with configured locale alias and plural-form completeness.\n",
+    );
 }
 
 /**
@@ -257,14 +260,28 @@ function assertBookStackBlade(array $output): void
         static fn (array $diagnostic): bool => is_string($diagnostic['identifier'] ?? null)
             && str_starts_with($diagnostic['identifier'], 'lostInTranslation.'),
     ));
+    $pluralFormDiagnostics = array_values(array_filter(
+        $extensionDiagnostics,
+        static fn (array $diagnostic): bool => $diagnostic['identifier']
+            === 'lostInTranslation.invalidChoice.missingPluralForm',
+    ));
     $extensionDiagnosticCount = count($extensionDiagnostics);
+    $nonPluralFormDiagnosticCount = $extensionDiagnosticCount - count($pluralFormDiagnostics);
 
     assertBookStackDiagnosticsUnique($extensionDiagnostics);
 
-    if ($extensionDiagnosticCount < 40 || $extensionDiagnosticCount > 100) {
+    if ($nonPluralFormDiagnosticCount < 40 || $nonPluralFormDiagnosticCount > 100) {
         throw new RuntimeException(sprintf(
-            'BookStack Blade analysis returned %d extension diagnostics; expected the broad range 40 through 100.',
-            $extensionDiagnosticCount,
+            'BookStack Blade analysis returned %d non-plural-form extension diagnostics; '
+                . 'expected the broad range 40 through 100.',
+            $nonPluralFormDiagnosticCount,
+        ));
+    }
+
+    if (count($pluralFormDiagnostics) < 70 || count($pluralFormDiagnostics) > 110) {
+        throw new RuntimeException(sprintf(
+            'BookStack Blade analysis returned %d missing-plural-form diagnostics; expected the broad range 70 through 110.',
+            count($pluralFormDiagnostics),
         ));
     }
 
@@ -284,6 +301,20 @@ function assertBookStackBlade(array $output): void
         'lostInTranslation.invalidChoice.nonNumeric',
         'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
         'Locale: "sk", Key: "entities.x_books"',
+    );
+    assertBookStackDiagnostic(
+        $extensionDiagnostics,
+        'lostInTranslation.invalidChoice.missingPluralForm',
+        'Translation choice provides 1 plural form, but locale "is" can select 2 forms',
+        'Locale: "is", Key: "entities.x_books"',
+        '/app/Users/Controllers/UserProfileController.php',
+    );
+    assertBookStackDiagnostic(
+        $extensionDiagnostics,
+        'lostInTranslation.invalidChoice.missingPluralForm',
+        'Translation choice provides 1 plural form, but locale "de_informal" can select 2 forms',
+        'Locale: "de_informal", Key: "entities.x_chapters"',
+        '/app/Users/Controllers/UserProfileController.php',
     );
     assertBookStackDiagnostic(
         $extensionDiagnostics,

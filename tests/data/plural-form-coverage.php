@@ -32,3 +32,11 @@ trans_choice('One|Two|Other', 3, [], 'sl');
 
 /** All four Slovenian positions are present. */
 trans_choice('One|Two|Few|Other', 3, [], 'sl');
+
+/** Laravel defaults locale variants absent from its exact selector table to the first form. */
+trans_choice('Informal form', 2, [], 'de_informal');
+trans_choice('Mozambican form', 2, [], 'pt_MZ');
+trans_choice('Script form', 2, [], 'sr_Latn_RS');
+
+/** Region variants explicitly recognized by Laravel retain their language policy. */
+trans_choice('Regional form', 2, [], 'en_US');

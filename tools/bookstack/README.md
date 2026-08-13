@@ -5,14 +5,18 @@ This optional integration check clones BookStack `v26.05.3` and verifies that th
 that artifact, installs it as a copied Composer path package, and runs three analyses:
 
 1. BookStack's stock application analysis must remain clean.
-2. Application-only translation analysis must remain clean when `de_informal` is configured as an alias of `de_DE`.
-3. Blade analysis must retain selected translation identifiers and tips while the known empty-array and
-   malformed-choice regressions remain absent.
+2. Application-only translation analysis must remain clean when `de_informal` is configured as an alias of `de_DE`
+   and opt-in plural-form completeness is enabled.
+3. Blade analysis must retain selected translation identifiers and tips, including plural-form findings, while the
+   known empty-array and malformed-choice regressions remain absent.
 
 BladeStan's own diagnostics and ordinary diagnostics from compiled templates are still generated. The assertion layer
 filters them from this extension's canary contract instead of adding broad PHPStan ignores. Curated signatures provide
-the behavioral contract; a broad range of 40 through 100 extension diagnostics catches major disappearance or flooding
-without freezing the complete mixed-confidence histogram, currently 55.
+the behavioral contract. The canary currently observes 55 non-plural extension diagnostics and guards them with a broad
+range of 40 through 100. It separately observes 89 opt-in `invalidChoice.missingPluralForm` diagnostics and guards them
+with a range of 70 through 110. Curated plural signatures cover the known Icelandic missing delimiter and prove that
+the configured `de_informal: de_DE` alias supplies the plural policy. The ranges catch major disappearance or flooding
+without freezing either mixed-confidence histogram.
 
 The check requires network access, Git, Composer, `tar`, and PHP 8.4. Run it from the repository root with:
 

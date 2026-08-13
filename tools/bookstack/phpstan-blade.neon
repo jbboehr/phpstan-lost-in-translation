@@ -10,3 +10,4 @@ parameters:
         fuzzySearch: false
         localeAliases:
             de_informal: de_DE
+        requireCompletePluralForms: true

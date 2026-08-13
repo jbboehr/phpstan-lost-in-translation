@@ -51,6 +51,17 @@ translation lookup key. The current canary retains 55 extension diagnostics: fiv
 choice conditions, 47 unused replacements, and one missing translation. Application-only translation analysis is now
 clean, and the Blade pass rejects any recurrence of the unknown-locale diagnostic.
 
+The opt-in plural-completeness follow-up on 2026-08-11 retains those 55 diagnostics and adds 89
+`invalidChoice.missingPluralForm` diagnostics. The new findings represent 75 unique locale/key pairs across four outer
+call sites; 14 pairs for `settings.users_mfa_x_methods` are reported at each of two distinct calls. The canary keeps the
+original 40-through-100 range guard on non-plural diagnostics and curates both the known Icelandic missing-delimiter
+case and a `de_informal` finding validated through its `de_DE` alias. A 2026-08-12 follow-up replaced the initial exact
+plural count with a 70-through-110 drift guard and corrected
+plural-locale matching to mirror Laravel: alias targets are resolved first, recognized locale spellings match exactly,
+and unlisted variants default to one form. The BookStack observation remains 89 because `de_informal` resolves to the
+recognized `de_DE` policy. These warnings describe translations that rely on Laravel's legal first-form fallback, so
+they remain an opt-in quality gate rather than a default runtime-validity check.
+
 The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
 the normal pull-request or `composer check:full` gate.
 
@@ -372,7 +383,8 @@ Laravel's choice range parser treats a bracketed comma expression as a two-ended
 ### BS-APP-04: Icelandic choice string likely lacks a delimiter
 
 **File:** `lang/is/entities.php`<br>
-**Key:** `x_books`
+**Key:** `x_books`<br>
+**Follow-up status:** Detected by the opt-in plural-completeness diagnostic and pinned BookStack canary
 
 The value is:
 
@@ -460,8 +472,7 @@ diagnostics are now removed by the bridge; findings attached to distinct outer v
 ### 5. Configure locale aliases
 
 **Complete.** Alias targets affect Symfony locale validation while lookup preserves the application-specific key. The
-BookStack canary covers `de_informal: de_DE`; locale-aware plural validation can reuse the target if that separate
-feature is implemented later.
+BookStack canary covers `de_informal: de_DE` for both locale validation and the opt-in plural-completeness policy.
 
 ### 6. Add an optional real-application canary
 
@@ -486,6 +497,7 @@ The canary should:
 | One-form choice locale | yes | yes | yes |
 | Two-form choice locale | yes | yes | yes |
 | Three-form choice locale | yes | yes | yes |
+| Opt-in plural-form completeness | yes | yes | yes |
 | Exact and range conditions | yes | yes | yes |
 | Invalid range-list syntax | yes | yes | yes |
 | Blade template source attribution | no | yes | yes |

@@ -231,7 +231,7 @@ class InvalidChoiceRuleTest extends RuleTestCase
     {
         $this->requireCompletePluralForms = true;
         $this->localeAliases = [
-            'application_plural' => 'AR-sa',
+            'application_plural' => 'ar_SA',
         ];
         $this->translationLoader = new TranslationLoader(
             langPath: __DIR__ . '/../lang',
@@ -271,6 +271,11 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 'Translation choice provides 3 plural forms, but locale "sl" can select 4 forms',
                 31,
                 Utils::formatTipForKeyValue('sl', 'One|Two|Other'),
+            ],
+            [
+                'Translation choice provides 1 plural form, but locale "en_US" can select 2 forms',
+                42,
+                Utils::formatTipForKeyValue('en_US', 'Regional form'),
             ],
         ]);
     }

@@ -261,22 +261,34 @@ function createPackageConsumer(string $consumerDirectory, string $packageDirecto
         throw new RuntimeException(sprintf('Unable to create consumer directory: %s', $consumerDirectory));
     }
 
+    $repositories = [
+        [
+            'type' => 'path',
+            'url' => str_replace('\\', '/', $packageDirectory),
+            'options' => [
+                'symlink' => false,
+                'versions' => [
+                    PACKAGE_NAME => PACKAGE_VERSION,
+                ],
+            ],
+        ],
+    ];
+    $offlineRepository = getenv('PACKAGE_CHECK_COMPOSER_REPOSITORY');
+
+    if (is_string($offlineRepository) && $offlineRepository !== '') {
+        $repositories[] = [
+            'type' => 'composer',
+            'url' => str_replace('\\', '/', $offlineRepository),
+            'canonical' => true,
+        ];
+        $repositories[] = ['packagist.org' => false];
+    }
+
     writePackageCheckJson($consumerDirectory . '/composer.json', [
         'name' => 'jbboehr/phpstan-lost-in-translation-package-check',
         'description' => 'Temporary consumer used to verify the packaged PHPStan extension',
         'type' => 'project',
-        'repositories' => [
-            [
-                'type' => 'path',
-                'url' => str_replace('\\', '/', $packageDirectory),
-                'options' => [
-                    'symlink' => false,
-                    'versions' => [
-                        PACKAGE_NAME => PACKAGE_VERSION,
-                    ],
-                ],
-            ],
-        ],
+        'repositories' => $repositories,
         'require-dev' => [
             PACKAGE_NAME => PACKAGE_VERSION,
             'phpstan/extension-installer' => '^1.4',

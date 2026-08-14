@@ -8,20 +8,28 @@ line coverage; it does not replace focused regression tests.
 
 The package and its default development shell support PHP 8.1, while the
 pinned Infection release requires a newer PHP version. Infection is therefore
-kept out of `composer.json` and `composer.lock` and is provided by a dedicated
-PHP 8.4 Nix shell with PCOV enabled:
+kept out of `composer.json` and `composer.lock` and is provided by Nix with PHP
+8.4 and PCOV. Run the complete, CI-equivalent campaign explicitly with:
+
+```console
+nix build .#mutation -L
+```
+
+This target is not under `checks`, so `nix flake check` does not run mutation
+testing. The exhaustive Nix GitHub Actions matrix adds the target explicitly.
+Nix pins Infection 0.34.2 by SHA-256 and installs the same fixed Composer
+closure used by the routine checks.
+
+## Running Infection
+
+For interactive investigation, enter the mutation shell:
 
 ```console
 nix develop .#mutation
 ```
 
-The shell pins Infection 0.34.2 by SHA-256. The mutation CI job downloads the
-same PHAR and verifies the same checksum before adding it to `PATH`.
-
-## Running Infection
-
 Run the focused campaign over the translation loader, call rules, helper, and
-utilities while developing:
+utilities:
 
 ```console
 composer infection:core
@@ -33,8 +41,10 @@ Run the complete campaign over `src` before changing the mutation baseline:
 composer infection
 ```
 
-Reports are written to `infection.log` and `infection-summary.log`. Both are
-ignored by Git and uploaded by CI even if the campaign fails.
+Interactive reports are written to `infection.log` and
+`infection-summary.log`, both ignored by Git. A successful Nix mutation build
+retains both reports in its output. On failure, Infection's score and Nix's
+original failure remain in the CI build log.
 
 ## Baseline policy
 

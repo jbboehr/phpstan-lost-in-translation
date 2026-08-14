@@ -5,7 +5,7 @@ These instructions apply to the entire repository.
 ## Project scope
 
 This package is a PHPStan extension for Laravel translation files. It supports PHP 8.1 through 8.5, PHPStan 1.12 and
-2.x, and the compatible Laravel 9 through 13 combinations encoded in `.github/workflows/ci.yml`.
+2.x, and the compatible Laravel 9 through 13 combinations encoded in `nix/validation.nix` and its Composer locks.
 
 Preserve compatibility across that declared matrix. Do not use a newer PHP, PHPUnit, PHPStan, Laravel, or PHP-Parser API
 without checking the oldest supported combination.
@@ -88,15 +88,25 @@ literary review, and absence of implementation leakage.
 
 ## Normal verification
 
-Install dependencies and run the ordinary review gate with:
+Use the ordinary mutable Composer installation for focused iteration:
 
 ```shell
 composer install
 composer check
 ```
 
-Use `composer check:full` for changes affecting packaging, extension registration, benchmarks, runtime dependency
-boundaries, or end-to-end diagnostics. Run `nix flake check -L` after changing Nix or repository scaffolding.
+The authoritative routine gate is:
+
+```shell
+nix flake check --keep-going -L
+```
+
+It includes the supported compatibility matrix, static checks, packaging and runtime checks, and isolated Eris and
+Akashi consumers. It uses Nix-managed Composer dependencies rather than the checkout's `vendor/`. Mutation testing is
+an explicit CI target under `packages`, not a flake check; run it with `nix build .#mutation -L`.
+
+Use `composer check:full` for focused iteration on packaging, extension registration, benchmarks, runtime dependency
+boundaries, or end-to-end diagnostics. Run the authoritative Nix gate after changing Nix or repository scaffolding.
 
 Run `composer eris` for the isolated property suite after changing locale canonicalization or translation-key parsing.
 The command validates and installs its locked PHPUnit 10 and Eris dependencies under `tools/eris/` before running the
@@ -104,8 +114,8 @@ suite. Set `ERIS_SEED` to override the tracked default when exploring or replayi
 
 Run `composer docs:check` from the PHP 8.2 `documentation` shell after changing marked README translation-call examples
 or their expected diagnostics. The isolated harness deliberately uses PHPStan 2, PHPUnit 11, and Laravel 12 independently
-of the root compatibility matrix, so this check has a dedicated CI job rather than running inside the PHP 8.1
-`composer check:full` gate.
+of the root compatibility matrix, so its two checks are separate exhaustive Nix CI entries rather than part of the PHP
+8.1 `composer check:full` gate.
 
 During focused iteration, run the narrowest relevant command first. The shared Composer entry points are:
 
@@ -155,8 +165,8 @@ BookStack, BladeStan, Livewire, and core analysis versions pinned in `tools/book
 installation from an extracted Composer archive, explicit filtering of non-extension BladeStan diagnostics, curated
 identifier-and-tip assertions, and broad diagnostic-count guard.
 
-Keep `composer.lock` synchronized with dependency-constraint changes. The lowest-dependency CI job is authoritative for
-the lower bounds; the Laravel matrix covers supported framework combinations.
+Keep `composer.lock` synchronized with dependency-constraint changes. The lowest-dependency Nix checks are authoritative
+for the lower bounds; the Laravel matrix covers supported framework combinations.
 
 The Composer archive policy intentionally retains `src/`, `extension.neon`, README and licensing material while
 excluding development-only fixtures and tooling. Revisit the archive exclusions when adding a new runtime asset.

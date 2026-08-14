@@ -21,100 +21,6 @@ env:
     COMPOSER_NO_INTERACTION: "1"
 
 jobs:
-    lint:
-        runs-on: ubuntu-latest
-        name: "Lint | PHP ${{ matrix.php-version }}"
-        timeout-minutes: 15
-        strategy:
-            fail-fast: false
-            matrix:
-                php-version:
-                    - "8.1"
-                    - "8.2"
-                    - "8.3"
-                    - "8.4"
-                    - "8.5"
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  coverage: "none"
-                  php-version: "${{ matrix.php-version }}"
-                  tools: composer:v2
-
-            - name: Validate composer.json and composer.lock
-              run: composer validate --strict
-
-            - name: Get Composer cache directory
-              id: composer-cache
-              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            - name: Cache Composer packages
-              uses: actions/cache@v6
-              with:
-                  path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
-                      ${{ runner.os }}-php-
-
-            - name: Install dependencies
-              run: composer install --prefer-dist --no-progress --ignore-platform-req=php+
-
-            - name: phpcs
-              run: composer phpcs
-
-            - name: phpstan
-              run: composer phpstan -- analyze
-
-    lowest-dependencies:
-        runs-on: ubuntu-latest
-        name: "Lowest dependencies | PHP 8.1"
-        timeout-minutes: 20
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  coverage: "none"
-                  php-version: "8.1"
-                  tools: composer:v2
-
-            - name: Validate composer.json and composer.lock
-              run: composer validate --strict
-
-            - name: Get Composer cache directory
-              id: composer-cache-lowest
-              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            - name: Cache Composer packages
-              uses: actions/cache@v6
-              with:
-                  path: ${{ steps.composer-cache-lowest.outputs.dir }}
-                  key: ${{ runner.os }}-php-8.1-composer-lowest-${{ hashFiles('composer.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-8.1-composer-lowest-
-                      ${{ runner.os }}-php-8.1-composer-
-                      ${{ runner.os }}-php-
-
-            - name: Install lowest supported dependencies
-              run: composer update --prefer-lowest --prefer-stable --prefer-dist --no-progress --no-blocking
-
-            - name: Run PHPStan
-              run: composer analyse -- --error-format=raw
-
-            - name: Run PHPUnit
-              run: composer test -- --colors=never
-
-            - name: Run runtime smoke test
-              run: composer runtime-smoke
-
-            - name: Run end-to-end tests
-              run: composer e2e
-
     audit:
         runs-on: ubuntu-latest
         name: "Audit | Runtime dependencies"
@@ -132,9 +38,9 @@ jobs:
             - name: Audit locked runtime dependencies
               run: composer audit --locked --no-dev
 
-    runtime:
+    phpunit:
         runs-on: ubuntu-latest
-        name: "Runtime and package | PHP 8.1"
+        name: "PHPUnit | PHP 8.4"
         timeout-minutes: 15
         steps:
             - uses: actions/checkout@v7
@@ -143,67 +49,11 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   coverage: "none"
-                  php-version: "8.1"
+                  php-version: "8.4"
                   tools: composer:v2
 
-            - name: Install runtime dependencies
-              run: composer install --no-dev --prefer-dist --no-progress
-
-            - name: Load extension and custom error formatter
-              run: composer runtime-smoke
-
-            - name: Verify packaged consumer
-              run: composer package:check
-
-    test:
-        runs-on: ubuntu-latest
-        name: "Test | PHP ${{ matrix.php-version }} | Laravel ${{ matrix.laravel-version }}"
-        timeout-minutes: 30
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - php-version: "8.1"
-                      laravel-version: "9"
-                    - php-version: "8.2"
-                      laravel-version: "9"
-                    - php-version: "8.1"
-                      laravel-version: "10"
-                    - php-version: "8.2"
-                      laravel-version: "10"
-                    - php-version: "8.3"
-                      laravel-version: "10"
-                    - php-version: "8.2"
-                      laravel-version: "11"
-                    - php-version: "8.3"
-                      laravel-version: "11"
-                    - php-version: "8.4"
-                      laravel-version: "11"
-                    - php-version: "8.5"
-                      laravel-version: "11"
-                    - php-version: "8.2"
-                      laravel-version: "12"
-                    - php-version: "8.3"
-                      laravel-version: "12"
-                    - php-version: "8.4"
-                      laravel-version: "12"
-                    - php-version: "8.5"
-                      laravel-version: "12"
-                    - php-version: "8.3"
-                      laravel-version: "13"
-                    - php-version: "8.4"
-                      laravel-version: "13"
-                    - php-version: "8.5"
-                      laravel-version: "13"
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  coverage: "none"
-                  php-version: "${{ matrix.php-version }}"
-                  tools: composer:v2
+            - name: Validate Composer files
+              run: composer validate --strict
 
             - name: Get Composer cache directory
               id: composer-cache
@@ -213,30 +63,20 @@ jobs:
               uses: actions/cache@v6
               with:
                   path: ${{ steps.composer-cache.outputs.dir }}
-                  key: ${{ runner.os }}-php-${{ matrix.php-version }}-laravel-${{ matrix.laravel-version }}-composer-${{ hashFiles('composer.lock') }}
+                  key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
                   restore-keys: |
-                      ${{ runner.os }}-php-${{ matrix.php-version }}-laravel-${{ matrix.laravel-version }}-composer-
-                      ${{ runner.os }}-php-${{ matrix.php-version }}-composer-
+                      ${{ runner.os }}-php-8.4-composer-
                       ${{ runner.os }}-php-
 
-            - name: Install Laravel
-              run: composer require --no-update --dev --prefer-dist laravel/framework:^${{ matrix.laravel-version }}
-
             - name: Install dependencies
-              run: composer update --no-progress --prefer-dist --no-blocking
+              run: composer install --prefer-dist --no-progress
 
-            - name: Run test suite
-              run: composer phpunit -- --no-coverage
+            - name: Run PHPUnit
+              run: composer test -- --colors=never
 
-            - name: Run e2e tests
-              run: composer e2e
-
-            - name: Run phpbench
-              run: ./vendor/bin/phpbench run
-
-    coverage:
+    phpstan:
         runs-on: ubuntu-latest
-        name: "Coverage | PHP 8.4"
+        name: "PHPStan | PHP 8.4"
         timeout-minutes: 15
         steps:
             - uses: actions/checkout@v7
@@ -244,7 +84,7 @@ jobs:
             - name: Install PHP
               uses: shivammathur/setup-php@v2
               with:
-                  coverage: pcov
+                  coverage: "none"
                   php-version: "8.4"
                   tools: composer:v2
 
@@ -264,19 +104,12 @@ jobs:
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress
 
-            - name: Run test suite with coverage
-              run: composer coverage
+            - name: Run PHPStan
+              run: composer analyse -- --error-format=raw
 
-            - name: Upload coverage report
-              uses: actions/upload-artifact@v7
-              with:
-                  name: coverage-clover
-                  path: clover.xml
-                  if-no-files-found: error
-
-    property:
+    php-cs-fixer:
         runs-on: ubuntu-latest
-        name: "Property testing | PHP 8.1 | PHPUnit 10"
+        name: "php-cs-fixer | PHP 8.4"
         timeout-minutes: 15
         steps:
             - uses: actions/checkout@v7
@@ -285,95 +118,17 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   coverage: "none"
-                  php-version: "8.1"
-                  tools: composer:v2
-
-            - name: Get Composer cache directory
-              id: composer-cache-property
-              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            - name: Cache Composer packages
-              uses: actions/cache@v6
-              with:
-                  path: ${{ steps.composer-cache-property.outputs.dir }}
-                  key: ${{ runner.os }}-php-8.1-eris-${{ hashFiles('tools/eris/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-8.1-eris-
-                      ${{ runner.os }}-php-8.1-composer-
-                      ${{ runner.os }}-php-
-
-            - name: Run property tests
-              run: composer eris
-
-    documentation:
-        runs-on: ubuntu-latest
-        name: "README examples | PHP 8.2 | PHPStan 2"
-        timeout-minutes: 15
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  coverage: "none"
-                  php-version: "8.2"
-                  tools: composer:v2
-
-            - name: Get Composer cache directory
-              id: composer-cache-documentation
-              run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            - name: Cache Composer packages
-              uses: actions/cache@v6
-              with:
-                  path: ${{ steps.composer-cache-documentation.outputs.dir }}
-                  key: ${{ runner.os }}-php-8.2-akashi-${{ hashFiles('tools/akashi/composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-php-8.2-akashi-
-                      ${{ runner.os }}-php-8.2-composer-
-                      ${{ runner.os }}-php-
-
-            - name: Verify README examples
-              run: composer docs:check
-
-    mutation:
-        runs-on: ubuntu-latest
-        name: "Mutation testing | PHP 8.4"
-        timeout-minutes: 30
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  coverage: pcov
                   php-version: "8.4"
                   tools: composer:v2
-              env:
-                  fail-fast: true
-
-            - name: Install Infection
-              env:
-                  INFECTION_SHA256: ae83bc5151579817c3a6217eb3deceb86a169a399139264534218b723320da3d
-                  INFECTION_VERSION: 0.34.2
-              run: |
-                  mkdir -p "$RUNNER_TEMP/bin"
-                  curl --fail --location --silent --show-error \
-                      "https://github.com/infection/infection/releases/download/$INFECTION_VERSION/infection.phar" \
-                      --output "$RUNNER_TEMP/bin/infection"
-                  echo "$INFECTION_SHA256  $RUNNER_TEMP/bin/infection" | sha256sum --check --strict
-                  chmod +x "$RUNNER_TEMP/bin/infection"
-                  php "$RUNNER_TEMP/bin/infection" --version
-                  echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
             - name: Get Composer cache directory
-              id: composer-cache-mutation
+              id: composer-cache
               run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             - name: Cache Composer packages
               uses: actions/cache@v6
               with:
-                  path: ${{ steps.composer-cache-mutation.outputs.dir }}
+                  path: ${{ steps.composer-cache.outputs.dir }}
                   key: ${{ runner.os }}-php-8.4-composer-${{ hashFiles('composer.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-php-8.4-composer-
@@ -382,37 +137,5 @@ jobs:
             - name: Install dependencies
               run: composer install --prefer-dist --no-progress
 
-            - name: Enforce mutation score
-              run: composer infection:ci
-
-            - name: Upload mutation reports
-              if: always()
-              uses: actions/upload-artifact@v7
-              with:
-                  name: infection-reports
-                  path: |
-                      infection.log
-                      infection-summary.log
-                  if-no-files-found: warn
-
-    nix:
-        runs-on: ubuntu-latest
-        name: Nix
-        timeout-minutes: 15
-        steps:
-            - uses: actions/checkout@v7
-
-            - name: Install Nix
-              uses: cachix/install-nix-action@v31
-              with:
-                  github_access_token: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Restore and save Nix store
-              uses: nix-community/cache-nix-action@v7
-              with:
-                  primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-                  restore-prefixes-first-match: nix-${{ runner.os }}-
-                  gc-max-store-size-linux: 2G
-
-            - name: Check flake
-              run: nix flake check -L
+            - name: Run php-cs-fixer
+              run: composer php-cs-fixer

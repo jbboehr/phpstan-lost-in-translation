@@ -6,6 +6,10 @@
 
 <!-- How was this tested? Include relevant commands or manual verification. -->
 
+- [ ] If a Composer lockfile changed, I updated the matching value in
+      [`nix/vendor-hashes.nix`](../nix/vendor-hashes.nix), using the replacement
+      reported by Nix or the failed Nix CI job.
+
 ## Additional context
 
 <!-- Compatibility concerns, screenshots, related issues, or implementation notes. -->

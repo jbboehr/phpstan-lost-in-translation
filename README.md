@@ -521,9 +521,38 @@ layout and remain unsupported.
 
 ## Development
 
-Mutation testing is available through the PHP 8.4 `mutation` development
-shell. See the [mutation-testing guide](docs/mutation-testing.md) for focused
-and full campaigns and the baseline policy.
+Enter the default PHP 8.1 development shell, then use an ordinary mutable
+Composer installation for interactive work:
+
+```console
+nix develop
+composer install
+vendor/bin/phpunit
+vendor/bin/phpstan
+```
+
+Run the complete routine validation suite, including the supported PHP and
+Laravel matrix and isolated consumers, with:
+
+```console
+nix flake check --keep-going -L
+```
+
+These checks install dependencies from Nix-managed fixed-output Composer
+repositories; they do not read the checkout's `vendor/`. GitHub runs the same
+checks as separate Nix jobs and also retains a small independent PHP 8.4
+baseline using `setup-php` and Composer.
+
+Mutation testing is an explicit Nix target and is not part of `nix flake
+check`:
+
+```console
+nix build .#mutation -L
+```
+
+The PHP 8.4 `mutation` development shell remains available for focused local
+campaigns. See the [mutation-testing guide](docs/mutation-testing.md) for the
+baseline policy.
 
 Run the PHPUnit suite with PCOV and regenerate the Clover report locally with:
 

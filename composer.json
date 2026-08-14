@@ -28,6 +28,7 @@
             "/.gitignore",
             "/.idea",
             "/.phpcs.xml.dist",
+            "/.php-cs-fixer.dist.php",
             "/.phpunit.result.cache",
             "/.pre-commit-config.yaml",
             "/AGENTS.md",
@@ -41,6 +42,7 @@
             "/flake.lock",
             "/flake.nix",
             "/infection.json5.dist",
+            "/nix",
             "/*.log",
             "/phpbench.json",
             "/phpstan-strict-rules.php",
@@ -70,12 +72,14 @@
     "require-dev": {
         "composer-runtime-api": "*",
         "brick/varexporter": "*",
+        "friendsofphp/php-cs-fixer": "^3.95",
         "jbboehr/doctrine-of-the-second-sun": "dev-master",
         "larastan/larastan": "^2.11 || ^3.4",
         "laravel/framework": "^9 || ^10 || ^11 || ^12 || ^13",
         "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3 || ^11.0",
         "phpbench/phpbench": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^1.2.1 || ^2.0",
+        "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-phpunit": "^1.4.2 || ^2.0.6",
         "phpstan/phpstan-strict-rules": "^1.6.2 || ^2.0.4",
         "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5",
@@ -92,7 +96,8 @@
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": false
+            "dealerdirect/phpcodesniffer-composer-installer": false,
+            "phpstan/extension-installer": false
         }
     },
     "extra": {
@@ -109,6 +114,7 @@
         "check": [
             "@composer validate --strict",
             "@check:whitespace",
+            "@php-cs-fixer",
             "@phpcs",
             "@analyse",
             "@test"
@@ -147,6 +153,7 @@
         "infection:core": "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php",
         "package:check": "@php tools/check-package.php",
         "phpcs": "./vendor/bin/phpcs",
+        "php-cs-fixer": "./vendor/bin/php-cs-fixer check --diff --show-progress=none --using-cache=no",
         "phpstan": "./vendor/bin/phpstan",
         "phpunit": "./vendor/bin/phpunit",
         "runtime-smoke": "@php tests/runtime-smoke/run.php",

@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+# Copyright (c) anno Domini nostri Jesu Christi MMXXVI John Boehr & contributors
+#
+# SPDX-License-Identifier: AGPL-3.0-only WITH romic-exception
+
+set -Eeu -o pipefail
+
+repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+temporary_root="$(mktemp -d)"
+
+cleanup() {
+    rm -rf "$temporary_root"
+}
+
+trap cleanup EXIT
+
+composer_home="$temporary_root/composer-home"
+composer_cache_dir="$(composer config --global cache-dir --absolute)"
+
+if ! doctrine_pin="$(
+    # The PHP fragment is intentionally single-quoted for the shell.
+    # shellcheck disable=SC2016
+    php -r '
+        $contents = file_get_contents($argv[1]);
+        if ($contents === false) {
+            throw new RuntimeException(sprintf("Unable to read %s", $argv[1]));
+        }
+
+        $lock = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+        $packages = array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []);
+
+        foreach ($packages as $package) {
+            if (($package["name"] ?? null) !== "jbboehr/doctrine-of-the-second-sun") {
+                continue;
+            }
+
+            $version = $package["version"] ?? null;
+            $reference = $package["source"]["reference"] ?? null;
+            if (!is_string($version) || !is_string($reference)) {
+                throw new RuntimeException("The reviewed Doctrine package has no version or source reference");
+            }
+
+            printf("%s#%s", $version, $reference);
+            exit(0);
+        }
+
+        throw new RuntimeException("The reviewed Doctrine package is missing from composer.lock");
+    ' "$repository_root/composer.lock"
+)"; then
+    exit 1
+fi
+
+configure_platform() {
+    local php_version="$1"
+
+    mkdir -p "$composer_home"
+    COMPOSER_CACHE_DIR="$composer_cache_dir" COMPOSER_HOME="$composer_home" \
+        composer config --global platform.php "$php_version"
+}
+
+remove_platform_override() {
+    local lock_file="$1"
+
+    # The override models the oldest supported interpreter during resolution.
+    # Do not retain it: installs on newer matrix versions must validate the
+    # interpreter that actually runs the tests.
+    # shellcheck disable=SC2016
+    php -r '
+        $contents = file_get_contents($argv[1]);
+        if ($contents === false) {
+            throw new RuntimeException(sprintf("Unable to read %s", $argv[1]));
+        }
+
+        $lock = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
+        unset($lock->{"platform-overrides"});
+
+        $encoded = json_encode(
+            $lock,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR,
+        );
+
+        if (file_put_contents($argv[1], $encoded . "\n") === false) {
+            throw new RuntimeException(sprintf("Unable to write %s", $argv[1]));
+        }
+    ' "$lock_file"
+}
+
+assert_doctrine_pin() {
+    local lock_file="$1"
+
+    # shellcheck disable=SC2016
+    php -r '
+        $contents = file_get_contents($argv[1]);
+        if ($contents === false) {
+            throw new RuntimeException(sprintf("Unable to read %s", $argv[1]));
+        }
+
+        $lock = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+        $packages = array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []);
+
+        foreach ($packages as $package) {
+            if (($package["name"] ?? null) !== "jbboehr/doctrine-of-the-second-sun") {
+                continue;
+            }
+
+            $pin = sprintf(
+                "%s#%s",
+                $package["version"] ?? "",
+                $package["source"]["reference"] ?? "",
+            );
+            if ($pin !== $argv[2]) {
+                throw new RuntimeException(sprintf(
+                    "Doctrine pin changed in %s: expected %s, got %s",
+                    $argv[1],
+                    $argv[2],
+                    $pin,
+                ));
+            }
+
+            exit(0);
+        }
+
+        throw new RuntimeException(sprintf("Doctrine package missing from %s", $argv[1]));
+    ' "$lock_file" "$doctrine_pin"
+}
+
+update_laravel_lock() {
+    local laravel_version="$1"
+    local php_version="$2"
+    local output="$repository_root/nix/composer/laravel-$laravel_version.lock"
+    local project="$temporary_root/laravel-$laravel_version"
+
+    mkdir -p "$project"
+    cp "$repository_root/composer.json" "$project/composer.json"
+    cp "$repository_root/composer.lock" "$project/composer.lock"
+
+    configure_platform "$php_version"
+    COMPOSER_CACHE_DIR="$composer_cache_dir" COMPOSER_HOME="$composer_home" \
+        composer --working-dir="$project" update \
+            --no-blocking \
+            --no-install \
+            --no-interaction \
+            --no-progress \
+            --prefer-dist \
+            --with "jbboehr/doctrine-of-the-second-sun:$doctrine_pin" \
+            --with "laravel/framework:^$laravel_version"
+
+    remove_platform_override "$project/composer.lock"
+    assert_doctrine_pin "$project/composer.lock"
+    install -m 0644 "$project/composer.lock" "$output"
+}
+
+update_laravel_lock 9 8.1.0
+update_laravel_lock 11 8.2.0
+update_laravel_lock 12 8.2.0
+update_laravel_lock 13 8.3.0
+
+lowest_project="$temporary_root/lowest"
+mkdir -p "$lowest_project"
+cp "$repository_root/composer.json" "$lowest_project/composer.json"
+cp "$repository_root/composer.lock" "$lowest_project/composer.lock"
+
+configure_platform 8.1.0
+COMPOSER_CACHE_DIR="$composer_cache_dir" COMPOSER_HOME="$composer_home" \
+    composer --working-dir="$lowest_project" update \
+        --no-blocking \
+        --no-install \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --prefer-lowest \
+        --prefer-stable \
+        --with "jbboehr/doctrine-of-the-second-sun:$doctrine_pin"
+
+remove_platform_override "$lowest_project/composer.lock"
+assert_doctrine_pin "$lowest_project/composer.lock"
+install -m 0644 "$lowest_project/composer.lock" "$repository_root/nix/composer/lowest.lock"
+
+composer --working-dir="$repository_root/tools/eris" update \
+    --ignore-platform-req=php \
+    --lock \
+    --no-blocking \
+    --no-install \
+    --no-interaction \
+    --no-progress
+
+composer --working-dir="$repository_root/tools/akashi" update \
+    --ignore-platform-req=php \
+    --lock \
+    --no-blocking \
+    --no-install \
+    --no-interaction \
+    --no-progress

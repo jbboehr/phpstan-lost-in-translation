@@ -498,9 +498,12 @@ the shared configuration.
 
 ### Development dependency advisories
 
-**Status:** CI now audits locked runtime dependencies separately. Compatibility
-matrix updates disable Composer policy blocking only while resolving the
-intentionally retained Laravel 9 through 11 development fixtures.
+**Status:** Conventional CI audits locked runtime dependencies separately with
+`composer audit --locked --no-dev`. The reproducible Nix checks intentionally
+remain offline and do not duplicate this current advisory check. Dependabot
+continues to monitor the Composer manifests. Compatibility lock updates disable
+Composer policy blocking only while resolving intentionally retained old
+framework fixtures.
 
 `composer audit --locked` reports three advisories against the locked Laravel
 10 development baseline. Laravel 10 is retained to exercise PHP 8.1
@@ -791,7 +794,8 @@ so validation and storage cannot diverge again.
 3. CR-12: tighten the PHP loader return type.
 4. CR-13: guard translation location paths.
 5. Migrate the PHPUnit configuration with matrix verification.
-6. Add runtime-only Composer auditing to CI.
+6. Add runtime-only Composer auditing to CI. **Complete:** conventional CI runs
+   `composer audit --locked --no-dev` without weakening the offline Nix checks.
 7. Triage the advisory Infection baseline and establish a covered-code MSI
    threshold. **Complete:** the reviewed 82.49% baseline now has an enforced
    80% overall and covered-code floor.

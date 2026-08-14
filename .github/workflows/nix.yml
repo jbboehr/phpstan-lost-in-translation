@@ -1,0 +1,103 @@
+name: nix
+
+on:
+    push:
+        branches:
+            - master
+            - develop
+            - ci
+    pull_request:
+        branches:
+            - master
+
+permissions:
+    contents: read
+
+concurrency:
+    group: nix-${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    matrix:
+        runs-on: ubuntu-latest
+        name: Generate Nix matrix
+        timeout-minutes: 10
+        outputs:
+            matrix: ${{ steps.generate.outputs.matrix }}
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install Nix
+              uses: cachix/install-nix-action@v31
+              with:
+                  github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+            - id: generate
+              name: Generate matrix from flake outputs
+              run: |
+                  set -Eeu
+                  matrix="$(nix eval --json '.#packages.x86_64-linux.github-actions-matrix.matrix')"
+                  echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+    build:
+        needs: matrix
+        name: "Nix | ${{ matrix.name }}"
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 60
+        strategy:
+            fail-fast: false
+            matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install Nix
+              uses: cachix/install-nix-action@v31
+              with:
+                  github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Restore and save Nix store
+              uses: nix-community/cache-nix-action@v7
+              with:
+                  primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', '**/composer.lock', 'nix/composer/*.lock') }}
+                  restore-prefixes-first-match: nix-${{ runner.os }}-
+                  gc-max-store-size-linux: 3G
+
+            - name: Build ${{ matrix.name }}
+              shell: bash
+              run: |
+                  set +e
+                  log_file="$RUNNER_TEMP/nix-build.log"
+                  nix build --no-link --print-build-logs '.#${{ matrix.attr }}' 2>&1 | tee "$log_file"
+                  status=${PIPESTATUS[0]}
+
+                  if (( status != 0 )); then
+                      replacement_hash="$(awk '
+                          /hash mismatch.*phpstan-lost-in-translation-.*-composer-repository/ {
+                              composer_repository = 1
+                              next
+                          }
+                          composer_repository && /^[[:space:]]*got:/ {
+                              print $2
+                              composer_repository = 0
+                          }
+                      ' "$log_file" | tail -n 1)"
+
+                      if [[ -n "$replacement_hash" ]]; then
+                          echo "vendorHash is out of date."
+                          echo "Replace the stale value in nix/vendor-hashes.nix with:"
+                          echo "    $replacement_hash"
+                          echo "::error title=vendorHash is out of date::Replace the stale value in nix/vendor-hashes.nix with $replacement_hash"
+
+                          {
+                              echo "## Composer vendor hash is stale"
+                              echo
+                              echo "Update the matching value in \`nix/vendor-hashes.nix\` to:"
+                              echo
+                              echo "\`$replacement_hash\`"
+                              echo
+                              echo "The failed job log retains Nix's original fixed-output hash mismatch."
+                          } >> "$GITHUB_STEP_SUMMARY"
+                      fi
+                  fi
+
+                  exit "$status"

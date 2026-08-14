@@ -40,6 +40,10 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -52,93 +56,181 @@
       flake-utils,
       phps,
       git-hooks,
+      nix-github-actions,
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        agentBadge =
-          if pkgs.stdenv.isLinux then
-            agent-badge.packages.${system}.agent-badge
-          else
-            agent-badge.packages.${system}.agent-badge-unwrapped;
-        buildEnv =
-          {
-            php,
-            withPcov ? true,
-          }:
-          php.buildEnv {
-            extraConfig = "memory_limit = 2G";
-            extensions =
-              {
-                enabled,
-                all,
-              }:
-              enabled ++ (pkgs.lib.optionals withPcov [ all.pcov ]);
-          };
-        pkgs = nixpkgs.legacyPackages.${system};
-        src = ./.;
-
-        pre-commit-check = git-hooks.lib.${system}.run {
-          inherit src;
-          hooks = {
-            actionlint.enable = true;
-            nixfmt.enable = true;
-            shellcheck.enable = true;
-          };
-        };
-
-        makeShell =
-          {
-            php,
-            withPcov ? true,
-            withInfection ? false,
-          }:
-          let
-            php' = buildEnv { inherit php withPcov; };
-            infection = pkgs.writeShellScriptBin "infection" ''
-              exec ${php'}/bin/php ${infectionPhar} "$@"
-            '';
-          in
-          pkgs.mkShell {
-            packages =
-              pre-commit-check.enabledPackages
-              ++ [
-                agentBadge
-                php'
-                php'.packages.composer
+    let
+      perSystem = flake-utils.lib.eachDefaultSystem (
+        system:
+        let
+          agentBadge =
+            if pkgs.stdenv.isLinux then
+              agent-badge.packages.${system}.agent-badge
+            else
+              agent-badge.packages.${system}.agent-badge-unwrapped;
+          buildEnv =
+            {
+              php,
+              withPcov ? true,
+            }:
+            php.buildEnv {
+              extraConfig = "memory_limit = 2G";
+              extensions =
+                {
+                  enabled,
+                  all,
+                }:
+                enabled ++ (pkgs.lib.optionals withPcov [ all.pcov ]);
+            };
+          pkgs = nixpkgs.legacyPackages.${system};
+          src = pkgs.lib.cleanSourceWith {
+            src = ./.;
+            filter =
+              path: type:
+              let
+                relativePath = pkgs.lib.removePrefix "${toString ./.}/" (toString path);
+                topLevel = builtins.head (pkgs.lib.splitString "/" relativePath);
+              in
+              !builtins.elem topLevel [
+                ".direnv"
+                ".git"
+                "coverage"
+                "result"
+                "secrets"
+                "vendor"
               ]
-              ++ pkgs.lib.optional withInfection infection;
-            shellHook = ''
-              ${pre-commit-check.shellHook}
-              export PATH="$PWD/vendor/bin:$PATH"
-              export PHPUNIT_WITH_PCOV="$PHP_WITH_PCOV -d memory_limit=512M -d pcov.directory=$PWD -dpcov.exclude="~vendor~" ./vendor/bin/phpunit"
-            '';
+              && !pkgs.lib.hasPrefix "result" topLevel
+              && !pkgs.lib.hasPrefix "tmp" topLevel
+              && !pkgs.lib.hasPrefix ".github/agent-badge/cache/" relativePath
+              && !pkgs.lib.hasPrefix ".github/agent-badge/logs/" relativePath
+              && !builtins.elem relativePath [
+                ".github/agent-badge/cache"
+                ".github/agent-badge/logs"
+                ".github/agent-badge/state.json"
+                "tools/akashi/vendor"
+                "tools/eris/vendor"
+              ]
+              && !pkgs.lib.hasPrefix "tools/akashi/vendor/" relativePath
+              && !pkgs.lib.hasPrefix "tools/eris/vendor/" relativePath
+              && !pkgs.lib.hasSuffix ".log" relativePath
+              && !builtins.elem relativePath [
+                ".php-cs-fixer.cache"
+                ".phpunit.result.cache"
+                "clover.xml"
+              ];
           };
-        infectionPhar = pkgs.fetchurl {
-          url = "https://github.com/infection/infection/releases/download/0.34.2/infection.phar";
-          hash = "sha256-roO8UVFXmBfDpiF+s97OuGoWmjmROSZFNCGLcjMg2j0=";
-        };
-      in
-      rec {
-        checks = {
-          inherit pre-commit-check;
-        };
 
-        devShells = rec {
-          php81 = makeShell { php = phps.packages.${system}.php81; };
-          php82 = makeShell { php = pkgs.php82; };
-          php83 = makeShell { php = pkgs.php83; };
-          php84 = makeShell { php = pkgs.php84; };
-          php85 = makeShell { php = pkgs.php85; };
-          documentation = php82;
-          mutation = makeShell {
-            php = pkgs.php84;
-            withInfection = true;
+          pre-commit-check = git-hooks.lib.${system}.run {
+            inherit src;
+            hooks = {
+              actionlint.enable = true;
+              nixfmt.enable = true;
+              shellcheck.enable = true;
+            };
           };
-          default = php81;
-        };
 
-        formatter = pkgs.nixfmt-tree;
-      }
-    );
+          makeShell =
+            {
+              php,
+              withPcov ? true,
+              withInfection ? false,
+            }:
+            let
+              php' = buildEnv { inherit php withPcov; };
+              infection = pkgs.writeShellScriptBin "infection" ''
+                exec ${php'}/bin/php ${infectionPhar} "$@"
+              '';
+            in
+            pkgs.mkShell {
+              packages =
+                pre-commit-check.enabledPackages
+                ++ [
+                  agentBadge
+                  php'
+                  php'.packages.composer
+                ]
+                ++ pkgs.lib.optional withInfection infection;
+              shellHook = ''
+                ${pre-commit-check.shellHook}
+                export PATH="$PWD/vendor/bin:$PATH"
+                export PHPUNIT_WITH_PCOV="$PHP_WITH_PCOV -d memory_limit=512M -d pcov.directory=$PWD -dpcov.exclude="~vendor~" ./vendor/bin/phpunit"
+              '';
+            };
+          infectionPhar = pkgs.fetchurl {
+            url = "https://github.com/infection/infection/releases/download/0.34.2/infection.phar";
+            hash = "sha256-roO8UVFXmBfDpiF+s97OuGoWmjmROSZFNCGLcjMg2j0=";
+          };
+          validation = import ./nix/validation.nix {
+            inherit
+              buildEnv
+              infectionPhar
+              pkgs
+              src
+              ;
+            php81 = phps.packages.${system}.php81;
+            inherit (pkgs)
+              php82
+              php83
+              php84
+              php85
+              ;
+          };
+          validationChecks = validation.checks // {
+            inherit pre-commit-check;
+          };
+          githubCheckMatrix = nix-github-actions.lib.mkGithubMatrix {
+            checks = {
+              ${system} = validationChecks;
+            };
+            attrPrefix = "checks";
+          };
+          githubMutationMatrix = nix-github-actions.lib.mkGithubMatrix {
+            checks = {
+              ${system} = {
+                mutation = validation.mutation;
+              };
+            };
+            attrPrefix = "packages";
+          };
+          githubMatrix = {
+            include = githubCheckMatrix.matrix.include ++ githubMutationMatrix.matrix.include;
+          };
+        in
+        rec {
+          checks = validationChecks;
+
+          packages = {
+            composer-dependencies = validation.repositories.root;
+            mutation = validation.mutation;
+            github-actions-matrix =
+              pkgs.runCommandLocal "phpstan-lost-in-translation-github-actions-matrix"
+                {
+                  passthru = {
+                    matrix = githubMatrix;
+                  };
+                }
+                ''
+                  mkdir -p "$out"
+                  printf '%s\n' '${builtins.toJSON githubMatrix}' > "$out/matrix.json"
+                '';
+          };
+
+          devShells = rec {
+            php81 = makeShell { php = phps.packages.${system}.php81; };
+            php82 = makeShell { php = pkgs.php82; };
+            php83 = makeShell { php = pkgs.php83; };
+            php84 = makeShell { php = pkgs.php84; };
+            php85 = makeShell { php = pkgs.php85; };
+            documentation = php82;
+            mutation = makeShell {
+              php = pkgs.php84;
+              withInfection = true;
+            };
+            default = php81;
+          };
+
+          formatter = pkgs.nixfmt-tree;
+        }
+      );
+    in
+    perSystem;
 }

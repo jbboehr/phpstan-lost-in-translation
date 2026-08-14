@@ -28,17 +28,43 @@ A pull request should:
 AI-assisted contributions are permitted, but you remain responsible for reviewing the submitted material and ensuring
 that you have the right to license it under these terms.
 
-Install Composer dependencies, then run the ordinary local review gate:
+Use the reproducible Nix development shell with an ordinary mutable Composer
+installation for interactive work:
 
 ```shell
+nix develop
 composer install
-composer check
 ```
 
-Use `composer check:full` for release preparation or changes affecting packaging, extension registration, benchmarks,
-or end-to-end behavior. The Nix development shell provides the pinned toolchain; run `nix flake check` when changing
-Nix or repository scaffolding. Mutation testing and coverage are optional investigative workflows documented under
-`docs/`.
+Run the authoritative routine validation gate before submitting a change:
+
+```shell
+nix flake check --keep-going -L
+```
+
+The flake uses Nix-managed Composer dependencies and does not read the
+checkout's `vendor/`. `composer check` and focused Composer scripts remain
+useful during iteration. Mutation testing is deliberately separate; run `nix
+build .#mutation -L` when it is required.
+
+### Updating Composer dependencies under Nix
+
+The fixed-output Composer hashes live in [`nix/vendor-hashes.nix`](nix/vendor-hashes.nix).
+When a Composer manifest or lock changes:
+
+1. Update `composer.json` and the relevant lockfiles normally. Run
+   `nix/update-composer-locks` after a root dependency change to refresh the
+   supported Laravel and lowest-dependency locks.
+2. Run `nix flake check --keep-going -L`. A stale hash fails with Nix's
+   fixed-output mismatch and a `got: sha256-...` replacement.
+3. Put that reported value in the matching entry in
+   `nix/vendor-hashes.nix`, then rerun the check.
+
+For the common root closure, `nix build .#composer-dependencies -L` is a faster
+way to obtain its replacement hash. If Nix is unavailable locally, push the
+lockfile change: the failed Nix GitHub Actions job repeats the replacement near
+the end of its log, adds an error annotation, and writes it to the job summary.
+The job remains failed until the hash is updated.
 
 ## Definitions
 

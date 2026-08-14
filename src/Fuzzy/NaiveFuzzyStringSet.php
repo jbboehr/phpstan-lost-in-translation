@@ -24,8 +24,11 @@ namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 
 final class NaiveFuzzyStringSet implements FuzzyStringSetInterface
 {
-    /** @var array<non-empty-string, true> */
+    /** @var list<non-empty-string> */
     private array $strings = [];
+
+    /** @var array<non-empty-string, true> */
+    private array $stringSet = [];
 
     /**
      * @param ?list<non-empty-string> $strings
@@ -37,13 +40,18 @@ final class NaiveFuzzyStringSet implements FuzzyStringSetInterface
 
     public function add(string $string): void
     {
-        $this->strings[$string] = true;
+        if (isset($this->stringSet[$string])) {
+            return;
+        }
+
+        $this->strings[] = $string;
+        $this->stringSet[$string] = true;
     }
 
     public function addMany(array $strings): void
     {
         foreach ($strings as $string) {
-            $this->strings[$string] = true;
+            $this->add($string);
         }
     }
 
@@ -52,7 +60,7 @@ final class NaiveFuzzyStringSet implements FuzzyStringSetInterface
         $stringWithSmallestDelta = null;
         $smallestDelta = null;
 
-        foreach ($this->strings as $otherString => $unused) {
+        foreach ($this->strings as $otherString) {
             $delta = levenshtein($string, $otherString);
 
             if ($smallestDelta === null || $smallestDelta > $delta) {

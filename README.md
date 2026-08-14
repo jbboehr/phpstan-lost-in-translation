@@ -560,6 +560,10 @@ Run the PHPUnit suite with PCOV and regenerate the Clover report locally with:
 composer coverage
 ```
 
+The routine Nix suite also runs one PHP 8.4 Xdebug coverage job. Its branch and
+path measurements are diagnostic and have no percentage threshold; mutation
+testing remains the behavioral coverage gate.
+
 README translation-call examples are verified with Akashi in the PHP 8.2 documentation shell:
 
 ```console

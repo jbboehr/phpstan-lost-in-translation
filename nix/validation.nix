@@ -43,6 +43,11 @@ let
     php = php84;
     withPcov = true;
   };
+  php84WithXdebug = buildEnv {
+    php = php84;
+    withPcov = false;
+    withXdebug = true;
+  };
 
   rootComposerSource = lib.cleanSourceWith {
     src = repositoryRoot;
@@ -488,15 +493,20 @@ in
       '';
     };
 
-    coverage = mkPhpCheck {
-      name = "coverage";
-      php = php84WithPcov;
+    branch-coverage = mkPhpCheck {
+      name = "branch-coverage";
+      php = php84WithXdebug;
       command = ''
-        php ./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text --colors=never
+        XDEBUG_MODE=coverage php ./vendor/bin/phpunit \
+          --coverage-filter src \
+          --coverage-cobertura coverage.xml \
+          --coverage-text \
+          --path-coverage \
+          --colors=never
       '';
       result = ''
         mkdir -p "$out"
-        cp clover.xml "$out/"
+        cp coverage.xml "$out/"
       '';
     };
 

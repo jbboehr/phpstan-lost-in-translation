@@ -25,9 +25,15 @@ namespace jbboehr\PHPStanLostInTranslation\PropertyTests;
 use Eris\Generator;
 use Eris\Generators;
 use Eris\TestTrait;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\MyFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
+use PHPStan\Rules\LineRuleError;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Finder\SplFileInfo;
 
 final class TranslationPropertiesTest extends TestCase
 {
@@ -93,6 +99,142 @@ final class TranslationPropertiesTest extends TestCase
             });
     }
 
+    public function testIndexedFuzzySearchFindsSameNearestDistanceAsNaiveReference(): void
+    {
+        $this
+            ->forAll(
+                self::nonEmptyAsciiStringListGenerator(),
+                self::nonEmptyAsciiStringGenerator(),
+            )
+            ->then(static function (array $candidates, string $query): void {
+                self::assertEquivalentFuzzySearchResult($candidates, $query);
+            });
+    }
+
+    public function testIndexedFuzzySearchAllowsEquivalentTieBreaking(): void
+    {
+        self::assertEquivalentFuzzySearchResult(['xbcd', 'abcx'], 'abcd');
+    }
+
+    public function testMemoizingFuzzySearchMatchesUncachedReference(): void
+    {
+        $this
+            ->forAll(self::fuzzyOperationSequenceGenerator())
+            ->then(static function (array $operations): void {
+                $reference = new NaiveFuzzyStringSet();
+                $memoized = new MemoizingFuzzyStringSet(new NaiveFuzzyStringSet());
+
+                foreach ($operations as [$operation, $first, $second]) {
+                    if ('add' === $operation) {
+                        $reference->add($first);
+                        $memoized->add($first);
+                    } elseif ('addMany' === $operation) {
+                        $reference->addMany([$first, $second]);
+                        $memoized->addMany([$first, $second]);
+                    } else {
+                        self::assertSame($reference->search($first), $memoized->search($first));
+                    }
+                }
+            });
+    }
+
+    public function testJsonLoaderMatchesReferenceForGeneratedCatalogues(): void
+    {
+        $this
+            ->forAll(self::jsonEntryListGenerator())
+            ->then(static function (array $entries): void {
+                $members = [];
+                $expectedLocations = [];
+
+                foreach ($entries as $index => [$key, $value]) {
+                    $members[] = sprintf(
+                        '  %s: %s',
+                        json_encode($key, JSON_THROW_ON_ERROR),
+                        json_encode($value, JSON_THROW_ON_ERROR),
+                    );
+
+                    if ('' !== $key) {
+                        $expectedLocations[$key] = $index + 2;
+                    }
+                }
+
+                $json = sprintf("{\n%s\n}\n", implode(",\n", $members));
+                $decoded = json_decode($json, true, flags: JSON_THROW_ON_ERROR);
+                self::assertIsArray($decoded);
+
+                $expectedTranslations = [];
+                $expectedErrors = [];
+
+                foreach ($decoded as $key => $value) {
+                    $line = $expectedLocations[$key] ?? $expectedLocations["int\0" . $key] ?? -1;
+
+                    if (!is_string($key)) {
+                        $expectedErrors[] = [
+                            'message' => sprintf('Invalid key: %d', $key),
+                            'line' => $line,
+                        ];
+                    } elseif (!is_string($value)) {
+                        $expectedErrors[] = [
+                            'message' => sprintf('Invalid value: %s', json_encode($value, JSON_THROW_ON_ERROR)),
+                            'line' => $line,
+                        ];
+                    } elseif ('' !== $key && '' !== $value) {
+                        $expectedTranslations[$key] = $value;
+                    }
+                }
+
+                $path = tempnam(sys_get_temp_dir(), 'phpstan-lost-in-translation-property-');
+                self::assertIsString($path);
+
+                try {
+                    self::assertNotFalse(file_put_contents($path, $json));
+
+                    $result = (new JsonLoader())->load(new SplFileInfo($path, '', basename($path)));
+                    $actualErrors = array_map(
+                        static fn($error): array => [
+                            'message' => $error->getMessage(),
+                            'line' => $error instanceof LineRuleError ? $error->getLine() : null,
+                        ],
+                        $result->errors,
+                    );
+
+                    self::assertSame($expectedTranslations, $result->translations);
+                    self::assertSame($expectedLocations, $result->locations);
+                    self::assertSame($expectedErrors, $actualErrors);
+                } finally {
+                    unlink($path);
+                }
+            });
+    }
+
+    public function testDiagnosticEscapingHandlesArbitraryBytes(): void
+    {
+        $this
+            ->forAll(self::binaryStringGenerator())
+            ->then(static function (string $value): void {
+                try {
+                    $expected = json_encode($value, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    self::assertStringContainsString('Malformed UTF-8 characters', $exception->getMessage());
+                    $escaped = preg_replace_callback(
+                        '/["\x00-\x1f\x7f-\xff]/',
+                        static function (array $matches): string {
+                            if ('"' === $matches[0]) {
+                                return '\\"';
+                            }
+
+                            return sprintf('\\x%02x', ord($matches[0]));
+                        },
+                        $value,
+                    );
+                    self::assertIsString($escaped);
+                    $expected = '"' . $escaped . '"';
+                }
+
+                self::assertSame($expected, Utils::e($value));
+            });
+    }
+
     private static function localeSpellingGenerator(): Generator
     {
         return Generators::map(
@@ -117,6 +259,93 @@ final class TranslationPropertiesTest extends TestCase
                 Generators::elements(['canonical', 'lower', 'upper']),
             ),
         );
+    }
+
+    private static function nonEmptyAsciiStringGenerator(): Generator
+    {
+        $characters = str_split('abcdefghijklmnopqrstuvwxyz0123456789._:-/ ');
+
+        return Generators::bind(
+            Generators::choose(1, 16),
+            static fn(int $length): Generator => Generators::map(
+                static fn(array $value): string => implode('', $value),
+                Generators::vector($length, Generators::elements($characters)),
+            ),
+        );
+    }
+
+    private static function nonEmptyAsciiStringListGenerator(): Generator
+    {
+        return Generators::bind(
+            Generators::choose(0, 12),
+            static fn(int $length): Generator => Generators::vector(
+                $length,
+                self::nonEmptyAsciiStringGenerator(),
+            ),
+        );
+    }
+
+    private static function fuzzyOperationSequenceGenerator(): Generator
+    {
+        return Generators::vector(
+            20,
+            Generators::tuple(
+                Generators::elements(['add', 'addMany', 'search']),
+                self::nonEmptyAsciiStringGenerator(),
+                self::nonEmptyAsciiStringGenerator(),
+            ),
+        );
+    }
+
+    private static function jsonEntryListGenerator(): Generator
+    {
+        $keyGenerator = Generators::oneOf(
+            self::nonEmptyAsciiStringGenerator(),
+            Generators::elements(['', '0', '01', '-1', 'quoted"key', 'backslash\\key']),
+        );
+        $valueGenerator = Generators::oneOf(
+            self::nonEmptyAsciiStringGenerator(),
+            Generators::constant(''),
+            Generators::choose(-50, 50),
+            Generators::bool(),
+            Generators::constant(null),
+            Generators::vector(2, Generators::choose(-5, 5)),
+        );
+
+        return Generators::bind(
+            Generators::choose(0, 12),
+            static fn(int $length): Generator => Generators::vector(
+                $length,
+                Generators::tuple($keyGenerator, $valueGenerator),
+            ),
+        );
+    }
+
+    private static function binaryStringGenerator(): Generator
+    {
+        return Generators::map(
+            static fn(array $bytes): string => implode('', array_map('chr', $bytes)),
+            Generators::seq(Generators::byte()),
+        );
+    }
+
+    /**
+     * @param list<non-empty-string> $candidates
+     * @param non-empty-string $query
+     */
+    private static function assertEquivalentFuzzySearchResult(array $candidates, string $query): void
+    {
+        $referenceResult = (new NaiveFuzzyStringSet($candidates))->search($query);
+        $indexedResult = (new MyFuzzyStringSet($candidates))->search($query);
+
+        if (null === $referenceResult) {
+            self::assertNull($indexedResult);
+            return;
+        }
+
+        self::assertNotNull($indexedResult);
+        self::assertTrue(in_array($indexedResult, $candidates, true));
+        self::assertSame(levenshtein($query, $referenceResult), levenshtein($query, $indexedResult));
     }
 
     private static function createTranslationLoader(): TranslationLoader

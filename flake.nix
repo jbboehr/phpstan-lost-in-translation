@@ -71,7 +71,9 @@
             {
               php,
               withPcov ? true,
+              withXdebug ? false,
             }:
+            assert !(withPcov && withXdebug);
             php.buildEnv {
               extraConfig = "memory_limit = 2G";
               extensions =
@@ -79,7 +81,9 @@
                   enabled,
                   all,
                 }:
-                enabled ++ (pkgs.lib.optionals withPcov [ all.pcov ]);
+                enabled
+                ++ (pkgs.lib.optionals withPcov [ all.pcov ])
+                ++ (pkgs.lib.optionals withXdebug [ all.xdebug ]);
             };
           pkgs = nixpkgs.legacyPackages.${system};
           src = pkgs.lib.cleanSourceWith {

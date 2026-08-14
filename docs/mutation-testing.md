@@ -63,12 +63,18 @@ Infection runs PHPUnit tests in the mutation process. The separate end-to-end
 suite launches PHPStan as a child process and should not be treated as mutation
 coverage because that process may not load the active mutant.
 
+The isolated Eris suite calls package code in its own PHPUnit process and does
+not use the end-to-end subprocess. It is nevertheless outside Infection's root
+PHPUnit campaign because its dependency closure is intentionally separate.
+When a property finds a counterexample, add a focused root PHPUnit regression;
+that regression then participates in mutation testing.
+
 ## Reviewed baseline
 
-The complete PHP 8.4 campaign on 2026-08-12 generated 1,047 mutants. PHPUnit
-killed 872 and 175 escaped, for 100% mutation code coverage and a covered-code
-MSI of 83.29%. With 100% mutation code coverage, the overall MSI is also
-83.29%. Both 80-point gates leave 3.29 percentage points of margin. No mutants
+The complete PHP 8.4 campaign on 2026-08-14 generated 1,065 mutants. PHPUnit
+killed 886 and 179 escaped, for 100% mutation code coverage and a covered-code
+MSI of 83.19%. With 100% mutation code coverage, the overall MSI is also
+83.19%. Both 80-point gates leave 3.19 percentage points of margin. No mutants
 are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
@@ -88,11 +94,13 @@ The review added focused assertions for these observable contracts:
 - namespaced and mixed-case translation helper calls follow PHP function
   resolution while genuine namespaced overrides remain outside the helper contract;
 - memoization caches null and non-null searches, invalidates on mutation, and
-  remains enabled by default; and
+  remains enabled by default;
 - formatter exit codes, application locale detection, exception chaining, and
-  boundary escaping remain observable.
+  boundary escaping remain observable; and
+- numeric fuzzy candidates remain strings instead of becoming integer array
+  keys, with a root regression promoted from the differential property suite.
 
-The remaining 175 mutants were classified by component. A row accounts for
+The remaining 179 mutants were classified by component. A row accounts for
 every survivor; "mixed" means the group contains both equivalent mutations and
 valid edge behavior whose additional tests are lower priority than the current
 gate.
@@ -100,8 +108,8 @@ gate.
 | Component | Survivors | Classification and disposition |
 | --- | ---: | --- |
 | Translation discovery and loaders | 69 | Mixed parser, path, flattening, and defensive-boundary variants. Retain for future focused loader work; do not weaken loader assertions or ignore the whole component. |
-| Call parsing and diagnostic rules | 55 | Mixed PHPStan type relationships, plural-policy table branches, fallback values, and multi-result control flow. Prioritize regressions tied to an observed application diagnostic. Structurally one-item return mutations are equivalent where a rule can emit at most one error. |
-| Fuzzy implementations | 23 | Mostly alternate pruning, tie, and internal-index behavior. The `NaiveFuzzyStringSet` boolean-value mutations are equivalent because only its keys are read. Test externally visible suggestions; do not couple tests to the optional index algorithm. |
+| Call parsing and diagnostic rules | 59 | Mixed PHPStan type relationships, plural-policy table branches, fallback values, and multi-result control flow. Prioritize regressions tied to an observed application diagnostic. Structurally one-item return mutations are equivalent where a rule can emit at most one error. |
+| Fuzzy implementations | 23 | Mostly alternate pruning, tie, and internal-index behavior. The `NaiveFuzzyStringSet` membership-map boolean mutations are equivalent because membership uses `isset()`. Test externally visible suggestions; do not couple tests to the optional index algorithm. |
 | JSON error formatter | 16 | Output aggregation and JSON-option variants. Exit status and pretty defaults are covered; add exact-output cases when a consumer requires a currently unasserted encoding detail. |
 | Blade marker bounds | 6 | Equivalent for Bladestan's positive compiled lines and marker-before-call layout. The valid boundary contract is covered, so these are documented rather than ignored by broad line-number mutator rules. |
 | Unused-string collectors | 3 | Two empty-constant-key early returns are equivalent because the following loops enqueue nothing; one fake-collector forwarding call remains an integration seam. |

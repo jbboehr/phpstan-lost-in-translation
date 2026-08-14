@@ -116,6 +116,17 @@ final class FuzzyStringSetTest extends TestCase
         $this->assertNull($set->search('zzzz'));
     }
 
+    /**
+     * @dataProvider implementationProvider
+     * @param class-string<FuzzyStringSetInterface> $className
+     */
+    public function testNumericStringCandidatesRemainStrings(string $className): void
+    {
+        $set = new $className(['1234']);
+
+        $this->assertSame('1234', $set->search('1235'));
+    }
+
     public function testMemoizingSetPreservesSearchResults(): void
     {
         $inner = $this->createMock(FuzzyStringSetInterface::class);

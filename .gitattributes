@@ -3,20 +3,31 @@
 composer.lock linguist-generated
 composer-project.nix linguist-generated
 
-.codex export-ignore
-.editorconfig export-ignore
-.envrc export-ignore
-.gitattributes export-ignore
-AGENTS.md export-ignore
-secrets export-ignore
+# Keep GitHub and Packagist archives aligned with Composer's package allowlist.
+/.codex export-ignore
+/.codeclimate.json export-ignore
+/.editorconfig export-ignore
+/.envrc export-ignore
+/.gitattributes export-ignore
+/.github export-ignore
+/.gitignore export-ignore
+/.php-cs-fixer.dist.php export-ignore
+/.phpcs.xml.dist export-ignore
+/AGENTS.md export-ignore
+/composer.lock export-ignore
+/docs/code-review-remediation-plan.md export-ignore
+/docs/development export-ignore
+/docs/mutation-testing.md export-ignore
+/e2e export-ignore
+/flake.lock export-ignore
+/flake.nix export-ignore
+/infection.json5.dist export-ignore
+/nix export-ignore
+/phpbench.json export-ignore
+/phpstan-strict-rules.php export-ignore
+/phpstan.neon.dist export-ignore
+/phpunit.xml.dist export-ignore
+/secrets export-ignore
+/tests export-ignore
 /tmp* export-ignore
-
-# we can't export-ignore these or nix build will fail...
-#/tests export-ignore
-#.github export-ignore
-#.phpcs.xml.dist export-ignore
-#psalm.xml export-ignore
-#psalm-baseline.xml export-ignore
-#phpstan.neon.dist export-ignore
-#phpstan-baseline.neon export-ignore
-#phpunit.xml.dist export-ignore
+/tools export-ignore

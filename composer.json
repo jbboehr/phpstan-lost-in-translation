@@ -27,6 +27,7 @@
             "/.github",
             "/.gitignore",
             "/.idea",
+            "/.php-cs-fixer.cache",
             "/.phpcs.xml.dist",
             "/.php-cs-fixer.dist.php",
             "/.phpunit.result.cache",

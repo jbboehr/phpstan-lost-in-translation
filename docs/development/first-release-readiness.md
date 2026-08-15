@@ -119,7 +119,9 @@ These changes remain on `develop` for review. No tag or `master` update belongs 
 
 ### Slice 3 — Release-candidate validation
 
-Run the final local gates on the prepared commit:
+**Status:** Complete for the `develop` release candidate at `65ea7b0`.
+
+The final local gates passed:
 
 ```shell
 composer check:full
@@ -128,7 +130,11 @@ nix flake check --keep-going -L
 composer package:check
 ```
 
-Review the resulting archive, confirm both CI workflows pass, and retain the tested commit SHA.
+The conventional workflow passed in run `31868405228`. The generated Nix workflow passed in run `31868405226`,
+including the CI-only mutation target. A fresh `0.1.0` Composer archive contained the 53 approved files, current package
+metadata and license, extension registration, public guide sources, and the `^0.1` installation command. The archive
+excluded development tooling and `secrets/` and was removed after inspection. Repeat the remote gates after the
+default-branch cutover in Slice 4.
 
 ### Slice 4 — Default-branch cutover
 

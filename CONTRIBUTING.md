@@ -59,6 +59,27 @@ Use `composer docs:serve` from that shell for a local preview. Public guide
 sources live under `docs/usage/`; planning, development, and legal documents
 remain outside the book.
 
+### Benchmarking
+
+Run `composer benchmark:smoke` to verify that every benchmark remains executable, or `composer benchmark` for the
+full wall-clock report. The suite measures fuzzy-key lookup with cold and warm caches, missing-key diagnostics,
+translation-catalogue loading, and unused-key analysis. It invokes those PHP paths directly rather than timing an
+external PHPStan process.
+
+On x86-64 Linux, the dedicated Nix shell also loads `ext-perfidious`:
+
+```shell
+nix develop .#benchmark --command composer benchmark:perfidious
+nix develop .#benchmark --command composer benchmark:perfidious:hardware
+```
+
+The first command uses the software CPU clock. The second also collects instructions, cycles, cache misses, and branch
+misses; both require host access to Linux performance events. GitHub-hosted Actions runners do not expose usable
+performance counters, so exhaustive CI runs the portable `benchmark-smoke` check but not Perfidious. Locally,
+`nix build .#benchmark-perfidious -L` provides an explicit Nix integration check. Perfidious runs each variant in an
+isolated PHP worker because its current long-lived executor can lose counts when reusing a handle. Compare measurements
+only across runs using the same PHP version, host, counter set, and benchmark configuration.
+
 ### Updating Composer dependencies under Nix
 
 The fixed-output Composer hashes live in [`nix/vendor-hashes.nix`](nix/vendor-hashes.nix).

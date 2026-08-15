@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a77707174f7a59657186aa405bb7f7e6",
+    "content-hash": "518f588ad093ce89c19ee0367e2c5fee",
     "packages": [
         {
             "name": "phpstan/phpstan",
@@ -2073,6 +2073,69 @@
                 "source": "https://github.com/jbboehr/doctrine-of-the-second-sun"
             },
             "time": "2026-08-11T00:58:36+00:00"
+        },
+        {
+            "name": "jbboehr/phpbench-perfidious",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jbboehr/phpbench-perfidious.git",
+                "reference": "e26c11ff103ac99a3df8c86a65d88979008d1a17"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jbboehr/phpbench-perfidious/zipball/e26c11ff103ac99a3df8c86a65d88979008d1a17",
+                "reference": "e26c11ff103ac99a3df8c86a65d88979008d1a17",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "phpbench/phpbench": "^1.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3",
+                "infection/infection": "^0.28",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^10.5"
+            },
+            "suggest": {
+                "ext-perfidious": "*"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "jbboehr\\PhpBenchPerfidious\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AGPL-3.0-only WITH romic-exception"
+            ],
+            "authors": [
+                {
+                    "name": "John Boehr",
+                    "email": "jbboehr@gmail.com"
+                }
+            ],
+            "description": "PHPBench executor, progress logger, and report generator backed by perf_event_open hardware/software performance counters (via ext-perfidious)",
+            "homepage": "https://github.com/jbboehr/phpbench-perfidious",
+            "keywords": [
+                "benchmarking",
+                "libpfm4",
+                "perf",
+                "perf_event_open",
+                "perfidious",
+                "phpbench",
+                "profiling"
+            ],
+            "support": {
+                "issues": "https://github.com/jbboehr/phpbench-perfidious/issues",
+                "source": "https://github.com/jbboehr/phpbench-perfidious"
+            },
+            "time": "2026-08-03T05:00:15+00:00"
         },
         {
             "name": "larastan/larastan",
@@ -10408,7 +10471,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "jbboehr/doctrine-of-the-second-sun": 20
+        "jbboehr/doctrine-of-the-second-sun": 20,
+        "jbboehr/phpbench-perfidious": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

@@ -88,11 +88,14 @@
             "require-dev": {
                 "brick/varexporter": "*",
                 "composer-runtime-api": "*",
+                "friendsofphp/php-cs-fixer": "^3.95",
                 "jbboehr/doctrine-of-the-second-sun": "dev-master",
+                "jbboehr/phpbench-perfidious": "dev-master",
                 "larastan/larastan": "^2.11 || ^3.4",
                 "laravel/framework": "^9 || ^10 || ^11 || ^12 || ^13",
                 "orchestra/testbench": "^7.55 || ^8.36 || ^9.14 || ^10.3 || ^11.0",
                 "phpbench/phpbench": "^1.4",
+                "phpstan/extension-installer": "^1.4",
                 "phpstan/phpstan-deprecation-rules": "^1.2.1 || ^2.0",
                 "phpstan/phpstan-phpunit": "^1.4.2 || ^2.0.6",
                 "phpstan/phpstan-strict-rules": "^1.6.2 || ^2.0.4",
@@ -122,6 +125,7 @@
             },
             "archive": {
                 "exclude": [
+                    "/.codex",
                     "/.codeclimate.json",
                     "/.direnv",
                     "/.dvc",
@@ -131,27 +135,36 @@
                     "/.github",
                     "/.gitignore",
                     "/.idea",
+                    "/.php-cs-fixer.cache",
                     "/.phpcs.xml.dist",
+                    "/.php-cs-fixer.dist.php",
                     "/.phpunit.result.cache",
                     "/.pre-commit-config.yaml",
+                    "/AGENTS.md",
+                    "/build",
                     "/clover.xml",
                     "/composer.lock",
                     "/coverage",
+                    "/docs/book.toml",
                     "/docs/code-review-remediation-plan.md",
                     "/docs/development",
                     "/docs/mutation-testing.md",
+                    "/docs/theme",
                     "/e2e",
                     "/flake.lock",
                     "/flake.nix",
                     "/infection.json5.dist",
+                    "/nix",
                     "/*.log",
                     "/phpbench.json",
+                    "/phpbench.perfidious.json",
                     "/phpstan-strict-rules.php",
                     "/phpstan.neon.dist",
                     "/phpunit.xml.dist",
                     "/result*",
+                    "/secrets",
                     "/tests",
-                    "/tmp.md",
+                    "/tmp*",
                     "/tools",
                     "/vendor"
                 ]
@@ -160,12 +173,25 @@
                 "analyse": [
                     "./vendor/bin/phpstan analyse"
                 ],
+                "benchmark": [
+                    "./vendor/bin/phpbench run --progress=none --report=aggregate"
+                ],
+                "benchmark:perfidious": [
+                    "./vendor/bin/phpbench run --config=phpbench.perfidious.json --progress=none --report=perfidious"
+                ],
+                "benchmark:perfidious:hardware": [
+                    "./vendor/bin/phpbench run --config=phpbench.perfidious.json --profile=hardware --progress=none --report=perfidious"
+                ],
                 "benchmark:smoke": [
                     "./vendor/bin/phpbench run --iterations=1 --revs=1 --warmup=1 --progress=none"
+                ],
+                "bookstack:canary": [
+                    "tools/bookstack/run"
                 ],
                 "check": [
                     "@composer validate --strict",
                     "@check:whitespace",
+                    "@php-cs-fixer",
                     "@phpcs",
                     "@analyse",
                     "@test"
@@ -173,6 +199,7 @@
                 "check:full": [
                     "@check",
                     "@runtime-smoke",
+                    "@package:check",
                     "@e2e",
                     "@benchmark:smoke"
                 ],
@@ -181,6 +208,35 @@
                 ],
                 "coverage": [
                     "./vendor/bin/phpunit --coverage-filter src --coverage-clover clover.xml --coverage-text"
+                ],
+                "docs:check": [
+                    "@docs:validate",
+                    "@docs:install",
+                    "@docs:analyse",
+                    "@docs:test",
+                    "@docs:build",
+                    "@docs:links"
+                ],
+                "docs:analyse": [
+                    "composer --working-dir=tools/akashi analyse"
+                ],
+                "docs:build": [
+                    "mdbook build docs"
+                ],
+                "docs:install": [
+                    "composer --working-dir=tools/akashi install --prefer-dist --no-progress"
+                ],
+                "docs:links": [
+                    "@php tools/docs/check-generated-links.php build/docs"
+                ],
+                "docs:serve": [
+                    "mdbook serve docs"
+                ],
+                "docs:test": [
+                    "composer --working-dir=tools/akashi test"
+                ],
+                "docs:validate": [
+                    "composer --working-dir=tools/akashi validate --strict"
                 ],
                 "e2e": [
                     "./vendor/bin/phpstan analyse --configuration=e2e/phpstan-e2e.neon --error-format=json  | ./e2e/test-runner"
@@ -211,8 +267,14 @@
                 "infection:core": [
                     "infection --no-progress src/TranslationLoader src/CallRule src/LostInTranslationHelper.php src/Utils.php"
                 ],
+                "package:check": [
+                    "@php tools/check-package.php"
+                ],
                 "phpcs": [
                     "./vendor/bin/phpcs"
+                ],
+                "php-cs-fixer": [
+                    "./vendor/bin/php-cs-fixer check --diff --show-progress=none --using-cache=no"
                 ],
                 "phpstan": [
                     "./vendor/bin/phpstan"
@@ -236,7 +298,7 @@
                     "email": "jbboehr@gmail.com"
                 }
             ],
-            "description": "Helps find missing translation strings in Laravel applications",
+            "description": "PHPStan extension for validating Laravel translation keys, replacements, choices, locales, files, and Blade usage",
             "homepage": "https://github.com/jbboehr/phpstan-lost-in-translation",
             "keywords": [
                 "bladestan",

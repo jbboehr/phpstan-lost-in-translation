@@ -169,6 +169,27 @@
         "type": "github"
       }
     },
+    "gitignore_3": {
+      "inputs": {
+        "nixpkgs": [
+          "perfidious",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1762808025,
+        "narHash": "sha256-XmjITeZNMTQXGhhww6ed/Wacy2KzD6svioyCX7pkUu4=",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "rev": "cb5e3fdca1de58ccbc3ef53de65bd372b48f567c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
@@ -205,6 +226,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1785318670,
+        "narHash": "sha256-dN6Ou5x/+23FZLEpYP3IffO+NyJFzUlGumt1uu3MMaY=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "0954f7ee2f6bb3dc7d4e3d0d8bcb8fd4bde4cfc5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1782978903,
@@ -218,6 +255,43 @@
         "owner": "NixOS",
         "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "perfidious": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "gitignore": "gitignore_3",
+        "nix-github-actions": [
+          "nix-github-actions"
+        ],
+        "nix-phps": [
+          "phps"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-unstable": "nixpkgs-unstable",
+        "pre-commit-hooks": [
+          "git-hooks"
+        ],
+        "systems": [
+          "systems"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785654964,
+        "narHash": "sha256-w7oogFyTI2pzUUIib7SCKaJ5/2bDi3Qi6/qG8dGifUY=",
+        "owner": "jbboehr",
+        "repo": "php-perfidious",
+        "rev": "c646bd1313214dc86c9101fe459784ce0e887b6f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jbboehr",
+        "repo": "php-perfidious",
         "type": "github"
       }
     },
@@ -249,6 +323,7 @@
         "git-hooks": "git-hooks",
         "nix-github-actions": "nix-github-actions",
         "nixpkgs": "nixpkgs",
+        "perfidious": "perfidious",
         "phps": "phps",
         "systems": "systems_2"
       }

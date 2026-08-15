@@ -17,7 +17,9 @@ trap cleanup EXIT
 composer_home="$temporary_root/composer-home"
 composer_cache_dir="$(composer config --global cache-dir --absolute)"
 
-if ! doctrine_pin="$(
+locked_package_pin() {
+    local package_name="$1"
+
     # The PHP fragment is intentionally single-quoted for the shell.
     # shellcheck disable=SC2016
     php -r '
@@ -30,23 +32,29 @@ if ! doctrine_pin="$(
         $packages = array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []);
 
         foreach ($packages as $package) {
-            if (($package["name"] ?? null) !== "jbboehr/doctrine-of-the-second-sun") {
+            if (($package["name"] ?? null) !== $argv[2]) {
                 continue;
             }
 
             $version = $package["version"] ?? null;
             $reference = $package["source"]["reference"] ?? null;
             if (!is_string($version) || !is_string($reference)) {
-                throw new RuntimeException("The reviewed Doctrine package has no version or source reference");
+                throw new RuntimeException(sprintf("%s has no version or source reference", $argv[2]));
             }
 
             printf("%s#%s", $version, $reference);
             exit(0);
         }
 
-        throw new RuntimeException("The reviewed Doctrine package is missing from composer.lock");
-    ' "$repository_root/composer.lock"
-)"; then
+        throw new RuntimeException(sprintf("%s is missing from composer.lock", $argv[2]));
+    ' "$repository_root/composer.lock" "$package_name"
+}
+
+if ! doctrine_pin="$(locked_package_pin "jbboehr/doctrine-of-the-second-sun")"; then
+    exit 1
+fi
+
+if ! perfidious_pin="$(locked_package_pin "jbboehr/phpbench-perfidious")"; then
     exit 1
 fi
 
@@ -85,8 +93,10 @@ remove_platform_override() {
     ' "$lock_file"
 }
 
-assert_doctrine_pin() {
+assert_package_pin() {
     local lock_file="$1"
+    local package_name="$2"
+    local expected_pin="$3"
 
     # shellcheck disable=SC2016
     php -r '
@@ -99,7 +109,7 @@ assert_doctrine_pin() {
         $packages = array_merge($lock["packages"] ?? [], $lock["packages-dev"] ?? []);
 
         foreach ($packages as $package) {
-            if (($package["name"] ?? null) !== "jbboehr/doctrine-of-the-second-sun") {
+            if (($package["name"] ?? null) !== $argv[2]) {
                 continue;
             }
 
@@ -108,11 +118,12 @@ assert_doctrine_pin() {
                 $package["version"] ?? "",
                 $package["source"]["reference"] ?? "",
             );
-            if ($pin !== $argv[2]) {
+            if ($pin !== $argv[3]) {
                 throw new RuntimeException(sprintf(
-                    "Doctrine pin changed in %s: expected %s, got %s",
-                    $argv[1],
+                    "%s pin changed in %s: expected %s, got %s",
                     $argv[2],
+                    $argv[1],
+                    $argv[3],
                     $pin,
                 ));
             }
@@ -120,8 +131,8 @@ assert_doctrine_pin() {
             exit(0);
         }
 
-        throw new RuntimeException(sprintf("Doctrine package missing from %s", $argv[1]));
-    ' "$lock_file" "$doctrine_pin"
+        throw new RuntimeException(sprintf("%s missing from %s", $argv[2], $argv[1]));
+    ' "$lock_file" "$package_name" "$expected_pin"
 }
 
 update_laravel_lock() {
@@ -143,10 +154,12 @@ update_laravel_lock() {
             --no-progress \
             --prefer-dist \
             --with "jbboehr/doctrine-of-the-second-sun:$doctrine_pin" \
+            --with "jbboehr/phpbench-perfidious:$perfidious_pin" \
             --with "laravel/framework:^$laravel_version"
 
     remove_platform_override "$project/composer.lock"
-    assert_doctrine_pin "$project/composer.lock"
+    assert_package_pin "$project/composer.lock" "jbboehr/doctrine-of-the-second-sun" "$doctrine_pin"
+    assert_package_pin "$project/composer.lock" "jbboehr/phpbench-perfidious" "$perfidious_pin"
     install -m 0644 "$project/composer.lock" "$output"
 }
 
@@ -170,10 +183,12 @@ COMPOSER_CACHE_DIR="$composer_cache_dir" COMPOSER_HOME="$composer_home" \
         --prefer-dist \
         --prefer-lowest \
         --prefer-stable \
-        --with "jbboehr/doctrine-of-the-second-sun:$doctrine_pin"
+        --with "jbboehr/doctrine-of-the-second-sun:$doctrine_pin" \
+        --with "jbboehr/phpbench-perfidious:$perfidious_pin"
 
 remove_platform_override "$lowest_project/composer.lock"
-assert_doctrine_pin "$lowest_project/composer.lock"
+assert_package_pin "$lowest_project/composer.lock" "jbboehr/doctrine-of-the-second-sun" "$doctrine_pin"
+assert_package_pin "$lowest_project/composer.lock" "jbboehr/phpbench-perfidious" "$perfidious_pin"
 install -m 0644 "$lowest_project/composer.lock" "$repository_root/nix/composer/lowest.lock"
 
 composer --working-dir="$repository_root/tools/eris" update \

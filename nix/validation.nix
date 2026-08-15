@@ -1,11 +1,13 @@
 {
   buildEnv,
   infectionPhar,
+  perfidiousEnabled,
   php81,
   php82,
   php83,
   php84,
   php85,
+  php84WithPerfidious,
   pkgs,
   src,
 }:
@@ -355,9 +357,26 @@ let
       cp infection.log infection-summary.log "$out/"
     '';
   };
+
+  perfidiousBenchmark =
+    if perfidiousEnabled then
+      mkPhpCheck {
+        name = "benchmark-perfidious";
+        php = php84WithPerfidious;
+        command = ''
+          php ./vendor/bin/phpbench run \
+            --config=phpbench.perfidious.json \
+            --iterations=1 \
+            --revs=1 \
+            --progress=none \
+            --report=perfidious
+        '';
+      }
+    else
+      null;
 in
 {
-  inherit mutation repositories;
+  inherit mutation perfidiousBenchmark repositories;
 
   checks = phpunitChecks // {
     composer-validate = mkSimpleCheck {

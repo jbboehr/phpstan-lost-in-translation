@@ -47,7 +47,7 @@ final class FuzzyStringSetTest extends TestCase
         $benchmark = new $className();
 
         $benchmark->setupDataSet1();
-        $benchmark->benchDataSet1();
+        $benchmark->benchDataSet1Cold();
     }
 
     /**
@@ -64,7 +64,7 @@ final class FuzzyStringSetTest extends TestCase
         $benchmark->setupDataSet1Memoized();
 
         for ($i = 0; $i < 10; ++$i) {
-            $benchmark->benchDataSet1Memoized();
+            $benchmark->benchDataSet1Warm();
         }
     }
 
@@ -80,7 +80,7 @@ final class FuzzyStringSetTest extends TestCase
         $benchmark = new $className();
 
         $benchmark->setupDataSet2();
-        $benchmark->benchDataSet2();
+        $benchmark->benchDataSet2Cold();
     }
 
     public function testNullFuzzyStringSet(): void

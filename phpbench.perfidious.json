@@ -1,0 +1,28 @@
+{
+    "$schema": "./vendor/phpbench/phpbench/phpbench.schema.json",
+    "runner.bootstrap": "vendor/autoload.php",
+    "runner.path": "tests/Benchmark",
+    "runner.executor": "perfidious-remote",
+    "core.extensions": [
+        "jbboehr\\PhpBenchPerfidious\\PerfidiousExtension"
+    ],
+    "core.profiles": {
+        "hardware": {
+            "perfidious.metrics": [
+                "perf::PERF_COUNT_SW_CPU_CLOCK",
+                "perf::PERF_COUNT_HW_INSTRUCTIONS",
+                "perf::PERF_COUNT_HW_CPU_CYCLES",
+                "perf::PERF_COUNT_HW_CACHE_MISSES",
+                "perf::PERF_COUNT_HW_BRANCH_MISSES"
+            ]
+        }
+    },
+    "report.generators": {
+        "perfidious": {
+            "generator": "perfidious"
+        }
+    },
+    "perfidious.metrics": [
+        "perf::PERF_COUNT_SW_CPU_CLOCK"
+    ]
+}

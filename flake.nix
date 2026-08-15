@@ -36,6 +36,15 @@
       inputs.systems.follows = "systems";
     };
     phps.url = "github:fossar/nix-phps";
+    perfidious = {
+      url = "github:jbboehr/php-perfidious";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nix-github-actions.follows = "nix-github-actions";
+      inputs.nix-phps.follows = "phps";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.pre-commit-hooks.follows = "git-hooks";
+      inputs.systems.follows = "systems";
+    };
     git-hooks = {
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -55,6 +64,7 @@
       systems,
       flake-utils,
       phps,
+      perfidious,
       git-hooks,
       nix-github-actions,
     }:
@@ -69,6 +79,7 @@
               agent-badge.packages.${system}.agent-badge-unwrapped;
           buildEnv =
             {
+              extraExtensions ? [ ],
               php,
               withPcov ? true,
               withXdebug ? false,
@@ -82,6 +93,7 @@
                   all,
                 }:
                 enabled
+                ++ extraExtensions
                 ++ (pkgs.lib.optionals withPcov [ all.pcov ])
                 ++ (pkgs.lib.optionals withXdebug [ all.xdebug ]);
             };
@@ -139,9 +151,10 @@
               withPcov ? true,
               withInfection ? false,
               withMdbook ? false,
+              extraExtensions ? [ ],
             }:
             let
-              php' = buildEnv { inherit php withPcov; };
+              php' = buildEnv { inherit extraExtensions php withPcov; };
               infection = pkgs.writeShellScriptBin "infection" ''
                 exec ${php'}/bin/php ${infectionPhar} "$@"
               '';
@@ -166,10 +179,19 @@
             url = "https://github.com/infection/infection/releases/download/0.34.2/infection.phar";
             hash = "sha256-roO8UVFXmBfDpiF+s97OuGoWmjmROSZFNCGLcjMg2j0=";
           };
+          perfidiousEnabled = pkgs.stdenv.isLinux && pkgs.stdenv.hostPlatform.isx86_64;
+          perfidiousExtension = if perfidiousEnabled then perfidious.packages.${system}.php84-gcc else null;
+          php84WithPerfidious = buildEnv {
+            extraExtensions = pkgs.lib.optional perfidiousEnabled perfidiousExtension;
+            php = pkgs.php84;
+            withPcov = false;
+          };
           validation = import ./nix/validation.nix {
             inherit
               buildEnv
               infectionPhar
+              perfidiousEnabled
+              php84WithPerfidious
               pkgs
               src
               ;
@@ -219,6 +241,9 @@
                   mkdir -p "$out"
                   printf '%s\n' '${builtins.toJSON githubMatrix}' > "$out/matrix.json"
                 '';
+          }
+          // pkgs.lib.optionalAttrs perfidiousEnabled {
+            benchmark-perfidious = validation.perfidiousBenchmark;
           };
 
           devShells = rec {
@@ -236,6 +261,13 @@
               withInfection = true;
             };
             default = php81;
+          }
+          // pkgs.lib.optionalAttrs perfidiousEnabled {
+            benchmark = makeShell {
+              extraExtensions = [ perfidiousExtension ];
+              php = pkgs.php84;
+              withPcov = false;
+            };
           };
 
           formatter = pkgs.nixfmt-tree;

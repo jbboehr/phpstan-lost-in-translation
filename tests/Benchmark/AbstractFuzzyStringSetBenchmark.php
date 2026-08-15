@@ -45,9 +45,9 @@ abstract class AbstractFuzzyStringSetBenchmark
     }
 
     #[Iterations(5)]
-    #[Revs(10)]
+    #[Revs(1)]
     #[BeforeMethods('setupDataSet1')]
-    public function benchDataSet1(): void
+    public function benchDataSet1Cold(): void
     {
         $expected = 'test';
         $result = $this->set->search('tezt');
@@ -61,14 +61,13 @@ abstract class AbstractFuzzyStringSetBenchmark
     {
         $this->setupDataSet1();
         $this->set = new MemoizingFuzzyStringSet($this->set);
-        $this->set->add(self::DATA_SET_1[0]);
-        $this->set->addMany(array_slice(self::DATA_SET_1, 0, 2));
+        $this->set->search('tezt');
     }
 
     #[Iterations(5)]
-    #[Revs(10)]
+    #[Revs(100)]
     #[BeforeMethods('setupDataSet1Memoized')]
-    public function benchDataSet1Memoized(): void
+    public function benchDataSet1Warm(): void
     {
         $expected = 'test';
         $result = $this->set->search('tezt');
@@ -83,10 +82,10 @@ abstract class AbstractFuzzyStringSetBenchmark
         $this->set = $this->createFuzzyStringSet(self::DATA_SET_2);
     }
 
-    #[Iterations(1)]
+    #[Iterations(3)]
     #[Revs(1)]
     #[BeforeMethods('setupDataSet2')]
-    public function benchDataSet2(): void
+    public function benchDataSet2Cold(): void
     {
         $expected = 'onto full money its fall child fish';
         $result = $this->set->search($expected . ' zzz');
@@ -100,12 +99,13 @@ abstract class AbstractFuzzyStringSetBenchmark
     {
         $this->setupDataSet2();
         $this->set = new MemoizingFuzzyStringSet($this->set);
+        $this->set->search('onto full money its fall child fish zzz');
     }
 
-    #[Iterations(1)]
-    #[Revs(1)]
+    #[Iterations(5)]
+    #[Revs(100)]
     #[BeforeMethods('setupDataSet2Memoized')]
-    public function benchDataSet2Memoized(): void
+    public function benchDataSet2Warm(): void
     {
         $expected = 'onto full money its fall child fish';
         $result = $this->set->search($expected . ' zzz');

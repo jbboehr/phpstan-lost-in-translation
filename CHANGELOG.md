@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Add repeatable PHPBench coverage for fuzzy lookup, missing-key diagnostics, catalogue loading, and unused-key
+  analysis, with optional Perfidious software and hardware counters through Nix.
+
 ### Changed
 
 ### Deprecated

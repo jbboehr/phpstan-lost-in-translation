@@ -25,41 +25,26 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Benchmark;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
-use PhpBench\Attributes\Assert;
+use PhpBench\Attributes\BeforeMethods;
 use PhpBench\Attributes\Iterations;
 use PhpBench\Attributes\Revs;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Type\Constant\ConstantStringType;
 
 final class MissingTranslationStringRuleBenchmark
 {
+    /** @var list<non-empty-string> */
+    private array $extraData = [];
+
     private TranslationLoader $loader;
 
     private MissingTranslationStringRule $rule;
 
+    private TranslationCall $call;
+
     public function __construct()
     {
-        $this->loader = new TranslationLoader(
-            langPath: __DIR__ . '/../lang',
-            baseLocale: 'en',
-        );
-
-        $this->rule = new MissingTranslationStringRule($this->loader);
-
-        try {
-            mt_srand(1234);
-
-            $this->generateExtraData();
-        } finally {
-            mt_srand();
-        }
-    }
-
-    #[Iterations(5)]
-    #[Revs(10)]
-    #[Assert('mode(variant.time.avg) < 50 milliseconds +/- 10%')]
-    public function benchProcessCall(): void
-    {
-        $this->rule->processCall(new TranslationCall(
+        $this->call = new TranslationCall(
             null,
             'functionName',
             __FILE__,
@@ -68,7 +53,53 @@ final class MissingTranslationStringRuleBenchmark
                 'foo' => [['*', null]],
             ],
             keyType: new ConstantStringType('foo'),
-        ));
+        );
+
+        try {
+            mt_srand(1234);
+
+            $this->generateExtraData();
+        } finally {
+            mt_srand();
+        }
+
+        $this->setUpColdMissingKey();
+    }
+
+    public function setUpColdMissingKey(): void
+    {
+        $this->loader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang',
+            baseLocale: 'en',
+        );
+
+        foreach ($this->extraData as $value) {
+            $this->loader->add('ja', $value, $value);
+        }
+
+        $this->rule = new MissingTranslationStringRule($this->loader);
+    }
+
+    #[Iterations(5)]
+    #[Revs(1)]
+    #[BeforeMethods('setUpColdMissingKey')]
+    public function benchColdMissingKey(): void
+    {
+        $this->assertSingleError($this->rule->processCall($this->call));
+    }
+
+    public function setUpWarmMissingKey(): void
+    {
+        $this->setUpColdMissingKey();
+        $this->assertSingleError($this->rule->processCall($this->call));
+    }
+
+    #[Iterations(5)]
+    #[Revs(100)]
+    #[BeforeMethods('setUpWarmMissingKey')]
+    public function benchWarmMissingKey(): void
+    {
+        $this->assertSingleError($this->rule->processCall($this->call));
     }
 
     private function generateExtraData(): void
@@ -88,9 +119,17 @@ final class MissingTranslationStringRuleBenchmark
                 $buf .= $chars[mt_rand(0, strlen($chars) - 1)];
             }
 
-            if (strlen($buf) > 0) {
-                $this->loader->add('ja', $buf, $buf);
+            if ('' !== $buf) {
+                $this->extraData[] = $buf;
             }
+        }
+    }
+
+    /** @param list<IdentifierRuleError> $errors */
+    private function assertSingleError(array $errors): void
+    {
+        if (1 !== count($errors)) {
+            throw new \RuntimeException(sprintf('Expected one diagnostic, got %d', count($errors)));
         }
     }
 }

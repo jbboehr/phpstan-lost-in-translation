@@ -24,6 +24,7 @@ composer-project.nix linguist-generated
 /infection.json5.dist export-ignore
 /nix export-ignore
 /phpbench.json export-ignore
+/phpbench.perfidious.json export-ignore
 /phpstan-strict-rules.php export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml.dist export-ignore

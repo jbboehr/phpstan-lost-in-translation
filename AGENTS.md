@@ -128,6 +128,8 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `composer e2e` for expected diagnostics;
 - `composer eris` for isolated locale and translation-key properties;
 - `composer docs:check` for the mdBook build, generated links, and marked public translation-call examples;
+- `composer benchmark:smoke` for portable benchmark execution and `composer benchmark` for repeated wall-clock results;
+- `composer benchmark:perfidious` from the x86-64 Linux `benchmark` shell for local software performance counters;
 - `composer infection` for optional mutation testing; and
 - `composer bookstack:canary` from the PHP 8.4 shell for the optional pinned real-application integration check.
 

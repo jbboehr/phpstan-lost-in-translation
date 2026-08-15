@@ -20,11 +20,11 @@ templates through Bladestan.
 
 ## Installation
 
-This project has not published its first stable release. While it remains experimental, install the current development
-branch explicitly:
+The `0.x` series remains experimental while its public configuration and diagnostics settle. Install the `0.1` release
+line so later minor releases do not introduce unexpected pre-1.0 compatibility changes:
 
 ```shell
-composer require --dev jbboehr/phpstan-lost-in-translation:dev-develop
+composer require --dev jbboehr/phpstan-lost-in-translation:^0.1
 ```
 
 When [phpstan/extension-installer](https://github.com/phpstan/extension-installer) is installed, Composer registers the

@@ -561,17 +561,18 @@ The tracked default seed is `20260811`; `ERIS_SEED` remains available for
 exploration and replay. Focused example tests remain the primary regression
 suite, with generated properties providing supplementary invariant coverage.
 
-### Akashi-backed README example verification
+### Akashi-backed public documentation verification
 
-**Status:** Complete for README translation-call diagnostics. Seven PHP examples are selected with invisible Akashi
-markers and analyzed against a dedicated language fixture. The harness compares stable extension identifiers from an
-external expectation map together with their code-relative lines, so public snippets contain no tool-only expectation
-comments while diagnostic attribution remains covered.
+**Status:** Complete for public translation-call diagnostics and the configuration reference. Seven PHP examples in the
+README and `docs/usage/` are selected with invisible Akashi markers and analyzed against a dedicated language fixture.
+The harness compares stable extension identifiers from an external expectation map together with their code-relative
+lines, so public snippets contain no tool-only expectation comments while diagnostic attribution remains covered. A
+separate test compares the documented configuration keys with both `parametersSchema` and the extension defaults.
 
-The remaining README fences were classified but intentionally excluded from this initial corpus. Blade examples require
-template compilation, translation-file examples describe loader inputs rather than executable calls, and NEON, JSON,
-console output, installation commands, and type-inference fragments need different execution contracts. Internal plans
-and historical reports remain outside the public documentation corpus.
+The remaining public documentation fences were classified but intentionally excluded from this corpus. Blade examples
+require template compilation, translation-file examples describe loader inputs rather than executable calls, and NEON,
+JSON, console output, installation commands, and type-inference fragments need different execution contracts. Internal
+plans and historical reports remain outside the public documentation corpus.
 
 The locked harness deliberately lives under `tools/akashi/` with Laravel 12, PHPUnit 11, and PHPStan 2, while existing
 tests continue to cover PHPStan 1.12 and the PHP 8.1 floor. Akashi now supports PHP 8.1 and PHPStan 1.12, but keeping the
@@ -723,7 +724,7 @@ This completed all six reported issue #6 items and its lower-priority invalid-in
 
 ### Blade unused-translation collection
 
-**Status:** Complete for GitHub issue #1, pending external issue closure.
+**Status:** Complete. GitHub issue #1 closed on 2026-08-15 after the implementation and regression coverage landed.
 
 Bladestan's nested analysis does not promote collector data into the outer PHPStan analysis. The compatibility rule
 therefore converts constant Blade translation calls into `UsedTranslationRecord` values, places them in a
@@ -840,4 +841,4 @@ so validation and storage cannot diverge again.
   actionlint, and `nix flake check -L` pass.
 - No new PHP warnings, deprecations, or ignored static-analysis errors are
   introduced.
-- User-visible behavior changes are reflected in `README.md` where applicable.
+- User-visible behavior changes are reflected in the README and `docs/usage/` where applicable.

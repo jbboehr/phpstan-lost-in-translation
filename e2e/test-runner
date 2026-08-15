@@ -59,6 +59,12 @@ $expectedErrors = array_merge($expectedErrors, [
     'src/blade:3:lostInTranslation.invalidReplacement.unused',
 ]);
 
+// These keys are referenced only from Blade; reporting either as unused means the nested collector bridge failed.
+$forbiddenErrors = [
+    'lang/ja.json:3:lostInTranslation.possiblyUnusedTranslationString',
+    'lang/zh.json:3:lostInTranslation.possiblyUnusedTranslationString',
+];
+
 /**
  * Main script.
  */
@@ -72,7 +78,7 @@ if (false === $stdIn) {
 }
 
 try {
-    $phpStanResultsChecker->checkResults($stdIn, $expectedErrors);
+    $phpStanResultsChecker->checkResults($stdIn, $expectedErrors, $forbiddenErrors);
     echo "E2E tests OK\n";
     exit(0);
 } catch (Exception $e) {

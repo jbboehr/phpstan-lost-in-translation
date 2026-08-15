@@ -721,6 +721,20 @@ because only it knows that repeating a locale-missing key is not actionable. Gen
 
 This completed all six reported issue #6 items and its lower-priority invalid-input diagnostic follow-up.
 
+### Blade unused-translation collection
+
+**Status:** Complete for GitHub issue #1, pending external issue closure.
+
+Bladestan's nested analysis does not promote collector data into the outer PHPStan analysis. The compatibility rule
+therefore converts constant Blade translation calls into `UsedTranslationRecord` values, places them in a
+process-local queue shared by the nested and outer collector instances, and drains that queue once from the outer
+analysis. This queue is analysis plumbing and is unrelated to Laravel's queue system.
+
+Focused tests assert successful forwarding, locale preservation, sharing across collector instances, and one-time
+draining. The end-to-end contract explicitly forbids unused-translation diagnostics for a key referenced only from
+Blade in both fixture locales, while other expected unused diagnostics prove the feature is enabled. Revisit this
+bridge if Bladestan gains a stable way to promote nested collector data directly.
+
 ### Compiled Blade diagnostic paths
 
 **Status:** A compatibility bridge and regression coverage are implemented.

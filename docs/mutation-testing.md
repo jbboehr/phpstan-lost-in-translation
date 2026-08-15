@@ -72,9 +72,9 @@ that regression then participates in mutation testing.
 ## Reviewed baseline
 
 The complete PHP 8.4 campaign on 2026-08-14 generated 1,201 mutants. PHPUnit
-killed 1,002 and 199 escaped, for 100% mutation code coverage and a covered-code
-MSI of 83.43%. With 100% mutation code coverage, the overall MSI is also
-83.43%. Both 80-point gates leave 3.43 percentage points of margin. No mutants
+killed 1,003 and 198 escaped, for 100% mutation code coverage and a covered-code
+MSI of 83.51%. With 100% mutation code coverage, the overall MSI is also
+83.51%. Both 80-point gates leave 3.51 percentage points of margin. No mutants
 are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
@@ -82,6 +82,8 @@ The review added focused assertions for these observable contracts:
 - Blade diagnostics from separate nested analyses accumulate, preserve order,
   and map to the nearest preceding nonempty template marker;
 - Blade's outer rule rebuilds every collected diagnostic;
+- Blade's fake unused-string collector forwards locale-aware calls into the
+  process-local queue shared with the outer collector;
 - translation discovery separates root JSON, grouped PHP, and vendor-namespaced
   PHP catalogues; loaders preserve callable fuzzy keys, flattened translations,
   source lines, and invalid-value diagnostics;
@@ -103,7 +105,7 @@ The review added focused assertions for these observable contracts:
 - numeric fuzzy candidates remain strings instead of becoming integer array
   keys, with a root regression promoted from the differential property suite.
 
-The remaining 199 mutants were classified by component. A row accounts for
+The remaining 198 mutants were classified by component. A row accounts for
 every survivor; "mixed" means the group contains both equivalent mutations and
 valid edge behavior whose additional tests are lower priority than the current
 gate.
@@ -115,7 +117,7 @@ gate.
 | Fuzzy implementations | 23 | Mostly alternate pruning, tie, and internal-index behavior. The `NaiveFuzzyStringSet` membership-map boolean mutations are equivalent because membership uses `isset()`. Test externally visible suggestions; do not couple tests to the optional index algorithm. |
 | JSON error formatter | 16 | Output aggregation and JSON-option variants. Exit status and pretty defaults are covered; add exact-output cases when a consumer requires a currently unasserted encoding detail. |
 | Blade marker bounds | 6 | Equivalent for Bladestan's positive compiled lines and marker-before-call layout. The valid boundary contract is covered, so these are documented rather than ignored by broad line-number mutator rules. |
-| Unused-string collectors | 3 | Two empty-constant-key early returns are equivalent because the following loops enqueue nothing; one fake-collector forwarding call remains an integration seam. |
+| Unused-string collectors | 2 | Both empty-constant-key early returns are equivalent because the following loops enqueue nothing. The fake-collector forwarding call is now covered directly. |
 | Locale and application utilities | 3 | The regex `D` flag is redundant with the terminal anchor here; the other two differ only by autoloading a class that these detection helpers intentionally require to be loaded already. |
 
 The first follow-up priority is an observed behavior gap in the translation

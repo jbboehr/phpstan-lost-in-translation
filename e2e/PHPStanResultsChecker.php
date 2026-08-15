@@ -14,8 +14,13 @@ final class PHPStanResultsChecker
 
     /**
      * @param array<int,string> $expectedResults see `test-runner` script for format
+     * @param array<int,string> $forbiddenResults diagnostics whose absence is part of the contract
      */
-    public function checkResults(string $phpstanResultsAsJsonString, array $expectedResults): void
+    public function checkResults(
+        string $phpstanResultsAsJsonString,
+        array $expectedResults,
+        array $forbiddenResults = [],
+    ): void
     {
         $asJson = json_decode($phpstanResultsAsJsonString, true);
         $this->assertArray($asJson, 'Failed to decode PHPStan results');
@@ -34,6 +39,7 @@ final class PHPStanResultsChecker
         $this->assertArray($files, 'Failed to find files in PHPStan results');
 
         $additionalReportedErrors = [];
+        $forbiddenReportedErrors = [];
 
         foreach ($files as $fullFileName => $fileIssues) {
             $filePath = $this->getCleanFilename($fullFileName);
@@ -51,6 +57,11 @@ final class PHPStanResultsChecker
                 $cleanIdentifier = str_replace(self::IDENTIFIER_PREFIX, '', $identifier);
 
                 $key = sprintf('%s:%d:%s', $filePath, $line, $cleanIdentifier);
+
+                if (in_array($key, $forbiddenResults, true)) {
+                    $forbiddenReportedErrors[] = $key;
+                    continue;
+                }
 
                 if ('src/blade:3:lostInTranslation.invalidReplacement.unused' === $key) {
                     $tip = $issue['tip'] ?? null;
@@ -70,7 +81,7 @@ final class PHPStanResultsChecker
             }
         }
 
-        if (([] === $additionalReportedErrors) && ([] === $expectedResults)) {
+        if (([] === $additionalReportedErrors) && ([] === $expectedResults) && ([] === $forbiddenReportedErrors)) {
             // ALL OK
             return;
         }
@@ -80,6 +91,8 @@ final class PHPStanResultsChecker
             var_export($additionalReportedErrors, true),
             'Expected errors not reported:',
             var_export($expectedResults, true),
+            'Forbidden errors reported:',
+            var_export($forbiddenReportedErrors, true),
         ]);
 
         throw new RuntimeException($errorMessage);

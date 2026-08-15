@@ -44,12 +44,13 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
         $collector = new UnusedTranslationStringCollector($helper);
         $this->assertNull($collector->processNode($node, $scope));
         $collector->push(new TranslationCall(
-            null,
-            '__',
-            '/tmp/example.blade.php',
-            1,
-            [],
-            new ConstantStringType('messages.example'),
+            className: null,
+            functionName: '__',
+            file: '/tmp/example.blade.php',
+            line: 1,
+            possibleTranslations: [],
+            keyType: new ConstantStringType('messages.example'),
+            localeType: new ConstantStringType('ja'),
         ));
 
         $otherCollector = new UnusedTranslationStringCollector($helper);
@@ -57,11 +58,12 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
         $this->assertEquals([
             new UsedTranslationRecord(
                 key: 'messages.example',
-                locale: '*',
+                locale: 'ja',
                 file: '/tmp/example.blade.php',
                 line: 1,
             ),
         ], $otherCollector->processNode($node, $scope));
+        $this->assertNull($collector->processNode($node, $scope));
     }
 
     public function testExceptionConversion(): void

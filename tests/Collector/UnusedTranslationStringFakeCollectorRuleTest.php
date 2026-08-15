@@ -24,13 +24,59 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Collector;
 
 use jbboehr\PHPStanLostInTranslation\LostInTranslationHelper;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
+use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringFakeCollectorRule;
+use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
+use PHPStan\Type\Constant\ConstantStringType;
 
 final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framework\TestCase
 {
+    public function testForwardsBladeCallsToTheOuterCollector(): void
+    {
+        $node = $this->createStub(FuncCall::class);
+        $bladeScope = $this->createMock(Scope::class);
+        $bladeScope->method('getFile')
+            ->willReturn('/tmp/example-blade-compiled.php');
+
+        $call = new TranslationCall(
+            className: null,
+            functionName: '__',
+            file: '/tmp/example.blade.php',
+            line: 19,
+            possibleTranslations: [],
+            keyType: new ConstantStringType('messages.blade'),
+            localeType: new ConstantStringType('ja'),
+        );
+
+        $bladeHelper = $this->createMock(LostInTranslationHelper::class);
+        $bladeHelper->expects($this->once())
+            ->method('parseCallLike')
+            ->with($node, $bladeScope)
+            ->willReturn($call);
+
+        $outerHelper = $this->createStub(LostInTranslationHelper::class);
+        $collector = new UnusedTranslationStringCollector($outerHelper);
+        $rule = new UnusedTranslationStringFakeCollectorRule($bladeHelper, $collector);
+
+        $this->assertSame([], $rule->processNode($node, $bladeScope));
+
+        $outerScope = $this->createMock(Scope::class);
+        $outerScope->method('getFile')
+            ->willReturn('/tmp/example.php');
+
+        $this->assertEquals([
+            new UsedTranslationRecord(
+                key: 'messages.blade',
+                locale: 'ja',
+                file: '/tmp/example.blade.php',
+                line: 19,
+            ),
+        ], $collector->processNode($node, $outerScope));
+    }
+
     public function testExceptionConversion(): void
     {
         if (!class_exists(FuncCall::class)) {

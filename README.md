@@ -158,6 +158,9 @@ parameters:
         unusedTranslationStrings: true
 ```
 
+With Bladestan enabled, constant translation calls in reachable Blade templates count as uses. The extension preserves
+those calls across Bladestan's nested analysis through a parallel process-local compatibility bridge.
+
 ```json
 {
     "this string is not used anywhere": "this string is not used anywhere"

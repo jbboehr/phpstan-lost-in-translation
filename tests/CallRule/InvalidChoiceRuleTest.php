@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
 
+use Illuminate\Translation\MessageSelector;
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
@@ -29,11 +30,14 @@ use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
+use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\MetadataRuleError;
 use PHPStan\Rules\Rule;
 use PHPStan\Type\ArrayType;
+use PHPStan\Type\Constant\ConstantFloatType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
+use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\UnionType;
@@ -103,6 +107,11 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 'Failed to parse translation choice: "{3 three"',
                 36,
                 Utils::formatTipForKeyValue('en', '{2} two|{3 three'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 2',
+                39,
+                Utils::formatTipForKeyValue('en', '{*}all the things'),
             ],
             [
                 'Explicit translation choice conditions do not cover all possible cases for number of type: 4',
@@ -244,6 +253,97 @@ class InvalidChoiceRuleTest extends RuleTestCase
 
             $this->assertCount(1, $errors);
             $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_CASE, $errors[0]->getIdentifier());
+        }
+    }
+
+    public function testFractionalConditionsMatchLaravelMessageSelector(): void
+    {
+        $selector = new MessageSelector();
+
+        foreach (
+            [
+                ['{1.5} selected', 1.5, true],
+                ['[1.25,1.75] selected', 1.5, true],
+                ['[-2.5,-1.5] selected', -2.0, true],
+                ['[*,1.75] selected', 1.5, true],
+                ['[1.25,*] selected', 1.5, true],
+                ['{1} selected', 1.0, true],
+                ['[*,*] selected', 1.5, true],
+                ['{*} selected', 1.5, false],
+                ['{1.5} selected', 1.0, false],
+                ['[1.25,1.75] selected', 1, false],
+                ['[-2.5,-1.5] selected', -1, false],
+                ['{9007199254740993} selected', 9007199254740993, true],
+                ['{9007199254740993} selected', 9007199254740992, false],
+                ['{09007199254740993} selected', 9007199254740993, true],
+                ['{-9007199254740993} selected', -9007199254740993, true],
+                ['{-9007199254740993} selected', -9007199254740992, false],
+                [sprintf('{%d} selected', PHP_INT_MAX), PHP_INT_MAX, true],
+                [sprintf('{%d} selected', PHP_INT_MAX), 0, false],
+                [sprintf('{%d} selected', PHP_INT_MIN), PHP_INT_MIN, true],
+            ] as [$value, $number, $shouldSelect]
+        ) {
+            /** @phpstan-ignore-next-line argument.type Laravel supports floats despite the stale method PHPDoc. */
+            $selected = $selector->choose('fallback zero|fallback one|' . $value, $number, 'en');
+            $selectorDidSelect = 'selected' === $selected;
+
+            $this->assertSame($shouldSelect, $selectorDidSelect, sprintf('%s with %s', $value, $number));
+
+            $numberType = is_int($number)
+                ? new ConstantIntegerType($number)
+                : new ConstantFloatType($number);
+            $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $value => [['en', null]],
+                ],
+                keyType: new ConstantStringType($value),
+                numberType: $numberType,
+                isChoice: true,
+            ));
+
+            $this->assertSame(
+                $shouldSelect ? [] : [InvalidChoiceRule::IDENTIFIER_MISSING_CASE],
+                array_map(static fn(IdentifierRuleError $error): string => $error->getIdentifier(), $errors),
+                sprintf('%s with %s', $value, $number),
+            );
+        }
+    }
+
+    public function testIntegerProjectionPreservesNumericBoundaries(): void
+    {
+        foreach (
+            [
+                ['[*,*] selected', true],
+                ['{*} selected', false],
+                ['{1.5} selected', false],
+                [sprintf('[%d,*] selected', PHP_INT_MAX), false],
+                [sprintf('[%d,*] selected', PHP_INT_MIN), true],
+                [sprintf('[*,%d] selected', PHP_INT_MAX), true],
+                [sprintf('[*,%d] selected', PHP_INT_MIN), false],
+            ] as [$value, $coversAllIntegers]
+        ) {
+            $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $value => [['en', null]],
+                ],
+                keyType: new ConstantStringType($value),
+                numberType: new IntegerType(),
+                isChoice: true,
+            ));
+
+            $this->assertSame(
+                $coversAllIntegers ? [] : [InvalidChoiceRule::IDENTIFIER_MISSING_CASE],
+                array_map(static fn(IdentifierRuleError $error): string => $error->getIdentifier(), $errors),
+                $value,
+            );
         }
     }
 

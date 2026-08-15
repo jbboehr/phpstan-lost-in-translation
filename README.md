@@ -286,6 +286,9 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 Choices will be analyzed for potentially invalid options. Syntax validation and explicit-condition completeness checking
 are **enabled by default**. Disable only the explicit-condition warning with `requireCompleteChoiceCoverage: false`;
 malformed conditions and invalid bounds will still be reported while `invalidChoices` remains enabled.
+Fractional exact values and ranges use Laravel's inclusive numeric comparisons. Constant float counts are checked
+precisely, and fractional ranges are projected onto inferred integer domains by rounding the lower bound up and the
+upper bound down.
 
 For stricter translation-quality checking, enable `requireCompletePluralForms`. This opt-in warning reports an
 unconditioned choice when it provides fewer positional forms than the locale can select. It uses the configured

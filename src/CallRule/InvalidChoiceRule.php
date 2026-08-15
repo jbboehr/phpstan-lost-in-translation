@@ -28,6 +28,7 @@ use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
+use PHPStan\Type\Constant\ConstantFloatType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\NeverType;
@@ -216,6 +217,22 @@ final class InvalidChoiceRule implements CallRuleInterface
         $unionType = null;
         $hasUnconditionedSegment = false;
         $hasInvalidCondition = false;
+        $hasNumericCondition = false;
+        $hasUniversalNumericCondition = false;
+        /** @var list<array{int|float|null, int|float|null}> $numericConditions */
+        $numericConditions = [];
+        // Laravel compares in-range integer strings as integers, so preserve them before any binary64 conversion.
+        $parseIntegerBound = static function (string $bound): ?int {
+            $normalizedBound = preg_replace('/^([+-]?)0+(?=\d)/', '$1', trim($bound));
+
+            if (null === $normalizedBound) {
+                return null;
+            }
+
+            $integer = filter_var($normalizedBound, FILTER_VALIDATE_INT);
+
+            return false === $integer ? null : $integer;
+        };
 
         foreach ($segments as $segment) {
             if (1 !== preg_match('/^([\{\[])([^\[\]\{\}]*)([\}\]])(.*)/s', $segment, $matches, PREG_UNMATCHED_AS_NULL)) {
@@ -299,7 +316,9 @@ final class InvalidChoiceRule implements CallRuleInterface
                 continue;
             }
 
-            if (2 === count($bounds)) {
+            $isRange = 2 === count($bounds);
+
+            if ($isRange) {
                 [$from, $to] = $bounds;
             } else {
                 $from = $to = $condition;
@@ -327,24 +346,85 @@ final class InvalidChoiceRule implements CallRuleInterface
                 continue;
             }
 
-            if ($from === '*' && $to === '*') {
+            $hasNumericCondition = true;
+
+            // Laravel treats a lone {*} as an exact comparison with "*", which never matches a numeric count.
+            if (!$isRange && '*' === $from) {
                 continue;
             }
 
-            if ($from === '*') {
-                $segmentType = IntegerRangeType::fromInterval(null, (int) $to);
-            } elseif ($to === '*') {
-                $segmentType = IntegerRangeType::fromInterval((int) $from, null);
-            } elseif ($from === $to) {
-                $segmentType = new ConstantIntegerType((int) $from);
-            } else {
-                $segmentType = IntegerRangeType::fromInterval((int) $from, (int) $to);
+            $integerFromBound = '*' === $from ? null : $parseIntegerBound($from);
+            $integerToBound = '*' === $to ? null : $parseIntegerBound($to);
+            $numericFrom = '*' === $from ? null : ($integerFromBound ?? (float) $from);
+            $numericTo = '*' === $to ? null : ($integerToBound ?? (float) $to);
+            $numericConditions[] = [$numericFrom, $numericTo];
+            $hasUniversalNumericCondition = $hasUniversalNumericCondition
+                || ($isRange && null === $numericFrom && null === $numericTo);
+
+            $integerRangeExists = true;
+            $integerFrom = null;
+            $integerTo = null;
+
+            if (null !== $numericFrom) {
+                if (is_int($numericFrom)) {
+                    $integerFrom = $numericFrom;
+                } elseif (!is_finite($numericFrom)) {
+                    $integerRangeExists = $numericFrom < 0;
+                } elseif ($numericFrom >= (float) PHP_INT_MAX) {
+                    $integerRangeExists = false;
+                } elseif ($numericFrom > (float) PHP_INT_MIN) {
+                    $integerFrom = (int) ceil($numericFrom);
+                }
             }
 
-            if (null === $unionType) {
-                $unionType = $segmentType;
-            } else {
-                $unionType = TypeCombinator::union($unionType, $segmentType);
+            if (null !== $numericTo) {
+                if (is_int($numericTo)) {
+                    $integerTo = $numericTo;
+                } elseif (!is_finite($numericTo)) {
+                    $integerRangeExists = $integerRangeExists && $numericTo > 0;
+                } elseif ($numericTo < (float) PHP_INT_MIN) {
+                    $integerRangeExists = false;
+                } elseif ($numericTo < (float) PHP_INT_MAX) {
+                    $integerTo = (int) floor($numericTo);
+                }
+            }
+
+            if (
+                $integerRangeExists
+                && (null === $integerFrom || null === $integerTo || $integerFrom <= $integerTo)
+            ) {
+                $segmentType = IntegerRangeType::fromInterval($integerFrom, $integerTo);
+
+                if (null === $unionType) {
+                    $unionType = $segmentType;
+                } else {
+                    $unionType = TypeCombinator::union($unionType, $segmentType);
+                }
+            }
+        }
+
+        if (!$hasInvalidCondition && [] !== $numericConditions) {
+            foreach ($numberType->getConstantScalarTypes() as $constantNumberType) {
+                if (
+                    !($constantNumberType instanceof ConstantIntegerType)
+                    && !($constantNumberType instanceof ConstantFloatType)
+                ) {
+                    continue;
+                }
+
+                $number = $constantNumberType->getValue();
+
+                foreach ($numericConditions as [$numericFrom, $numericTo]) {
+                    if (
+                        (null === $numericFrom || $number >= $numericFrom)
+                        && (null === $numericTo || $number <= $numericTo)
+                    ) {
+                        $unionType = null === $unionType
+                            ? $constantNumberType
+                            : TypeCombinator::union($unionType, $constantNumberType);
+                        break;
+                    }
+                }
             }
         }
 
@@ -352,9 +432,15 @@ final class InvalidChoiceRule implements CallRuleInterface
             $this->requireCompleteChoiceCoverage
             && !$hasUnconditionedSegment
             && !$hasInvalidCondition
-            && null !== $unionType
-            && !$unionType->accepts($numberType, true)->yes()
-            && !(TypeCombinator::remove($numberType, $unionType) instanceof NeverType)
+            && !$hasUniversalNumericCondition
+            && $hasNumericCondition
+            && (
+                null === $unionType
+                || (
+                    !$unionType->accepts($numberType, true)->yes()
+                    && !(TypeCombinator::remove($numberType, $unionType) instanceof NeverType)
+                )
+            )
         ) {
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Explicit translation choice conditions do not cover all possible cases for number of type: %s',

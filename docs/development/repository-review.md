@@ -281,6 +281,10 @@ Location records store `$file->getRealPath()`, which may be `false`. Unused-tran
 
 `InvalidChoiceRule` casts range bounds with `(int)`, so fractional bounds in ICU-style segments are truncated. Uncommon in Laravel apps; note if supporting full MessageSelector syntax later. Negative-number coverage is an open `@TODO` and can false-positive if only non-negative segments are defined.
 
+**Follow-up (2026-08-14):** Fractional exact values and inclusive ranges now preserve constant-float coverage and use
+`ceil()`/`floor()` when projected onto PHPStan integer domains. An in-process differential PHPUnit case checks the
+extension against Laravel's `MessageSelector` across the supported Composer matrix.
+
 ## Relation to prior remediation plan
 
 | Prior ID | Status in this review |

@@ -1,3 +1,5 @@
+![Lost in Translation Utsusemi — static Laravel translation analysis for PHPStan](docs/usage/images/lost-in-translation-banner.png)
+
 # phpstan-lost-in-translation
 
 [![ci](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml/badge.svg)](https://github.com/jbboehr/phpstan-lost-in-translation/actions/workflows/ci.yml)

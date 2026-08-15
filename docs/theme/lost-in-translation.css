@@ -174,6 +174,23 @@ main a:hover {
     background: var(--bg);
 }
 
+#mdbook-content > main > img[alt^="Lost in Translation"]:first-child,
+#mdbook-content > main > p:first-child:has(> img[alt^="Lost in Translation"]) {
+    display: block;
+    width: calc(100% + 2 * var(--lit-content-gutter));
+    max-width: none;
+    height: auto;
+    margin: 0 calc(-1 * var(--lit-content-gutter)) 2rem;
+    border-bottom: 1px solid var(--lit-rule);
+}
+
+#mdbook-content > main > p:first-child > img[alt^="Lost in Translation"] {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+}
+
 .lit-page-outline {
     margin-left: 34px;
 }

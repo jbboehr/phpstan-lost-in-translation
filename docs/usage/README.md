@@ -1,3 +1,7 @@
+{{#title Lost in Translation - Laravel translation analysis for PHPStan}}
+
+![Lost in Translation Utsusemi](images/lost-in-translation-banner.png)
+
 # Lost in Translation
 
 Lost in Translation is a PHPStan extension for statically checking Laravel translations. It finds missing and possibly

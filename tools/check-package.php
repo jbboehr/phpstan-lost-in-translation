@@ -142,6 +142,7 @@ function inspectPackageArchive(string $archivePath): array
         'docs/usage/blade.md',
         'docs/usage/configuration.md',
         'docs/usage/getting-started.md',
+        'docs/usage/images/lost-in-translation-banner.png',
         'docs/usage/locales-and-files.md',
         'docs/usage/replacements-and-choices.md',
         'docs/usage/translation-keys.md',

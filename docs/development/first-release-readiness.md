@@ -1,55 +1,58 @@
 # First-release readiness
 
 **Audited:** 2026-08-14 (America/Los_Angeles)<br>
-**Source:** `develop` at `50e3e2e` (`Add mdBook user guide`)<br>
+**Updated:** 2026-08-15 after the default-branch cutover<br>
+**Initial source:** `develop` at `50e3e2e` (`Add mdBook user guide`)<br>
+**Release candidate:** `master` and `develop` at `1b0fb11` (`Refresh BookStack canary diagnostics`)<br>
 **Scope:** Package metadata, distributable archive, public documentation, dependency health, GitHub configuration,
 Packagist state, and release validation
 
 ## Decision summary
 
-The package is technically close to a first tagged release. Its current `develop` revision passes both conventional CI
-and the exhaustive Nix matrix, the shipped archive passes an isolated PHPStan 1.12 consumer check, and the runtime
-dependency audit is clean.
+The source release candidate is ready for the final repository-settings and publication decisions. `master` and
+`develop` now point to the same reviewed commit. Conventional CI, the exhaustive Nix matrix, Pages, and the pinned
+BookStack canary pass at that source revision; the shipped archive also passes an isolated PHPStan 1.12 consumer check,
+and the runtime dependency audit is clean.
 
-The release is not ready to tag directly from the current repository state. GitHub's default `master` branch is 57
-commits behind `develop`, so Packagist presents obsolete package metadata by default and the new user guide cannot deploy
-through the `master`-only Pages workflow. The version and changelog boundary are now resolved; the default-branch
-cutover, repository settings, tag, and publication remain separately authorized actions.
+The initial audit found `master` 57 commits behind `develop`, obsolete Packagist metadata, and no hosted guide. The
+default-branch cutover resolved those findings: Packagist now publishes current metadata for both development branches,
+and Pages is live. Repository metadata and protection changes were authorized on 2026-08-15, but the available GitHub
+token lacks repository-administration and workflow-write permissions. Their selected values are recorded under RR-04
+for the repository owner to apply before tagging or explicitly waive.
 
 The selected first version is `0.1.0`. It gives Composer users a stable install while retaining the project's honest
-experimental, pre-1.0 compatibility signal. No tag, release, branch update, or public repository setting was changed by
-this audit.
+experimental, pre-1.0 compatibility signal. No tag or release has been created.
 
 ## Current state
 
 | Area | Observation | Release effect |
 | --- | --- | --- |
-| Source | `origin/develop` matches audited HEAD. `origin/master` is an ancestor, 57 commits behind. | `master` can be fast-forwarded after release preparation and validation. |
+| Source | `master` and `develop` both resolve to `1b0fb11`. | The reviewed default-branch cutover is complete. |
 | Tags and releases | The repository has no Git tags or GitHub releases. | The first release process has no legacy automation or numbering to preserve. |
 | Composer metadata | `composer.json` has the current description, PHP `^8.1`, PHPStan `^1.12 || ^2.0`, and `AGPL-3.0-only WITH romic-exception`. | Suitable for a pre-1.0 release. |
 | Package archive | `composer package:check` found the expected 53-file allowlisted archive and passed an isolated PHPStan 1.12 consumer. | The distributable contents and extension discovery are ready. |
 | Runtime dependencies | `composer audit --locked --no-dev` reports no advisories. | No known advisory affects the shipped dependency closure. |
 | Development dependencies | The full lock audit reports Laravel advisories and abandoned `doctrine/annotations`. Laravel 10 is present only under `require-dev` to test a supported compatibility boundary. | Do not ship these dependencies. Track supported-framework advisories without hiding them or dropping compatibility silently. |
-| Conventional CI | Run `31866628091` passed at the audited commit. | Independent PHPUnit, PHPStan, php-cs-fixer, Composer validation, and runtime audit coverage is green. |
-| Nix CI | Run `31866628125` passed all generated jobs at the audited commit, including mutation and the PHP/Laravel matrix. | Reproducible compatibility, documentation, consumer, coverage, property, and mutation checks are green. |
-| BookStack canary | The workflow is manual and currently exists only on `develop`; GitHub cannot dispatch it by filename from the default branch. | Run it after `master` contains the workflow, before tagging. |
-| User documentation | README and `docs/usage/` advertise `^0.1` for the selected release line. Pages deploys only from `master`, and the Pages API does not expose a configured site to the current credentials. | The constraint will resolve only after `0.1.0` is tagged; keep the validated `master`-to-tag interval short and verify Pages after updating `master`. |
-| Packagist | Automatic updates are active. `dev-develop` resolves to the audited commit and carries current metadata. The default `dev-master` remains at `5cb24e9` from 2025 with the old description, license expression, dependencies, and README. | Update `master` before tagging so the public default and the tag are built from the reviewed package. |
-| GitHub metadata | The repository description is the older missing-strings-only summary, no homepage is set, and GitHub reports `master` as unprotected. | Refresh the description/homepage and decide whether to protect `master` before or immediately after the first release. |
+| Conventional CI | Run `31873777456` passed on `master` at `1b0fb11`. | Independent PHPUnit, PHPStan, php-cs-fixer, Composer validation, and runtime audit coverage is green. |
+| Nix CI | Run `31873777510` passed on `master` at `1b0fb11`, including mutation and the PHP/Laravel matrix. | Reproducible compatibility, documentation, consumer, coverage, property, and mutation checks are green. |
+| BookStack canary | Run `31873535591` passed at `1b0fb11` under `develop` before the identical commit became `master`. A branch-specific redispatch was rejected with HTTP 403. | The release source is validated; redispatch from `master` when workflow-write credentials are available if branch-labelled evidence is required. |
+| User documentation | README and `docs/usage/` advertise `^0.1`. Pages run `31873777475` passed from `master`; the guide is live at `https://jbboehr.github.io/phpstan-lost-in-translation/`. | Hosted documentation is ready; the Composer constraint will resolve after the `0.1.0` tag is published. |
+| Packagist | `dev-master` and `dev-develop` both resolve to `1b0fb11` with the current description, dependencies, and license. | The public development branches now represent the reviewed package. |
+| GitHub metadata | The description remains the older missing-strings-only summary, no homepage is set, and `master` remains unprotected because the authorized update received HTTP 403. | Apply the selected RR-04 settings with repository-administration credentials before tagging or explicitly waive them. |
 | Changelog | `CHANGELOG.md` is the intentionally empty Keep a Changelog skeleton. | Preserve the prior decision not to add entries before the first tag. Begin normal entries after the first-tag baseline. |
 
 ## Release blockers
 
 ### RR-01 — Reconcile `develop` with the default branch
 
-**Status:** Open; this requires an explicitly authorized default-branch update after release-candidate validation.
+**Status:** Resolved. The authorized fast-forward aligned `master` and `develop` at `1b0fb11`.
 
 `master` is the source of Packagist's default development version and the trigger for documentation deployment. Tagging
 the current `develop` commit without first updating `master` would leave the repository landing page and Packagist's
 default branch on the obsolete package.
 
-Prepare and validate the release on `develop`, then fast-forward `master` to the reviewed commit. Do not merge an
-unreviewed branch tip or tag a commit that has not passed the default-branch checks.
+The initial 57-commit difference is retained in the audit evidence below. The cutover used the reviewed release
+candidate without introducing a merge commit or an unvalidated branch tip.
 
 ### RR-02 — Choose the first version and first-tag changelog boundary
 
@@ -62,28 +65,40 @@ that is a separate policy decision rather than an automatic reconstruction of th
 
 ### RR-03 — Validate the release candidate on `master`
 
-**Status:** Open; local release-preparation checks pass, but the prepared commit and later `master` tip require the full
-release-candidate gates.
+**Status:** Resolved for source validation at `1b0fb11`.
 
-The audited `develop` commit is green, but the release candidate must include the installation and metadata edits and
-must pass after becoming the default-branch tip. Require:
+The release candidate includes the installation, documentation, metadata, and BookStack-canary changes. Its required
+gates passed as follows:
 
-- conventional CI;
-- the complete generated Nix matrix, including mutation;
-- `composer package:check` against the final source tree;
-- the manually dispatched pinned BookStack canary; and
-- a successful documentation build and Pages deployment, or an explicit decision to release without hosted Pages.
+- conventional CI passed on `master` in run `31873777456`;
+- the complete generated Nix matrix, including mutation, passed on `master` in run `31873777510`;
+- `composer package:check` passed against the release-candidate package contents;
+- the pinned BookStack canary passed at the exact release-candidate SHA in run `31873535591`; and
+- Pages deployed successfully from `master` in run `31873777475`.
+
+The BookStack run is labelled `develop` because it completed before the same SHA became `master`. The workflow and
+canary do not branch on the ref name. A later dispatch from `master` was attempted for administrative completeness but
+the available token received HTTP 403.
 
 ### RR-04 — Make release-critical repository settings explicit
 
-**Status:** Open; no repository settings were changed during local release preparation.
+**Status:** Decision complete; application blocked by the available token's repository-administration permissions.
 
-The GitHub API reports `master` as unprotected and no repository rulesets are configured. Before the first tag, decide
-whether direct pushes and force-pushes to `master` should remain possible. This is an external repository-setting change
-and must not be inferred from code work.
+The selected policy preserves the current solo direct-push workflow while preventing destructive history changes:
 
-The public repository description should also be changed to the current Composer description, and the homepage should
-point to the hosted guide once its URL is known. These metadata changes improve discovery but do not change the package.
+- require linear history on `master`;
+- enforce protection for administrators;
+- disallow force-pushes and branch deletion;
+- continue allowing ordinary direct pushes; and
+- do not require pull-request approvals or duplicate the generated Nix matrix as required status-check contexts.
+
+The selected repository description is `PHPStan extension for validating Laravel translation keys, replacements,
+choices, locales, files, and Blade usage`. The selected homepage is
+`https://jbboehr.github.io/phpstan-lost-in-translation/`.
+
+Applying the description, homepage, protection, and branch-specific BookStack dispatch through the current token each
+received HTTP 403. The settings remain unchanged. Apply them with repository-administration credentials before tagging,
+or record an explicit decision to release without them.
 
 ## Not release blockers
 
@@ -138,9 +153,12 @@ default-branch cutover in Slice 4.
 
 ### Slice 4 — Default-branch cutover
 
-With explicit authorization, fast-forward `master` to the reviewed release candidate. Then verify conventional CI, the
-Nix matrix, Pages, and the manual BookStack canary from `master`. Refresh the GitHub description and homepage only with
-authorization to change repository settings.
+**Status:** Source cutover and validation complete at `1b0fb11`; authorized repository settings remain blocked by token
+permissions under RR-04.
+
+The authorized fast-forward aligned `master` and `develop`. Conventional CI, the Nix matrix, and Pages passed from
+`master`. The BookStack canary passed at the same commit immediately before the cutover; a branch-specific repeat could
+not be dispatched with the current token. Packagist now resolves both development branches to the release candidate.
 
 ### Slice 5 — First tag and publication verification
 
@@ -148,7 +166,7 @@ With explicit authorization, create the selected tag on the validated `master` c
 Verify that Packagist discovers the tag, exposes the current dependencies and license, and accepts the documented
 Composer install command. Do not create a tag or release as an incidental part of another slice.
 
-## Evidence gathered
+## Initial audit evidence
 
 | Command or source | Result |
 | --- | --- |
@@ -164,5 +182,19 @@ Composer install command. Do not create a tag or release as an incidental part o
 | GitHub branch API | `master` and `develop` are both reported as unprotected; repository rulesets list is empty. |
 | GitHub Pages API | Returned `404` to the current credentials; hosted-site configuration was not verified. |
 
-The audit did not fetch or modify remote branches, change GitHub settings, dispatch workflows, create a tag, or publish a
-release.
+The initial audit did not fetch or modify remote branches, change GitHub settings, dispatch workflows, create a tag, or
+publish a release. Later release slices changed the branch state and attempted the authorized settings recorded below;
+the initial evidence remains here rather than being rewritten as if those findings had never existed.
+
+## Default-branch cutover evidence
+
+| Command or source | Result |
+| --- | --- |
+| GitHub branch API | `master` and `develop` both resolve to `1b0fb11510610a9a1fc7a3b31faabeb0cdfea24b`. |
+| GitHub conventional CI run `31873777456` | Passed from `master` at `1b0fb11`. |
+| GitHub Nix CI run `31873777510` | Passed every generated job from `master` at `1b0fb11`, including mutation. |
+| GitHub Pages run `31873777475` | Passed from `master`; the guide is available at `https://jbboehr.github.io/phpstan-lost-in-translation/`. |
+| GitHub BookStack run `31873535591` | Passed at `1b0fb11` under `develop` before the identical SHA became `master`. |
+| Packagist metadata endpoint | `dev-master` and `dev-develop` resolve to `1b0fb11` with current metadata and licensing. |
+| GitHub repository API | The selected description, homepage, protection, and master-labelled BookStack dispatch were rejected with HTTP 403; settings remained unchanged. |
+| `git tag` and `gh release list` | No tags or releases exist. |

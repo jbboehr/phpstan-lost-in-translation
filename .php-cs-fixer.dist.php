@@ -31,6 +31,7 @@ $finder = PhpCsFixer\Finder::create()
         __DIR__ . '/phpstan-strict-rules.php',
         __DIR__ . '/tools/bookstack/assert-output.php',
         __DIR__ . '/tools/check-package.php',
+        __DIR__ . '/tools/docs',
     ]);
 
 return (new PhpCsFixer\Config())

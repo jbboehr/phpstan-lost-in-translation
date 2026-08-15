@@ -97,6 +97,7 @@
               !builtins.elem topLevel [
                 ".direnv"
                 ".git"
+                "build"
                 "coverage"
                 "result"
                 "secrets"
@@ -137,6 +138,7 @@
               php,
               withPcov ? true,
               withInfection ? false,
+              withMdbook ? false,
             }:
             let
               php' = buildEnv { inherit php withPcov; };
@@ -152,7 +154,8 @@
                   php'
                   php'.packages.composer
                 ]
-                ++ pkgs.lib.optional withInfection infection;
+                ++ pkgs.lib.optional withInfection infection
+                ++ pkgs.lib.optional withMdbook pkgs.mdbook;
               shellHook = ''
                 ${pre-commit-check.shellHook}
                 export PATH="$PWD/vendor/bin:$PATH"
@@ -224,7 +227,10 @@
             php83 = makeShell { php = pkgs.php83; };
             php84 = makeShell { php = pkgs.php84; };
             php85 = makeShell { php = pkgs.php85; };
-            documentation = php82;
+            documentation = makeShell {
+              php = pkgs.php82;
+              withMdbook = true;
+            };
             mutation = makeShell {
               php = pkgs.php84;
               withInfection = true;

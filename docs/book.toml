@@ -1,0 +1,28 @@
+[book]
+title = "Lost in Translation"
+description = "User guide for phpstan-lost-in-translation"
+authors = ["John Boehr and contributors"]
+src = "usage"
+
+[build]
+build-dir = "../build/docs"
+create-missing = false
+
+[output.html]
+additional-css = ["theme/lost-in-translation.css"]
+additional-js = ["theme/lost-in-translation.js"]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+no-section-label = true
+git-repository-url = "https://github.com/jbboehr/phpstan-lost-in-translation"
+edit-url-template = "https://github.com/jbboehr/phpstan-lost-in-translation/edit/master/docs/{path}"
+site-url = "/phpstan-lost-in-translation/"
+sidebar-header-nav = true
+
+[output.html.fold]
+enable = false
+
+[output.html.search]
+enable = true
+heading-split-level = 3
+use-boolean-and = true

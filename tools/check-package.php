@@ -137,6 +137,14 @@ function inspectPackageArchive(string $archivePath): array
         'docs/CLA-v1.md',
         'docs/LICENSE_EXCEPTION.md',
         'docs/STEWARD.md',
+        'docs/usage/README.md',
+        'docs/usage/SUMMARY.md',
+        'docs/usage/blade.md',
+        'docs/usage/configuration.md',
+        'docs/usage/getting-started.md',
+        'docs/usage/locales-and-files.md',
+        'docs/usage/replacements-and-choices.md',
+        'docs/usage/translation-keys.md',
         'extension.neon',
     ];
     $requiredFileSet = array_fill_keys($requiredFiles, true);

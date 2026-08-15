@@ -112,10 +112,11 @@ Run `composer eris` for the isolated property suite after changing locale canoni
 The command validates and installs its locked PHPUnit 10 and Eris dependencies under `tools/eris/` before running the
 suite. Set `ERIS_SEED` to override the tracked default when exploring or replaying generated inputs.
 
-Run `composer docs:check` from the PHP 8.2 `documentation` shell after changing marked README translation-call examples
-or their expected diagnostics. The isolated harness deliberately uses PHPStan 2, PHPUnit 11, and Laravel 12 independently
-of the root compatibility matrix, so its two checks are separate exhaustive Nix CI entries rather than part of the PHP
-8.1 `composer check:full` gate.
+Run `composer docs:check` from the PHP 8.2 `documentation` shell after changing the README, the mdBook user guide, marked
+translation-call examples, or their expected diagnostics. The command builds the book, validates its generated links,
+and runs an isolated Akashi harness with PHPStan 2, PHPUnit 11, and Laravel 12 independently of the root compatibility
+matrix. These checks have separate exhaustive Nix CI entries rather than running inside the PHP 8.1
+`composer check:full` gate.
 
 During focused iteration, run the narrowest relevant command first. The shared Composer entry points are:
 
@@ -126,7 +127,7 @@ During focused iteration, run the narrowest relevant command first. The shared C
 - `composer package:check` for the built archive and an isolated PHPStan 1.12 consumer;
 - `composer e2e` for expected diagnostics;
 - `composer eris` for isolated locale and translation-key properties;
-- `composer docs:check` for marked README translation-call examples;
+- `composer docs:check` for the mdBook build, generated links, and marked public translation-call examples;
 - `composer infection` for optional mutation testing; and
 - `composer bookstack:canary` from the PHP 8.4 shell for the optional pinned real-application integration check.
 
@@ -155,8 +156,8 @@ under `require-dev` and must not be needed to load the installed extension.
 The Eris suite is a separate Composer project because no supported Eris release spans the root PHPUnit 9 through 11
 matrix. Keep its dependencies and lock under `tools/eris/`; do not add Eris to the root development requirements.
 
-The Akashi README suite is a separate Composer project so its fixed PHPStan 2, PHPUnit 11, and Laravel 12 verification
-stack does not alter the root PHP 8.1 and PHPStan 1.12 dependency resolution. Keep its dependencies and lock under
+The Akashi documentation suite is a separate Composer project so its fixed PHPStan 2, PHPUnit 11, and Laravel 12
+verification stack does not alter the root PHP 8.1 and PHPStan 1.12 dependency resolution. Keep its dependencies and lock under
 `tools/akashi/` while the root compatibility matrix spans both PHPStan major versions. Akashi intentionally tracks
 `dev-master`; the isolated lock pins the reviewed revision, and upstream API changes must be reviewed when updating it.
 
@@ -177,8 +178,8 @@ When changing the shipped file set, update both `composer.json` archive exclusio
 
 ## Documentation and planning
 
-The README is the public usage reference. Keep configuration and diagnostic examples consistent with the shipped
-extension and its fixtures.
+The README is the package landing page, and `docs/usage/` is the mdBook user guide. Keep configuration and diagnostic
+examples on both public surfaces consistent with the shipped extension and its fixtures.
 
 Engineering reports and remediation plans live under `docs/`. Update planning status when completing a recorded item,
 but do not rewrite historical findings to pretend they were never present.

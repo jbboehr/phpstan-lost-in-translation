@@ -4,6 +4,7 @@
     <file>tests</file>
     <file>tools/bookstack/assert-output.php</file>
     <file>tools/check-package.php</file>
+    <file>tools/docs</file>
 
     <exclude-pattern>*/.direnv/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
@@ -49,11 +50,13 @@
         <exclude-pattern>*/tests/fixtures/*</exclude-pattern>
         <exclude-pattern>*/tools/bookstack/assert-output.php</exclude-pattern>
         <exclude-pattern>*/tools/check-package.php</exclude-pattern>
+        <exclude-pattern>*/tools/docs/check-generated-links.php</exclude-pattern>
     </rule>
 
     <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace">
         <exclude-pattern>*/tests/fixtures/*</exclude-pattern>
         <exclude-pattern>*/tools/bookstack/assert-output.php</exclude-pattern>
         <exclude-pattern>*/tools/check-package.php</exclude-pattern>
+        <exclude-pattern>*/tools/docs/check-generated-links.php</exclude-pattern>
     </rule>
 </ruleset>

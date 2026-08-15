@@ -47,6 +47,18 @@ checkout's `vendor/`. `composer check` and focused Composer scripts remain
 useful during iteration. Mutation testing is deliberately separate; run `nix
 build .#mutation -L` when it is required.
 
+Build the mdBook user guide, validate its generated links and fragments, and
+run the executable documentation examples from the PHP 8.2 documentation
+shell:
+
+```shell
+nix develop .#documentation --command composer docs:check
+```
+
+Use `composer docs:serve` from that shell for a local preview. Public guide
+sources live under `docs/usage/`; planning, development, and legal documents
+remain outside the book.
+
 ### Updating Composer dependencies under Nix
 
 The fixed-output Composer hashes live in [`nix/vendor-hashes.nix`](nix/vendor-hashes.nix).

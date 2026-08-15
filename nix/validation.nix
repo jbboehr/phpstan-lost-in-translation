@@ -554,5 +554,18 @@ in
         php ./vendor/bin/phpunit --configuration phpunit.xml.dist --colors=never
       '';
     };
+
+    documentation-book =
+      pkgs.runCommandLocal "phpstan-lost-in-translation-documentation-book"
+        {
+          nativeBuildInputs = [
+            pkgs.mdbook
+            php.php82
+          ];
+        }
+        ''
+          mdbook build ${src}/docs --dest-dir "$out"
+          php ${src}/tools/docs/check-generated-links.php "$out"
+        '';
   };
 }

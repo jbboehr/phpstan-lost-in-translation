@@ -1,0 +1,64 @@
+name: pages
+
+on:
+    push:
+        branches:
+            - master
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+concurrency:
+    group: pages
+    cancel-in-progress: false
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        name: Build documentation
+        timeout-minutes: 15
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install Nix
+              uses: cachix/install-nix-action@v31
+              with:
+                  github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Restore and save Nix store
+              uses: nix-community/cache-nix-action@v7
+              with:
+                  primary-key: pages-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'docs/**', 'tools/docs/**') }}
+                  restore-prefixes-first-match: |
+                      pages-${{ runner.os }}-
+                      nix-${{ runner.os }}-
+                  gc-max-store-size-linux: 1G
+
+            - name: Build and verify documentation
+              run: |
+                  nix build --print-build-logs '.#checks.x86_64-linux.documentation-book'
+                  mkdir -p build/docs
+                  cp --recursive --dereference result/. build/docs/
+
+            - name: Configure Pages
+              uses: actions/configure-pages@v6
+
+            - name: Upload documentation
+              uses: actions/upload-pages-artifact@v5
+              with:
+                  path: build/docs
+
+    deploy:
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        name: Deploy documentation
+        needs: build
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v5

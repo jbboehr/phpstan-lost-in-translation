@@ -1,0 +1,269 @@
+/*
+ * Copyright (c) anno Domini nostri Jesu Christi MMXXVI John Boehr & contributors
+ *
+ * SPDX-License-Identifier: AGPL-3.0-only WITH romic-exception
+ *
+ * Adapted from Yumemi's mdBook theme:
+ * https://github.com/jbboehr/yumemi.php/blob/master/docs/theme/yumemi.css
+ */
+
+:root {
+    --content-max-width: 900px;
+    --lit-content-gutter: clamp(1.5rem, 3vw, 3rem);
+    --lit-heading: var(--fg);
+    --lit-rule: var(--quote-border);
+    --lit-section: var(--sidebar-active);
+    --lit-code-bg: var(--quote-bg);
+    --lit-sidebar-border: var(--sidebar-spacer);
+    --lit-selection-bg: var(--search-mark-bg);
+    --lit-selection-fg: var(--fg);
+}
+
+.light,
+html:not(.js) {
+    --bg: #f2f3f1;
+    --fg: #24242a;
+    --sidebar-bg: #18171c;
+    --sidebar-fg: #ddd7cc;
+    --sidebar-non-existant: #817a70;
+    --sidebar-active: #e8786e;
+    --sidebar-spacer: #554529;
+    --scrollbar: #776e62;
+    --icons: #6f695f;
+    --icons-hover: #8c2336;
+    --links: #60428f;
+    --inline-code-color: #7f233b;
+    --theme-popup-bg: #f0f1ee;
+    --theme-popup-border: #aa9259;
+    --theme-hover: #e0e1dd;
+    --quote-bg: #e9e9e4;
+    --quote-border: #a78336;
+    --warning-border: #98640f;
+    --table-border-color: #c9c5ba;
+    --table-header-bg: #dcdbd4;
+    --table-alternate-bg: #e9eae6;
+    --searchbar-border-color: #a4936b;
+    --searchbar-bg: #fafaf7;
+    --searchbar-fg: #24242a;
+    --searchbar-shadow-color: #a78336;
+    --searchresults-header-fg: #69645c;
+    --searchresults-border-color: #b5aa94;
+    --searchresults-li-bg: #e7e3d9;
+    --search-mark-bg: #e0ca79;
+    --footnote-highlight: #d8c15f;
+    --overlay-bg: rgb(36 36 42 / 24%);
+    --blockquote-note-color: #526b99;
+    --blockquote-tip-color: #3d7159;
+    --blockquote-important-color: #60428f;
+    --blockquote-warning-color: #98640f;
+    --blockquote-caution-color: #8c2336;
+    --sidebar-header-border-color: #a78336;
+    --lit-heading: #3b252d;
+    --lit-rule: #a78336;
+    --lit-section: #dfb85f;
+    --lit-code-bg: #e5e5e0;
+    --lit-sidebar-border: #8c6b2d;
+    --lit-selection-bg: #d9c374;
+    --lit-selection-fg: #201e20;
+}
+
+.ayu {
+    --bg: #0d0e12;
+    --fg: #ded9cf;
+    --sidebar-bg: #17171c;
+    --sidebar-fg: #d7d1c6;
+    --sidebar-non-existant: #77716a;
+    --sidebar-active: #d0aa55;
+    --sidebar-spacer: #39343a;
+    --scrollbar: #8e8578;
+    --icons: #9a9185;
+    --icons-hover: #d0aa55;
+    --links: #c59add;
+    --inline-code-color: #dfb968;
+    --theme-popup-bg: #18191d;
+    --theme-popup-border: #705d35;
+    --theme-hover: #29262b;
+    --quote-bg: #1a1a20;
+    --quote-border: #806635;
+    --warning-border: #d39a46;
+    --table-border-color: #39353a;
+    --table-header-bg: #2a272c;
+    --table-alternate-bg: #16171b;
+    --searchbar-border-color: #705d35;
+    --searchbar-bg: #1b1c20;
+    --searchbar-fg: #e5dfd4;
+    --searchbar-shadow-color: #c7a04f;
+    --searchresults-header-fg: #aaa196;
+    --searchresults-border-color: #5b535a;
+    --searchresults-li-bg: #27242b;
+    --search-mark-bg: #8b642d;
+    --footnote-highlight: #6f4f87;
+    --overlay-bg: rgb(0 0 0 / 44%);
+    --blockquote-note-color: #83a0ce;
+    --blockquote-tip-color: #79a186;
+    --blockquote-important-color: #c59add;
+    --blockquote-warning-color: #d0aa55;
+    --blockquote-caution-color: #df7582;
+    --sidebar-header-border-color: #806b3c;
+    --lit-heading: #f0e8db;
+    --lit-rule: #92763d;
+    --lit-section: #dfb75d;
+    --lit-code-bg: #191a1e;
+    --lit-sidebar-border: #705a30;
+    --lit-selection-bg: #704f83;
+    --lit-selection-fg: #fff8ed;
+}
+
+::selection {
+    color: var(--lit-selection-fg);
+    background: var(--lit-selection-bg);
+}
+
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6 {
+    color: var(--lit-heading);
+}
+
+main h1 {
+    padding-bottom: 0.2em;
+    border-bottom: 1px solid var(--lit-rule);
+}
+
+main a:hover {
+    color: var(--sidebar-active);
+}
+
+.chapter li.part-title {
+    color: var(--lit-section);
+}
+
+.sidebar {
+    border-right: 1px solid var(--lit-sidebar-border);
+}
+
+[dir="rtl"] .sidebar {
+    border-right: 0;
+    border-left: 1px solid var(--lit-sidebar-border);
+}
+
+.hljs {
+    background-color: var(--lit-code-bg);
+}
+
+#mdbook-menu-bar {
+    position: sticky;
+    top: 0 !important;
+}
+
+#mdbook-menu-bar .right-buttons {
+    display: flex;
+    align-items: center;
+}
+
+#mdbook-content > main {
+    box-sizing: border-box;
+    max-width: calc(var(--content-max-width) + 2 * var(--lit-content-gutter));
+    padding-right: var(--lit-content-gutter);
+    padding-bottom: var(--lit-content-gutter);
+    padding-left: var(--lit-content-gutter);
+    color: var(--fg);
+    background: var(--bg);
+}
+
+.lit-page-outline {
+    margin-left: 34px;
+}
+
+.lit-page-outline > ol {
+    padding-left: 0;
+}
+
+@media (min-width: 1081px) {
+    html.lit-wide-navigation-mounted #mdbook-menu-bar .menu-title {
+        visibility: hidden;
+    }
+
+    #mdbook-menu-bar .right-buttons {
+        margin-left: auto;
+    }
+
+    .nav-wide-wrapper {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        z-index: 102;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        width: 360px;
+        height: var(--menu-bar-height);
+        transform: translateX(-50%);
+        pointer-events: none;
+    }
+
+    html.sidebar-visible .nav-wide-wrapper {
+        left: calc(50% + var(--sidebar-width) / 2);
+    }
+
+    .nav-chapters {
+        position: static;
+        display: grid;
+        flex: 0 0 32px;
+        place-items: center;
+        box-sizing: border-box;
+        width: 32px;
+        min-width: 32px;
+        max-width: 32px;
+        height: 32px;
+        margin: 0;
+        padding: 0;
+        font-size: 1.4rem;
+        line-height: 1;
+        transition: color 0.5s;
+        pointer-events: auto;
+    }
+
+    .nav-chapters:hover {
+        background-color: transparent;
+    }
+
+    .lit-navigation-title {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        font-weight: 200;
+        font-size: 2.4rem;
+        line-height: var(--menu-bar-height);
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .lit-navigation-placeholder {
+        flex: 0 0 32px;
+        width: 32px;
+        height: 32px;
+    }
+
+    #mdbook-sidebar-toggle-anchor:checked ~ .page-wrapper .nav-wide-wrapper {
+        display: flex;
+    }
+
+    .nav-chapters .fa-svg {
+        width: 0.65em;
+        height: 0.65em;
+    }
+}
+
+@media (max-width: 1080px) {
+    .nav-wide-wrapper {
+        display: none;
+    }
+}

@@ -96,11 +96,12 @@ final class DocumentationExamplesTest extends RuleTestCase
         );
     }
 
-    public function testMarkedReadmeTranslationExamplesMatchDocumentedDiagnostics(): void
+    public function testMarkedDocumentationExamplesMatchDocumentedDiagnostics(): void
     {
         $projectRoot = dirname(__DIR__, 3);
         $corpus = MarkdownSource::forProject($projectRoot)
             ->includeFile('README.md')
+            ->includeDirectory('docs/usage')
             ->withMarkerName('akashi-example')
             ->load();
         $temporaryDirectory = sys_get_temp_dir()
@@ -120,7 +121,7 @@ final class DocumentationExamplesTest extends RuleTestCase
                 }
 
                 self::assertArrayHasKey($marker, self::EXPECTED_DIAGNOSTICS, sprintf(
-                    'README marker %s has no diagnostic expectation',
+                    'Documentation marker %s has no diagnostic expectation',
                     $marker,
                 ));
 
@@ -154,7 +155,7 @@ final class DocumentationExamplesTest extends RuleTestCase
                 }
 
                 self::assertSame([], $unexpectedDiagnostics, sprintf(
-                    'README example %s at README.md:%d produced unrelated PHPStan diagnostics',
+                    'Documentation example %s at line %d produced unrelated PHPStan diagnostics',
                     $marker,
                     $example->codeOrigin()->firstCodeLine,
                 ));
@@ -164,7 +165,7 @@ final class DocumentationExamplesTest extends RuleTestCase
                 sort($extensionDiagnostics, SORT_STRING);
 
                 self::assertSame($expectedDiagnostics, $extensionDiagnostics, sprintf(
-                    'README example %s at README.md:%d produced different extension diagnostics',
+                    'Documentation example %s at line %d produced different extension diagnostics',
                     $marker,
                     $example->codeOrigin()->firstCodeLine,
                 ));

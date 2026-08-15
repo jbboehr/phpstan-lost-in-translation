@@ -32,10 +32,10 @@ final class ConfigurationReferenceTest extends \PHPUnit\Framework\TestCase
     {
         $projectRoot = dirname(__DIR__, 3);
         $extensionLines = file($projectRoot . '/extension.neon', FILE_IGNORE_NEW_LINES);
-        $readmeLines = file($projectRoot . '/README.md', FILE_IGNORE_NEW_LINES);
+        $referenceLines = file($projectRoot . '/docs/usage/configuration.md', FILE_IGNORE_NEW_LINES);
 
         self::assertIsArray($extensionLines);
-        self::assertIsArray($readmeLines);
+        self::assertIsArray($referenceLines);
 
         $schemaKeys = self::nestedKeys(
             $extensionLines,
@@ -48,15 +48,15 @@ final class ConfigurationReferenceTest extends \PHPUnit\Framework\TestCase
             '    lostInTranslation:',
         );
 
-        $referenceStart = array_search(self::REFERENCE_START, $readmeLines, true);
-        $referenceEnd = array_search(self::REFERENCE_END, $readmeLines, true);
+        $referenceStart = array_search(self::REFERENCE_START, $referenceLines, true);
+        $referenceEnd = array_search(self::REFERENCE_END, $referenceLines, true);
 
-        self::assertIsInt($referenceStart, 'README configuration reference start marker is missing');
-        self::assertIsInt($referenceEnd, 'README configuration reference end marker is missing');
+        self::assertIsInt($referenceStart, 'Configuration reference start marker is missing');
+        self::assertIsInt($referenceEnd, 'Configuration reference end marker is missing');
         self::assertGreaterThan($referenceStart, $referenceEnd);
 
         $documentedKeys = self::nestedKeys(
-            array_slice($readmeLines, $referenceStart + 1, $referenceEnd - $referenceStart - 1),
+            array_slice($referenceLines, $referenceStart + 1, $referenceEnd - $referenceStart - 1),
             'parameters:',
             '    lostInTranslation:',
         );

@@ -122,6 +122,21 @@ function countBookStackIdentifiers(array $diagnostics): array
 }
 
 /**
+ * @param array<string, mixed> $diagnostic
+ */
+function getBookStackDiagnosticFingerprint(array $diagnostic): string
+{
+    return json_encode([
+        $diagnostic['file'] ?? null,
+        $diagnostic['line'] ?? null,
+        $diagnostic['identifier'] ?? null,
+        $diagnostic['message'] ?? null,
+        $diagnostic['ignorable'] ?? null,
+        $diagnostic['tip'] ?? null,
+    ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+}
+
+/**
  * @param list<array<string, mixed>> $diagnostics
  */
 function assertBookStackDiagnostic(
@@ -190,13 +205,7 @@ function assertBookStackDiagnosticsUnique(array $diagnostics): void
     $fingerprints = [];
 
     foreach ($diagnostics as $diagnostic) {
-        $fingerprint = json_encode([
-            $diagnostic['file'] ?? null,
-            $diagnostic['line'] ?? null,
-            $diagnostic['identifier'] ?? null,
-            $diagnostic['message'] ?? null,
-            $diagnostic['tip'] ?? null,
-        ], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        $fingerprint = getBookStackDiagnosticFingerprint($diagnostic);
 
         if (isset($fingerprints[$fingerprint])) {
             throw new RuntimeException(sprintf(
@@ -234,41 +243,163 @@ function assertBookStackApplication(array $output): void
 {
     assertNoBookStackGlobalErrors($output, 'application');
     $diagnostics = getBookStackFileDiagnostics($output);
+    $identifierCounts = countBookStackIdentifiers($diagnostics);
+    $expectedIdentifiers = [
+        'lostInTranslation.invalidReplacement.unused',
+        'lostInTranslation.missingBaseLocaleTranslationString',
+        'lostInTranslation.missingTranslationString',
+    ];
 
-    if ([] !== $diagnostics) {
+    assertBookStackDiagnosticsUnique($diagnostics);
+
+    if (array_keys($identifierCounts) !== $expectedIdentifiers) {
         throw new RuntimeException(sprintf(
-            'Application-only translation analysis is no longer clean: %s',
-            json_encode(countBookStackIdentifiers($diagnostics), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            'Application-only translation analysis returned an unexpected identifier set: %s',
+            json_encode($identifierCounts, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         ));
     }
 
-    fwrite(
-        STDOUT,
-        "BookStack application translation analysis: clean with configured locale alias and plural-form completeness.\n",
+    $diagnosticCount = count($diagnostics);
+
+    if ($diagnosticCount < 150 || $diagnosticCount > 210) {
+        throw new RuntimeException(sprintf(
+            'BookStack application analysis returned %d extension diagnostics; expected the broad range 150 through 210.',
+            $diagnosticCount,
+        ));
+    }
+
+    $unusedReplacementCount = $identifierCounts['lostInTranslation.invalidReplacement.unused'];
+
+    if ($unusedReplacementCount < 110 || $unusedReplacementCount > 170) {
+        throw new RuntimeException(sprintf(
+            'BookStack application analysis returned %d unused-replacement diagnostics; '
+                . 'expected the broad range 110 through 170.',
+            $unusedReplacementCount,
+        ));
+    }
+
+    $sortRuleDiagnostics = array_values(array_filter(
+        $diagnostics,
+        static fn (array $diagnostic): bool => is_string($diagnostic['file'] ?? null)
+            && str_ends_with(
+                str_replace('\\', '/', $diagnostic['file']),
+                '/app/Sorting/SortRuleOperation.php',
+            ),
+    ));
+    $expectedSortRuleCounts = [
+        'lostInTranslation.missingBaseLocaleTranslationString' => 19,
+        'lostInTranslation.missingTranslationString' => 19,
+    ];
+    $sortRuleCounts = countBookStackIdentifiers($sortRuleDiagnostics);
+
+    if ($sortRuleCounts !== $expectedSortRuleCounts) {
+        throw new RuntimeException(sprintf(
+            'BookStack SortRuleOperation inference noise changed: %s',
+            json_encode($sortRuleCounts, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+        ));
+    }
+
+    assertBookStackDiagnostic(
+        $diagnostics,
+        'lostInTranslation.missingBaseLocaleTranslationString',
+        'Likely missing translation string "passwords.throttled" for base locale: en',
+        fileSuffix: '/app/Access/Controllers/ForgotPasswordController.php',
     );
+    assertBookStackDiagnostic(
+        $diagnostics,
+        'lostInTranslation.missingBaseLocaleTranslationString',
+        'Likely missing translation string "entities.comment_deleted" for base locale: en',
+        fileSuffix: '/app/Activity/Controllers/CommentController.php',
+    );
+    assertBookStackDiagnostic(
+        $diagnostics,
+        'lostInTranslation.missingBaseLocaleTranslationString',
+        'Likely missing translation string "settings.sort_rule_op_name_asc" for base locale: en',
+        fileSuffix: '/app/Sorting/SortRuleOperation.php',
+    );
+    assertBookStackDiagnostic(
+        $diagnostics,
+        'lostInTranslation.invalidReplacement.unused',
+        'Unused translation replacement: "email"',
+        'Locale: "ar", Key: "auth.reset_password_sent"',
+        '/app/Access/Controllers/ForgotPasswordController.php',
+    );
+
+    fwrite(STDOUT, sprintf(
+        "BookStack application translation analysis: %d extension diagnostics retained; "
+            . "curated findings and known inference noise passed.\n",
+        $diagnosticCount,
+    ));
+    fwrite(STDOUT, sprintf(
+        "Observed application identifiers: %s\n",
+        json_encode($identifierCounts, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+    ));
+}
+
+/**
+ * @param list<array<string, mixed>> $diagnostics
+ * @param list<array<string, mixed>> $diagnosticsToRemove
+ *
+ * @return list<array<string, mixed>>
+ */
+function subtractBookStackDiagnostics(array $diagnostics, array $diagnosticsToRemove): array
+{
+    $fingerprintsToRemove = [];
+
+    foreach ($diagnosticsToRemove as $diagnostic) {
+        $fingerprintsToRemove[getBookStackDiagnosticFingerprint($diagnostic)] = true;
+    }
+
+    $remainingDiagnostics = [];
+
+    foreach ($diagnostics as $diagnostic) {
+        $fingerprint = getBookStackDiagnosticFingerprint($diagnostic);
+
+        if (isset($fingerprintsToRemove[$fingerprint])) {
+            unset($fingerprintsToRemove[$fingerprint]);
+            continue;
+        }
+
+        $remainingDiagnostics[] = $diagnostic;
+    }
+
+    if ($fingerprintsToRemove !== []) {
+        throw new RuntimeException(sprintf(
+            'Blade analysis did not reproduce %d application-only extension diagnostic(s).',
+            count($fingerprintsToRemove),
+        ));
+    }
+
+    return $remainingDiagnostics;
 }
 
 /**
  * @param array<string, mixed> $output
+ * @param array<string, mixed> $applicationOutput
  */
-function assertBookStackBlade(array $output): void
+function assertBookStackBlade(array $output, array $applicationOutput): void
 {
     assertNoBookStackGlobalErrors($output, 'Blade');
+    assertNoBookStackGlobalErrors($applicationOutput, 'application comparison');
     $diagnostics = getBookStackFileDiagnostics($output);
+    $applicationDiagnostics = getBookStackFileDiagnostics($applicationOutput);
     $extensionDiagnostics = array_values(array_filter(
         $diagnostics,
         static fn (array $diagnostic): bool => is_string($diagnostic['identifier'] ?? null)
             && str_starts_with($diagnostic['identifier'], 'lostInTranslation.'),
     ));
+
+    assertBookStackDiagnosticsUnique($extensionDiagnostics);
+    assertBookStackDiagnosticsUnique($applicationDiagnostics);
+
+    $bladeDiagnostics = subtractBookStackDiagnostics($extensionDiagnostics, $applicationDiagnostics);
     $pluralFormDiagnostics = array_values(array_filter(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         static fn (array $diagnostic): bool => $diagnostic['identifier']
             === 'lostInTranslation.invalidChoice.missingPluralForm',
     ));
-    $extensionDiagnosticCount = count($extensionDiagnostics);
-    $nonPluralFormDiagnosticCount = $extensionDiagnosticCount - count($pluralFormDiagnostics);
-
-    assertBookStackDiagnosticsUnique($extensionDiagnostics);
+    $bladeDiagnosticCount = count($bladeDiagnostics);
+    $nonPluralFormDiagnosticCount = $bladeDiagnosticCount - count($pluralFormDiagnostics);
 
     if ($nonPluralFormDiagnosticCount < 40 || $nonPluralFormDiagnosticCount > 100) {
         throw new RuntimeException(sprintf(
@@ -285,72 +416,74 @@ function assertBookStackBlade(array $output): void
         ));
     }
 
-    assertBookStackIdentifiersAbsent($extensionDiagnostics, [
+    assertBookStackIdentifiersAbsent($bladeDiagnostics, [
         'lostInTranslation.invalidChoice.malformed',
         'lostInTranslation.invalidLocale.unknown',
         'lostInTranslation.translationLoaderError',
     ]);
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidChoice.missingCase',
         'Explicit translation choice conditions do not cover all possible cases for number of type: int',
         'Locale: "cs", Key: "entities.search_total_results_found"',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidChoice.nonNumeric',
         'Translation choice range must contain exactly two bounds; use "[2,4]" instead of "[2,3,4]" for contiguous values',
         'Locale: "sk", Key: "entities.x_books"',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidChoice.missingPluralForm',
         'Translation choice provides 1 plural form, but locale "is" can select 2 forms',
         'Locale: "is", Key: "entities.x_books"',
         '/app/Users/Controllers/UserProfileController.php',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidChoice.missingPluralForm',
         'Translation choice provides 1 plural form, but locale "de_informal" can select 2 forms',
         'Locale: "de_informal", Key: "entities.x_chapters"',
         '/app/Users/Controllers/UserProfileController.php',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidReplacement.unused',
         'Unused translation replacement: "bookName"',
         'Locale: "id", Key: "entities.books_delete_explain"',
         '/app/Entities/Controllers/BookController.php',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidReplacement.unused',
         'Unused translation replacement: "pageLink"',
         'Locale: "fr", Key: "components.image_uploaded_to"',
         '/app/Uploads/Controllers/ImageController.php',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.invalidReplacement.unused',
         'Unused translation replacement: "appName"',
         'Locale: "et", Key: "auth.user_invite_page_text"',
         '/app/Access/Controllers/UserInviteController.php',
     );
     assertBookStackDiagnostic(
-        $extensionDiagnostics,
+        $bladeDiagnostics,
         'lostInTranslation.missingTranslationString',
         'Missing translation string "entities.books_sort_auto_sort" for locales: pt',
         fileSuffix: '/app/Sorting/BookSortController.php',
     );
 
     fwrite(STDOUT, sprintf(
-        "BookStack Blade analysis: %d extension diagnostics retained; curated identifiers and bridge tips passed.\n",
-        $extensionDiagnosticCount,
+        "BookStack Blade analysis: %d Blade-specific extension diagnostics retained after subtracting %d "
+            . "application diagnostics; curated identifiers and bridge tips passed.\n",
+        $bladeDiagnosticCount,
+        count($applicationDiagnostics),
     ));
     fwrite(STDOUT, sprintf(
-        "Observed extension identifiers: %s\n",
-        json_encode(countBookStackIdentifiers($extensionDiagnostics), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+        "Observed Blade-specific identifiers: %s\n",
+        json_encode(countBookStackIdentifiers($bladeDiagnostics), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
     ));
 }
 
@@ -421,22 +554,34 @@ function assertBookStackVersions(array $output): void
 try {
     $arguments = $_SERVER['argv'] ?? $GLOBALS['argv'] ?? null;
 
-    if (
-        !is_array($arguments)
-        || 3 !== count($arguments)
-        || !is_string($arguments[1] ?? null)
-        || !is_string($arguments[2] ?? null)
-    ) {
-        throw new InvalidArgumentException('Usage: assert-output.php <baseline|application|blade|versions> <json-file>');
+    if (!is_array($arguments) || !is_string($arguments[1] ?? null) || !is_string($arguments[2] ?? null)) {
+        throw new InvalidArgumentException(
+            'Usage: assert-output.php <baseline|application|versions> <json-file> '
+                . '| blade <json-file> <application-json-file>',
+        );
     }
 
     $mode = $arguments[1];
+
+    if (($mode === 'blade' && count($arguments) !== 4) || ($mode !== 'blade' && count($arguments) !== 3)) {
+        throw new InvalidArgumentException(
+            'Usage: assert-output.php <baseline|application|versions> <json-file> '
+                . '| blade <json-file> <application-json-file>',
+        );
+    }
+
     $output = readBookStackCanaryJson($arguments[2]);
+    $applicationOutput = $mode === 'blade' && is_string($arguments[3] ?? null)
+        ? readBookStackCanaryJson($arguments[3])
+        : null;
 
     match ($mode) {
         'baseline' => assertBookStackBaseline($output),
         'application' => assertBookStackApplication($output),
-        'blade' => assertBookStackBlade($output),
+        'blade' => assertBookStackBlade(
+            $output,
+            $applicationOutput ?? throw new InvalidArgumentException('Blade comparison output is required.'),
+        ),
         'versions' => assertBookStackVersions($output),
         default => throw new InvalidArgumentException(sprintf('Unknown BookStack canary mode: %s', $mode)),
     };

@@ -59,6 +59,7 @@ run_analysis() {
     local mode=$1
     local expected_exit_code=$2
     local configuration=$3
+    local comparison_file=${4:-}
     local output_file="$temporary_directory/$mode.json"
     local error_file="$temporary_directory/$mode.stderr"
     local actual_exit_code
@@ -81,7 +82,11 @@ run_analysis() {
         return 1
     fi
 
-    php "$script_directory/assert-output.php" "$mode" "$output_file"
+    if [[ -n "$comparison_file" ]]; then
+        php "$script_directory/assert-output.php" "$mode" "$output_file" "$comparison_file"
+    else
+        php "$script_directory/assert-output.php" "$mode" "$output_file"
+    fi
 }
 
 trap cleanup EXIT
@@ -192,8 +197,8 @@ cp "$script_directory/phpstan-application.neon" "$bookstack_directory/phpstan-ap
 cp "$script_directory/phpstan-blade.neon" "$bookstack_directory/phpstan-blade-canary.neon"
 
 pushd "$bookstack_directory" >/dev/null
-run_analysis application 0 phpstan-application-canary.neon
-run_analysis blade 1 phpstan-blade-canary.neon
+run_analysis application 1 phpstan-application-canary.neon
+run_analysis blade 1 phpstan-blade-canary.neon "$temporary_directory/application.json"
 composer show --format=json --no-interaction >"$temporary_directory/installed.json"
 php "$script_directory/assert-output.php" versions "$temporary_directory/installed.json"
 popd >/dev/null

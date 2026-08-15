@@ -62,6 +62,20 @@ and unlisted variants default to one form. The BookStack observation remains 89 
 recognized `de_DE` policy. These warnings describe translations that rely on Laravel's legal first-form fallback, so
 they remain an opt-in quality gate rather than a default runtime-validity check.
 
+The 2026-08-15 canary refresh accounts for namespaced-global-helper support added on 2026-08-12, which made ordinary
+namespaced `trans()` calls visible to the extension. The application pass now retains 179 diagnostics: 137 unused
+replacements and 21 findings under each missing-key
+identifier. Two missing keys are likely BookStack defects: `passwords.throttled` is absent from BookStack's password
+translations, and `entities.comment_deleted` differs from the available `comment_deleted_success` key. The other 38
+missing-key diagnostics come from 19 impossible `SortRuleOperation` candidates that PHPStan infers by applying each
+`substr()` branch to an insufficiently narrowed union of enum backing values. The canary records that inference noise
+explicitly instead of suppressing extension diagnostics.
+
+The full Blade pass reproduces those 179 diagnostics exactly and adds the existing 55 non-plural and 89 plural-form
+Blade-specific findings. The assertion layer subtracts matching application fingerprints before applying the existing
+Blade ranges and curated signatures. This preserves the nested-analysis contract without relabeling ordinary PHP
+diagnostics as Blade findings.
+
 The external check is manually dispatched through `.github/workflows/bookstack.yml`. It is intentionally not part of
 the normal pull-request or `composer check:full` gate.
 
@@ -408,7 +422,9 @@ The raw count of 96 Blade translation diagnostics should not be read as 96 BookS
 | 51 unused replacements | 38 unique locale/key/replacement tuples: 35 probable translation defects, 3 plausible locale-specific caller supersets, and no caller-wide dead argument |
 | 1 missing translation | High-confidence empty Portuguese translation |
 
-Likewise, the 54 application-only diagnostics do not indicate 54 unrelated problems. Fifty-three are the same empty-array loader defect repeated for every locale, and one is the deliberate `de_informal` application locale.
+Likewise, the original 54 application-only diagnostics did not indicate 54 unrelated problems. Fifty-three were the
+same empty-array loader defect repeated for every locale, and one was the deliberate `de_informal` application locale.
+Those historical findings were fixed; the current automated application contract is described in the follow-up above.
 
 ## Performance observations
 

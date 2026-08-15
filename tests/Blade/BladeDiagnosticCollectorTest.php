@@ -50,7 +50,7 @@ final class BladeDiagnosticCollectorTest extends \PHPUnit\Framework\TestCase
         ));
 
         $compiledScope = $this->createStub(Scope::class);
-        $compiledScope->method('getFile')->willReturn('/tmp/example-blade-compiled.php');
+        $compiledScope->method('getFile')->willReturn('/tmp/098f6bcd4621d373cade4e832627b4f6-blade-compiled.php');
         $this->assertNull($collector->processNode($this->createStub(FuncCall::class), $compiledScope));
 
         $outerNode = $this->createStub(FuncCall::class);

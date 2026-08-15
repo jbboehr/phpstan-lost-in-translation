@@ -31,6 +31,9 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /** @var array<non-empty-string, int> */
     private array $lineNumbers = [];
 
+    /** @var array<non-empty-string, int> */
+    private array $lineNumberDepths = [];
+
     /** @var list<int|string> */
     private array $stack = [];
 
@@ -58,8 +61,11 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     {
         if ($node instanceof Node\Expr\ArrayItem) {
             $path = join('.', $this->stack);
-            if (strlen($path) > 0) {
+            $depth = count($this->stack);
+
+            if (strlen($path) > 0 && (!isset($this->lineNumberDepths[$path]) || $depth <= $this->lineNumberDepths[$path])) {
                 $this->lineNumbers[$path] = $node->getStartLine();
+                $this->lineNumberDepths[$path] = $depth;
             }
             array_pop($this->stack);
         }

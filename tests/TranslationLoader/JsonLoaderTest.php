@@ -73,6 +73,26 @@ final class JsonLoaderTest extends TestCase
         }
     }
 
+    public function testReportsUnencodableInvalidValuesWithoutThrowing(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'phpstan-lost-in-translation-');
+        $this->assertIsString($path);
+
+        try {
+            $this->assertNotFalse(file_put_contents($path, "{\n  \"infinite\": 1e400\n}\n"));
+
+            $result = (new JsonLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+            $this->assertSame([], $result->translations);
+            $this->assertCount(1, $result->errors);
+            $this->assertSame('Invalid value: INF', $result->errors[0]->getMessage());
+            $this->assertInstanceOf(LineRuleError::class, $result->errors[0]);
+            $this->assertSame(2, $result->errors[0]->getLine());
+        } finally {
+            unlink($path);
+        }
+    }
+
     /**
      * @runInSeparateProcess
      * @preserveGlobalState disabled

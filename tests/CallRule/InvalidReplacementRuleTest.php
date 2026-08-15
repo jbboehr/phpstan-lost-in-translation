@@ -112,4 +112,29 @@ class InvalidReplacementRuleTest extends RuleTestCase
             ],
         ]);
     }
+
+    public function testReplacementKeysAreDeduplicatedAcrossConstantArrayVariants(): void
+    {
+        $tip = Utils::formatTipForKeyValue('en', 'exists in all locales', 'exists in all locales');
+
+        $this->analyse([
+            __DIR__ . '/../data/replacement-array-variant-deduplication.php',
+        ], [
+            ['Unused translation replacement: "other"', 7, $tip],
+            ['Unused translation replacement: "same"', 7, $tip],
+        ]);
+    }
+
+    public function testArrayValuedTranslationsAndLiteralDottedItemsUseRuntimeValues(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-array-values',
+            baseLocale: 'en',
+            fuzzySearch: false,
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/array-valued-translation.php',
+        ], []);
+    }
 }

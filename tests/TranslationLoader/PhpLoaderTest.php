@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests\TranslationLoader;
 
+use Illuminate\Support\Arr;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\LoadResult;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use PHPStan\Rules\LineRuleError;
@@ -52,12 +53,72 @@ final class PhpLoaderTest extends TestCase
         $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
 
         $this->assertSame([
+            'messages.nested' => 'Still loaded',
             'messages.nested.translation' => 'Still loaded',
         ], $result->translations);
+        $this->assertSame(['messages.nested'], $result->arrayKeys);
         $this->assertCount(1, $result->errors);
         $this->assertSame('Invalid value: 1', $result->errors[0]->getMessage());
         $this->assertInstanceOf(LineRuleError::class, $result->errors[0]);
         $this->assertSame(7, $result->errors[0]->getLine());
+    }
+
+    public function testReportsUnencodableInvalidValuesWithoutThrowing(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'phpstan-lost-in-translation-');
+        $this->assertIsString($path);
+
+        try {
+            $this->assertNotFalse(file_put_contents(
+                $path,
+                "<?php\n\$stream = fopen('php://memory', 'r');\nreturn [\n"
+                . "    'infinite' => INF,\n"
+                . "    'not_a_number' => NAN,\n"
+                . "    'stream' => \$stream,\n"
+                . "];\n",
+            ));
+
+            $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+            $this->assertSame([], $result->translations);
+            $this->assertSame([
+                'Invalid value: INF',
+                'Invalid value: NAN',
+                'Invalid value: resource (stream)',
+            ], array_map(static fn ($error): string => $error->getMessage(), $result->errors));
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function testPreservesArrayParentsAndLiteralDottedItemPrecedence(): void
+    {
+        $path = __DIR__ . '/../lang-array-values/en/messages.php';
+        $runtimeTranslations = require $path;
+        $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+
+        $this->assertIsArray($runtimeTranslations);
+        $this->assertSame('Literal :literal', Arr::get($runtimeTranslations, 'options.one'));
+        $this->assertSame($runtimeTranslations['options'], Arr::get($runtimeTranslations, 'options'));
+        $this->assertSame([
+            'messages.options.one' => 'Literal :literal',
+            'messages.options' => "Nested :nested\nTwo :name\nLabel :label",
+            'messages.options.two' => 'Two :name',
+            'messages.options.nested' => 'Label :label',
+            'messages.options.nested.label' => 'Label :label',
+        ], $result->translations);
+        $this->assertSame([
+            'messages.options.one' => 4,
+            'messages.options.two' => 7,
+            'messages.options.nested.label' => 9,
+            'messages.options.nested' => 8,
+            'messages.options' => 5,
+        ], $result->locations);
+        $this->assertSame([
+            'messages.options',
+            'messages.options.nested',
+        ], $result->arrayKeys);
+        $this->assertSame([], $result->errors);
     }
 
     public function testLoadDeclaresItsConcreteReturnType(): void

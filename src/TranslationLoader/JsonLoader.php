@@ -78,7 +78,15 @@ final class JsonLoader
             }
 
             if (!is_string($v)) {
-                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
+                $encodedValue = json_encode($v);
+
+                if (false === $encodedValue) {
+                    $encodedValue = is_float($v)
+                        ? (is_nan($v) ? 'NAN' : (0.0 > $v ? '-INF' : 'INF'))
+                        : get_debug_type($v);
+                }
+
+                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", $encodedValue))
                     ->identifier(self::IDENTIFIER)
                     ->file($file->getPathname())
                     ->line($line)

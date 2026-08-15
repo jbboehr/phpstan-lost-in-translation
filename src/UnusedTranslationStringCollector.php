@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
@@ -52,7 +53,7 @@ final class UnusedTranslationStringCollector implements Collector
     public function processNode(Node $node, Scope $scope): ?array
     {
         try {
-            if (str_contains($scope->getFile(), 'blade-compiled')) {
+            if (1 === preg_match(BladeDiagnosticCollector::COMPILED_FILE_PATTERN, $scope->getFile())) {
                 return null;
             }
 
@@ -80,17 +81,7 @@ final class UnusedTranslationStringCollector implements Collector
             return;
         }
 
-        $possibleLocales = [];
-
-        if ($call->localeType !== null) {
-            foreach ($call->localeType->getConstantStrings() as $localeConstantString) {
-                $possibleLocales[] = $localeConstantString->getValue();
-            }
-        }
-
-        if (count($possibleLocales) <= 0) {
-            $possibleLocales = ['*'];
-        }
+        $possibleLocales = $call->usesImplicitLocale ? ['*'] : $call->explicitLocales;
 
         foreach ($call->keyType->getConstantStrings() as $keyConstantString) {
             foreach ($possibleLocales as $possibleLocale) {

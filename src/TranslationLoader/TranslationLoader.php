@@ -54,6 +54,9 @@ class TranslationLoader
     /** @var array<string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
     private array $data = [];
 
+    /** @var array<string, array<non-empty-string, array<non-empty-string, true>>> */
+    private array $arrayKeys = [];
+
     /** @var list<IdentifierRuleError> */
     private array $errors = [];
 
@@ -313,6 +316,24 @@ class TranslationLoader
             }
 
             $usedByKey[$locale][$item->key] = true;
+
+            [$namespace, $normalizedKey] = $this->parseKey($item->key);
+            $targetLocales = '*' === $locale ? array_keys($this->data) : [$locale];
+
+            foreach ($targetLocales as $targetLocale) {
+                if (!isset($this->arrayKeys[$targetLocale][$namespace][$normalizedKey])) {
+                    continue;
+                }
+
+                foreach ($this->data[$targetLocale][$namespace] ?? [] as $candidateKey => $_value) {
+                    if ($candidateKey !== $normalizedKey && !str_starts_with($candidateKey, $normalizedKey . '.')) {
+                        continue;
+                    }
+
+                    $externalKey = '*' === $namespace ? $candidateKey : $namespace . '::' . $candidateKey;
+                    $usedByKey[$targetLocale][$externalKey] = true;
+                }
+            }
         }
 
         $possiblyUnused = [];
@@ -320,6 +341,10 @@ class TranslationLoader
         foreach ($this->data as $locale => $localeData) {
             foreach ($localeData as $namespace => $namespaceData) {
                 foreach ($namespaceData as $item => $value) {
+                    if (isset($this->arrayKeys[$locale][$namespace][$item])) {
+                        continue;
+                    }
+
                     $key = $item;
 
                     if ($namespace !== '*') {
@@ -494,6 +519,7 @@ class TranslationLoader
             $this->errors = array_merge($this->errors, $result->errors);
             $realPath = $file->getRealPath();
             $filePath = false === $realPath ? $file->getPathname() : $realPath;
+            $resultArrayKeys = array_fill_keys($result->arrayKeys, true);
 
             foreach ($result->translations as $k => $v) {
                 $line = ($result->locations[$k] ?? -1);
@@ -508,6 +534,12 @@ class TranslationLoader
 
                 $this->data[$localeKey][$namespace][$k] = $v;
                 $this->locations[$localeKey . "\0" . $namespace . "\0" . $k] = [$filePath, $line];
+
+                if (isset($resultArrayKeys[$k])) {
+                    $this->arrayKeys[$localeKey][$namespace][$k] = true;
+                } else {
+                    unset($this->arrayKeys[$localeKey][$namespace][$k]);
+                }
             }
         }
 
@@ -528,12 +560,15 @@ class TranslationLoader
     {
         $arr = [];
 
-        foreach ($this->data as $localeItems) {
+        foreach ($this->data as $locale => $localeItems) {
             foreach ($localeItems as $namespace => $namespaceItems) {
                 foreach ($namespaceItems as $key => $value) {
                     $searchKey = '*' === $namespace ? $key : $namespace . '::' . $key;
                     $arr[$searchKey] = true;
-                    $arr[$value] = true;
+
+                    if (!isset($this->arrayKeys[$locale][$namespace][$key])) {
+                        $arr[$value] = true;
+                    }
                 }
             }
         }

@@ -32,6 +32,7 @@ final class TranslationCall implements \JsonSerializable
     /**
      * @phpstan-param PossibleTranslationRecordCollection $possibleTranslations
      * @phpstan-param non-empty-string $file
+     * @param list<string> $explicitLocales
      */
     public function __construct(
         public readonly ?string $className,
@@ -44,6 +45,8 @@ final class TranslationCall implements \JsonSerializable
         public readonly ?Type $localeType = null,
         public readonly ?Type $numberType = null,
         public readonly bool $isChoice = false,
+        public readonly array $explicitLocales = [],
+        public readonly bool $usesImplicitLocale = true,
     ) {
     }
 

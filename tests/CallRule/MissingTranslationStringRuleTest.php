@@ -275,4 +275,24 @@ class MissingTranslationStringRuleTest extends RuleTestCase
             __DIR__ . '/../data/flexible-locale.php',
         ], []);
     }
+
+    public function testFalseyLocalesUseImplicitLookup(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/falsey-locale.php',
+        ], []);
+    }
+
+    public function testArrayValuedTranslationsAreRecognized(): void
+    {
+        $this->translationLoader = new TranslationLoader(
+            langPath: __DIR__ . '/../lang-array-values',
+            baseLocale: 'en',
+            fuzzySearch: false,
+        );
+
+        $this->analyse([
+            __DIR__ . '/../data/array-valued-translation.php',
+        ], []);
+    }
 }

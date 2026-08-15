@@ -48,6 +48,9 @@ use PHPStan\Rules\TipRuleError;
  */
 final class BladeDiagnosticCollector implements Collector
 {
+    /** Bladestan writes compiled views as <md5(source path)>-blade-compiled.php. */
+    public const COMPILED_FILE_PATTERN = '~(?:^|[/\\\\])[a-f0-9]{32}-blade-compiled\.php$~D';
+
     private const TEMPLATE_LOCATION_PATTERN = '~/\*\* file: (.*?), line: (\d+) \*/~';
 
     /**
@@ -73,7 +76,7 @@ final class BladeDiagnosticCollector implements Collector
 
     public function processNode(Node $node, Scope $scope): ?array
     {
-        if (str_contains($scope->getFile(), 'blade-compiled')) {
+        if (1 === preg_match(self::COMPILED_FILE_PATTERN, $scope->getFile())) {
             return null;
         }
 

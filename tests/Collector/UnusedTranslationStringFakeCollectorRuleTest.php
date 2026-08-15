@@ -39,7 +39,7 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
         $node = $this->createStub(FuncCall::class);
         $bladeScope = $this->createMock(Scope::class);
         $bladeScope->method('getFile')
-            ->willReturn('/tmp/example-blade-compiled.php');
+            ->willReturn('/tmp/098f6bcd4621d373cade4e832627b4f6-blade-compiled.php');
 
         $call = new TranslationCall(
             className: null,
@@ -49,6 +49,8 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
             possibleTranslations: [],
             keyType: new ConstantStringType('messages.blade'),
             localeType: new ConstantStringType('ja'),
+            explicitLocales: ['ja'],
+            usesImplicitLocale: false,
         );
 
         $bladeHelper = $this->createMock(LostInTranslationHelper::class);
@@ -77,6 +79,25 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
         ], $collector->processNode($node, $outerScope));
     }
 
+    public function testIgnoresOrdinaryFilesInsideDirectoriesNamedBladeCompiled(): void
+    {
+        $node = $this->createStub(FuncCall::class);
+        $scope = $this->createMock(Scope::class);
+        $scope->method('getFile')
+            ->willReturn('/tmp/blade-compiled-project/example.php');
+
+        $helper = $this->createMock(LostInTranslationHelper::class);
+        $helper->expects($this->never())
+            ->method('parseCallLike');
+
+        $rule = new UnusedTranslationStringFakeCollectorRule(
+            $helper,
+            new UnusedTranslationStringCollector($helper),
+        );
+
+        $this->assertSame([], $rule->processNode($node, $scope));
+    }
+
     public function testExceptionConversion(): void
     {
         if (!class_exists(FuncCall::class)) {
@@ -92,7 +113,7 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
 
         $scope = $this->createMock(Scope::class);
         $scope->method('getFile')
-            ->willReturn('blade-compiled');
+            ->willReturn('/tmp/098f6bcd4621d373cade4e832627b4f6-blade-compiled.php');
 
         $obj = new UnusedTranslationStringFakeCollectorRule(
             $helper,

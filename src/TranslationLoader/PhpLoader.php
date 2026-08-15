@@ -82,16 +82,36 @@ final class PhpLoader
         $lineNumbers = self::dot($lineNumbers, $group);
         /** @var array<non-empty-string, int> $lineNumbers */
 
-        $raw = self::dot($raw, $group);
+        $raw = self::dot($raw, $group, true);
 
         /** @var array<non-empty-string, non-empty-string> $results */
         $results = [];
+        /** @var list<non-empty-string> $arrayKeys */
+        $arrayKeys = [];
 
         foreach ($raw as $k => $v) {
+            assert(is_string($k) && '' !== $k);
             $line = $lineNumbers[$k] ?? -1;
 
+            if (is_array($v)) {
+                $arrayKeys[] = $k;
+                $arrayValues = array_filter(
+                    self::dot($v),
+                    static fn (mixed $value): bool => is_string($value) && '' !== $value,
+                );
+                $v = [] === $arrayValues ? $k : implode("\n", $arrayValues);
+            }
+
             if (!is_string($v)) {
-                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", json_encode($v, JSON_THROW_ON_ERROR)))
+                $encodedValue = json_encode($v);
+
+                if (false === $encodedValue) {
+                    $encodedValue = is_float($v)
+                        ? (is_nan($v) ? 'NAN' : (0.0 > $v ? '-INF' : 'INF'))
+                        : get_debug_type($v);
+                }
+
+                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", $encodedValue))
                     ->identifier(self::IDENTIFIER)
                     ->file($file->getPathname())
                     ->line($line)
@@ -100,7 +120,7 @@ final class PhpLoader
             }
 
             // discard empty keys and values
-            if (strlen($k) <= 0 || strlen($v) <= 0) {
+            if (strlen($v) <= 0) {
                 continue;
             }
 
@@ -126,7 +146,7 @@ final class PhpLoader
         }
 
 
-        return new LoadResult($results, $lineNumbers, $errors);
+        return new LoadResult($results, $lineNumbers, $errors, $arrayKeys);
     }
 
     private static function createParser(ParserFactory $parserFactory): Parser
@@ -149,7 +169,7 @@ final class PhpLoader
      * @return array<array-key, mixed>
      * @see \Illuminate\Support\Arr::dot()
      */
-    public static function dot(array $array, string $prepend = ''): array
+    public static function dot(array $array, string $prepend = '', bool $includeArrays = false): array
     {
         $results = [];
 
@@ -168,10 +188,18 @@ final class PhpLoader
                     continue;
                 }
 
-                foreach (self::dot($value, $path) as $k2 => $v2) {
-                    $results[$k2] = $v2;
+                if ($includeArrays && !array_key_exists($path, $results)) {
+                    $results[$path] = $value;
+                }
+
+                foreach (self::dot($value, $path, $includeArrays) as $k2 => $v2) {
+                    // Laravel's Arr::get() gives an exact dotted key precedence over traversal.
+                    if (!array_key_exists($k2, $results)) {
+                        $results[$k2] = $v2;
+                    }
                 }
             } else {
+                // A literal dotted item remains authoritative regardless of declaration order.
                 $results[$path] = $value;
             }
         }

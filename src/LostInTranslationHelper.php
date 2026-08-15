@@ -180,17 +180,24 @@ class LostInTranslationHelper
 
         assert(strlen($file) > 0);
 
+        [$possibleTranslations, $explicitLocales, $usesImplicitLocale] = $this->gatherPossibleTranslations(
+            $keyType,
+            $localeType,
+        );
+
         return new TranslationCall(
             className: $className,
             functionName: $name,
             file: $file,
             line: $node->getStartLine(),
-            possibleTranslations: $this->gatherPossibleTranslations($keyType, $localeType),
+            possibleTranslations: $possibleTranslations,
             keyType: $keyType,
             replaceType: $replace !== null ? $scope->getType($replace) : null,
             localeType: $localeType,
             numberType: $number !== null ? $scope->getType($number) : null,
             isChoice: $isChoice,
+            explicitLocales: $explicitLocales,
+            usesImplicitLocale: $usesImplicitLocale,
         );
     }
 
@@ -218,18 +225,40 @@ class LostInTranslationHelper
     }
 
     /**
-     * @phpstan-return PossibleTranslationRecordCollection
+     * @phpstan-return array{PossibleTranslationRecordCollection, list<string>, bool}
      */
     private function gatherPossibleTranslations(Type $keyType, ?Type $localeType = null): array
     {
-        if (null !== $localeType && count($localeType->getConstantStrings()) > 0) {
-            $lookInLocales = [];
+        $localeConstantStrings = $localeType?->getConstantStrings() ?? [];
+        $explicitLocales = [];
+        $usesImplicitLocale = null === $localeType || [] === $localeConstantStrings;
 
-            foreach ($localeType->getConstantStrings() as $localeTypeConstantString) {
-                $lookInLocales[] = $localeTypeConstantString->getValue();
+        foreach ($localeConstantStrings as $localeTypeConstantString) {
+            $locale = $localeTypeConstantString->getValue();
+
+            if ('' === $locale || '0' === $locale) {
+                $usesImplicitLocale = true;
+            } else {
+                $explicitLocales[$locale] = $locale;
             }
-        } else {
-            $lookInLocales = $this->translationLoader->getLocalesForImplicitLookup();
+        }
+
+        foreach ($localeType?->getConstantScalarValues() ?? [] as $localeValue) {
+            if (false === (bool) $localeValue) {
+                $usesImplicitLocale = true;
+            }
+        }
+
+        $explicitLocales = array_values($explicitLocales);
+        sort($explicitLocales, SORT_NATURAL);
+        $lookInLocales = $explicitLocales;
+
+        if ($usesImplicitLocale) {
+            $lookInLocales = array_values(array_unique([
+                ...$lookInLocales,
+                ...$this->translationLoader->getLocalesForImplicitLookup(),
+            ]));
+            sort($lookInLocales, SORT_NATURAL);
         }
 
         $keyConstantStrings = array_map(function (ConstantStringType $constantStringType): string {
@@ -249,6 +278,6 @@ class LostInTranslationHelper
             }
         }
 
-        return $rv;
+        return [$rv, $explicitLocales, $usesImplicitLocale];
     }
 }

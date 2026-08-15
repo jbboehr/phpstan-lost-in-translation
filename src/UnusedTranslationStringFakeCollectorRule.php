@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+use jbboehr\PHPStanLostInTranslation\Blade\BladeDiagnosticCollector;
 use PhpParser\Node;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
@@ -45,7 +46,7 @@ final class UnusedTranslationStringFakeCollectorRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            if (!str_contains($scope->getFile(), 'blade-compiled')) {
+            if (1 !== preg_match(BladeDiagnosticCollector::COMPILED_FILE_PATTERN, $scope->getFile())) {
                 return [];
             }
 

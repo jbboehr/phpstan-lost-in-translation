@@ -310,6 +310,33 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('Invalid value: 1', $loader->getErrors()[0]->getMessage());
     }
 
+    public function testArrayValuedTranslationsPreserveLookupsAndMarkReturnedLeavesUsed(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: __DIR__ . '/lang-array-values',
+            baseLocale: 'en',
+            fuzzySearch: false,
+        );
+
+        $this->assertSame(
+            "Nested :nested\nTwo :name\nLabel :label",
+            $loader->get('en', 'messages.options'),
+        );
+        $this->assertSame('Literal :literal', $loader->get('en', 'messages.options.one'));
+        $this->assertSame('Two :name', $loader->get('en', 'messages.options.two'));
+        $this->assertSame([], $loader->diffUsed([
+            new UsedTranslationRecord('messages.options', 'en', __FILE__, __LINE__),
+        ]));
+
+        $unused = $loader->diffUsed([
+            new UsedTranslationRecord('messages.options.one', 'en', __FILE__, __LINE__),
+        ]);
+        $this->assertSame([
+            'messages.options.nested.label',
+            'messages.options.two',
+        ], array_column($unused, 'key'));
+    }
+
     public function testFlexibleLocalesUseCanonicalLookupKeys(): void
     {
         $loader = new TranslationLoader(

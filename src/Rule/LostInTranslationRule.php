@@ -66,7 +66,7 @@ final class LostInTranslationRule implements Rule
             if (
                 $this->bridgeBladeDiagnostics
                 && [] !== $errors
-                && str_contains($scope->getFile(), 'blade-compiled')
+                && 1 === preg_match(BladeDiagnosticCollector::COMPILED_FILE_PATTERN, $scope->getFile())
                 && $this->bladeDiagnosticCollector->push($errors, $scope->getFile(), $node->getStartLine())
             ) {
                 return [];

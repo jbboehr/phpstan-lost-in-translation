@@ -121,4 +121,11 @@ class InvalidLocaleRuleTest extends RuleTestCase
             __DIR__ . '/../data/locale-alias.php',
         ], []);
     }
+
+    public function testFalseyLocalesUseImplicitLookupWithoutLocaleErrors(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/falsey-locale.php',
+        ], []);
+    }
 }

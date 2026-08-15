@@ -51,6 +51,8 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
             possibleTranslations: [],
             keyType: new ConstantStringType('messages.example'),
             localeType: new ConstantStringType('ja'),
+            explicitLocales: ['ja'],
+            usesImplicitLocale: false,
         ));
 
         $otherCollector = new UnusedTranslationStringCollector($helper);
@@ -64,6 +66,38 @@ final class UnusedTranslationStringCollectorTest extends \PHPUnit\Framework\Test
             ),
         ], $otherCollector->processNode($node, $scope));
         $this->assertNull($collector->processNode($node, $scope));
+    }
+
+    public function testProcessesOrdinaryFilesInsideDirectoriesNamedBladeCompiled(): void
+    {
+        $node = $this->createStub(FuncCall::class);
+        $scope = $this->createMock(Scope::class);
+        $scope->method('getFile')
+            ->willReturn('/tmp/blade-compiled-project/example.php');
+        $call = new TranslationCall(
+            className: null,
+            functionName: '__',
+            file: '/tmp/blade-compiled-project/example.php',
+            line: 7,
+            possibleTranslations: [],
+            keyType: new ConstantStringType('messages.example'),
+        );
+        $helper = $this->createMock(LostInTranslationHelper::class);
+        $helper->expects($this->once())
+            ->method('parseCallLike')
+            ->with($node, $scope)
+            ->willReturn($call);
+
+        $collector = new UnusedTranslationStringCollector($helper);
+
+        $this->assertEquals([
+            new UsedTranslationRecord(
+                key: 'messages.example',
+                locale: '*',
+                file: '/tmp/blade-compiled-project/example.php',
+                line: 7,
+            ),
+        ], $collector->processNode($node, $scope));
     }
 
     public function testExceptionConversion(): void

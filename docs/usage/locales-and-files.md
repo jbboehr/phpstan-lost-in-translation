@@ -78,6 +78,10 @@ Invalid character encoding for value "\xf0(\x8c\xbc" in locale "ja"
 other errors encountered while loading translation files. Translation values must be strings or nested arrays that
 ultimately contain strings.
 
+Non-empty PHP array parents are valid translation lookups, matching Laravel's `Translator::get()` behavior. Using an
+array parent counts its returned string leaves as used. When a group contains both a literal dotted item and the same
+nested path, the literal item takes precedence as it does in Laravel's `Arr::get()`.
+
 For example, numeric values in either format are reported at their source files:
 
 ```json

@@ -30,11 +30,13 @@ final class LoadResult
      * @param array<non-empty-string, non-empty-string> $translations
      * @param array<non-empty-string, int> $locations
      * @param list<IdentifierRuleError> $errors
+     * @param list<non-empty-string> $arrayKeys
      */
     public function __construct(
         public readonly array $translations,
         public readonly array $locations,
         public readonly array $errors,
+        public readonly array $arrayKeys = [],
     ) {
     }
 }

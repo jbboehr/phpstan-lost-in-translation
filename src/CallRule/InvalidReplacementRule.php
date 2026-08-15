@@ -70,6 +70,8 @@ final class InvalidReplacementRule implements CallRuleInterface
             }
         }
 
+        $replaceKeys = array_values(array_unique($replaceKeys));
+
         // Make sure they are stably sorted
         sort($replaceKeys, SORT_NATURAL);
 

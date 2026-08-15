@@ -39,16 +39,13 @@ final class InvalidLocaleRule implements CallRuleInterface
 
     public function processCall(TranslationCall $call): array
     {
-        if (null === $call->localeType) {
+        if ([] === $call->explicitLocales) {
             return [];
         }
 
-        $localeType = $call->localeType;
         $errors = [];
 
-        foreach ($localeType->getConstantStrings() as $localeConstantString) {
-            $locale = $localeConstantString->getValue();
-
+        foreach ($call->explicitLocales as $locale) {
             if (!$this->loader->hasLocale($locale)) {
                 $errors[] = RuleErrorBuilder::message(sprintf(
                     'Locale has no available translation strings: %s',

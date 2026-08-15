@@ -243,6 +243,7 @@ class LostInTranslationHelper
             }
         }
 
+        // Benevolent unions can omit non-string constants above; Laravel falls back for every falsey scalar locale.
         foreach ($localeType?->getConstantScalarValues() ?? [] as $localeValue) {
             if (false === (bool) $localeValue) {
                 $usesImplicitLocale = true;

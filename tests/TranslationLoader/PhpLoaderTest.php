@@ -73,19 +73,33 @@ final class PhpLoaderTest extends TestCase
                 $path,
                 "<?php\n\$stream = fopen('php://memory', 'r');\nreturn [\n"
                 . "    'infinite' => INF,\n"
+                . "    'negative_infinite' => -INF,\n"
                 . "    'not_a_number' => NAN,\n"
                 . "    'stream' => \$stream,\n"
+                . "    'parent' => [\n"
+                . "        'valid' => 'Nested value',\n"
+                . "        'empty' => '',\n"
+                . "        'stream' => \$stream,\n"
+                . "    ],\n"
+                . "    'empty' => '',\n"
                 . "];\n",
             ));
 
             $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+            $group = basename($path);
 
-            $this->assertSame([], $result->translations);
+            $this->assertSame([
+                $group . '.parent' => 'Nested value',
+                $group . '.parent.valid' => 'Nested value',
+            ], $result->translations);
             $this->assertSame([
                 'Invalid value: INF',
+                'Invalid value: -INF',
                 'Invalid value: NAN',
                 'Invalid value: resource (stream)',
+                'Invalid value: resource (stream)',
             ], array_map(static fn ($error): string => $error->getMessage(), $result->errors));
+            $this->assertSame([$group . '.parent'], $result->arrayKeys);
         } finally {
             unlink($path);
         }
@@ -99,26 +113,44 @@ final class PhpLoaderTest extends TestCase
 
         $this->assertIsArray($runtimeTranslations);
         $this->assertSame('Literal :literal', Arr::get($runtimeTranslations, 'options.one'));
+        $this->assertSame('Literal nested :literal_nested', Arr::get($runtimeTranslations, 'options.nested'));
+        $this->assertSame('Label :label', Arr::get($runtimeTranslations, 'options.nested.label'));
         $this->assertSame($runtimeTranslations['options'], Arr::get($runtimeTranslations, 'options'));
         $this->assertSame([
             'messages.options.one' => 'Literal :literal',
+            'messages.options.nested' => 'Literal nested :literal_nested',
             'messages.options' => "Nested :nested\nTwo :name\nLabel :label",
             'messages.options.two' => 'Two :name',
-            'messages.options.nested' => 'Label :label',
             'messages.options.nested.label' => 'Label :label',
+            'messages.optionsExtra' => 'Prefix sibling',
         ], $result->translations);
         $this->assertSame([
             'messages.options.one' => 4,
-            'messages.options.two' => 7,
-            'messages.options.nested.label' => 9,
-            'messages.options.nested' => 8,
-            'messages.options' => 5,
+            'messages.options.nested' => 5,
+            'messages.options.two' => 8,
+            'messages.options.nested.label' => 10,
+            'messages.options' => 6,
+            'messages.optionsExtra' => 13,
         ], $result->locations);
-        $this->assertSame([
-            'messages.options',
-            'messages.options.nested',
-        ], $result->arrayKeys);
+        $this->assertSame(['messages.options'], $result->arrayKeys);
         $this->assertSame([], $result->errors);
+    }
+
+    public function testNestedDottedArrayDoesNotOverrideTraversedLeaf(): void
+    {
+        $translations = [
+            'parent' => [
+                'child' => [
+                    'leaf' => 'Traversed',
+                ],
+                'child.leaf' => [
+                    'nested' => 'Literal dotted array',
+                ],
+            ],
+        ];
+
+        $this->assertSame('Traversed', Arr::get($translations, 'parent.child.leaf'));
+        $this->assertSame('Traversed', PhpLoader::dot($translations, includeArrays: true)['parent.child.leaf']);
     }
 
     public function testLoadDeclaresItsConcreteReturnType(): void

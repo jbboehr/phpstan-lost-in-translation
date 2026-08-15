@@ -280,7 +280,23 @@ class MissingTranslationStringRuleTest extends RuleTestCase
     {
         $this->analyse([
             __DIR__ . '/../data/falsey-locale.php',
-        ], []);
+        ], [
+            ['Missing translation string "missing with empty locale" for locales: ja, zh', 5],
+            ['Missing translation string "missing with zero locale" for locales: ja, zh', 6],
+        ]);
+    }
+
+    public function testDynamicLocalesPreserveConservativeImplicitLookup(): void
+    {
+        $this->analyse([
+            __DIR__ . '/../data/dynamic-locale.php',
+        ], [
+            ['Missing translation string "missing with dynamic locale" for locales: ja, zh', 4],
+            ['Missing translation string "missing with mixed falsey scalar locale" for locales: ja, zh', 7],
+            ['Missing translation string "missing with mixed false locale" for locales: ja, zh', 10],
+            ['Missing translation string "missing with mixed null locale" for locales: ja, zh', 13],
+            ['Missing translation string "only in en" for locales: ja, zh', 22],
+        ]);
     }
 
     public function testArrayValuedTranslationsAreRecognized(): void

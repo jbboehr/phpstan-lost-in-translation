@@ -242,6 +242,10 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         );
         $this->assertSame('Other vendor translation', $loader->get('en', 'other::messages.shared'));
         $this->assertSame(
+            "English vendor option one\nEnglish vendor option two",
+            $loader->get('en', 'acme::messages.options'),
+        );
+        $this->assertSame(
             'acme::messages.only_in_en',
             $loader->searchForSimilarKeys('acme::messages.only_in_enn'),
         );
@@ -290,6 +294,7 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
             new UsedTranslationRecord('root', '*', __FILE__, __LINE__),
             new UsedTranslationRecord('messages.grouped', '*', __FILE__, __LINE__),
             new UsedTranslationRecord('acme::messages.shared', '*', __FILE__, __LINE__),
+            new UsedTranslationRecord('acme::messages.options', '*', __FILE__, __LINE__),
             new UsedTranslationRecord('other::messages.shared', '*', __FILE__, __LINE__),
         ]));
     }
@@ -315,7 +320,6 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $loader = new TranslationLoader(
             langPath: __DIR__ . '/lang-array-values',
             baseLocale: 'en',
-            fuzzySearch: false,
         );
 
         $this->assertSame(
@@ -324,17 +328,46 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         );
         $this->assertSame('Literal :literal', $loader->get('en', 'messages.options.one'));
         $this->assertSame('Two :name', $loader->get('en', 'messages.options.two'));
-        $this->assertSame([], $loader->diffUsed([
+        $this->assertSame('Prefix sibling', $loader->searchForSimilarKeys('Prefix siblin'));
+        $this->assertNull($loader->searchForSimilarKeys("Nested :nested\nTwo :name\nLabel :label"));
+        $unused = $loader->diffUsed([
             new UsedTranslationRecord('messages.options', 'en', __FILE__, __LINE__),
-        ]));
+        ]);
+        $this->assertSame(['messages.optionsExtra'], array_column(array_filter(
+            $unused,
+            static fn (array $item): bool => 'en' === $item['locale'],
+        ), 'key'));
 
         $unused = $loader->diffUsed([
             new UsedTranslationRecord('messages.options.one', 'en', __FILE__, __LINE__),
         ]);
         $this->assertSame([
+            'messages.options.nested',
             'messages.options.nested.label',
             'messages.options.two',
-        ], array_column($unused, 'key'));
+            'messages.optionsExtra',
+        ], array_column(array_filter(
+            $unused,
+            static fn (array $item): bool => 'en' === $item['locale'],
+        ), 'key'));
+
+        $unused = $loader->diffUsed([
+            new UsedTranslationRecord('messages.options.nested', 'en', __FILE__, __LINE__),
+        ]);
+        $this->assertContains('messages.options.nested.label', array_column(array_filter(
+            $unused,
+            static fn (array $item): bool => 'en' === $item['locale'],
+        ), 'key'));
+
+        $unused = $loader->diffUsed([
+            new UsedTranslationRecord('messages.options', '*', __FILE__, __LINE__),
+        ]);
+        $this->assertSame([
+            ['locale' => 'en', 'key' => 'messages.optionsExtra'],
+        ], array_map(
+            static fn (array $item): array => ['locale' => $item['locale'], 'key' => $item['key']],
+            $unused,
+        ));
     }
 
     public function testFlexibleLocalesUseCanonicalLookupKeys(): void

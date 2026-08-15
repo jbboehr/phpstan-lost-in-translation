@@ -658,12 +658,14 @@ This completed the first of the six reported items.
 `InvalidChoiceRule` now mirrors Laravel's `Translator::choice()` boundary by converting array and `Countable` members
 of the inferred number type to their possible counts before checking explicit condition coverage. Arrays retain
 PHPStan's inferred size, including exact and non-empty bounds; other `Countable` objects use `int<0, max>`. The
-conversion preserves non-countable union members, so valid counted inputs no longer emit `missingCase` while a counted
-collection still requires every possible count. Rule coverage includes fixed-size, empty, non-empty, and general lists,
-`Countable`, an `ArrayAccess&Countable` intersection, and a union of counted and numeric inputs.
+conversion preserves supported numeric union members, so valid counted inputs no longer emit `missingCase` while a
+counted collection still requires every possible count. Rule coverage includes fixed-size, empty, non-empty, and general
+lists, `Countable`, an `ArrayAccess&Countable` intersection, and a union of counted and numeric inputs.
 
-This completed the second of the six reported items. The issue's separate, lower-priority observation about redundant
-coverage errors for inputs rejected by PHPStan remains unaddressed.
+This completed the second of the six reported items. A follow-up also filters members PHPStan cannot prove belong to
+Laravel's supported count domain out of coverage, rather than using `missingCase` as an argument-type diagnostic.
+PHPStan's configured argument rules remain responsible for invalid arguments, supported union members are still checked,
+and choice-syntax diagnostics remain independent of the count type.
 
 ### Laravel vendor translation namespaces
 
@@ -705,8 +707,7 @@ Missing-translation diagnostics no longer suggest the requested key itself when 
 The generic fuzzy-set contract still permits exact nearest-neighbor matches; the diagnostic layer suppresses the tip
 because only it knows that repeating a locale-missing key is not actionable. Genuine typo suggestions remain enabled.
 
-This completed all six reported issue #6 items. The separate lower-priority invalid-input diagnostic observation
-remains unaddressed.
+This completed all six reported issue #6 items and its lower-priority invalid-input diagnostic follow-up.
 
 ### Compiled Blade diagnostic paths
 

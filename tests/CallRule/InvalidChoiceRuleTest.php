@@ -40,6 +40,7 @@ use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
+use PHPStan\Type\StringType;
 use PHPStan\Type\UnionType;
 
 /**
@@ -199,6 +200,11 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 46,
                 Utils::formatTipForKeyValue('en', '[1,*] There are :count'),
             ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: int',
+                50,
+                Utils::formatTipForKeyValue('en', '{1} There is one'),
+            ],
         ]);
     }
 
@@ -253,6 +259,83 @@ class InvalidChoiceRuleTest extends RuleTestCase
 
             $this->assertCount(1, $errors);
             $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_CASE, $errors[0]->getIdentifier());
+        }
+    }
+
+    public function testUnsupportedNumberTypesDoNotProduceCoverageNoise(): void
+    {
+        foreach (
+            [
+                ['{1} selected', new StringType(), []],
+                [
+                    '{1} selected',
+                    new UnionType([new StringType(), new ConstantIntegerType(1)]),
+                    [],
+                ],
+                [
+                    '{1.5} selected',
+                    new UnionType([new StringType(), new ConstantFloatType(1.5)]),
+                    [],
+                ],
+                [
+                    '{1} selected',
+                    new UnionType([new StringType(), new IntegerType()]),
+                    [[
+                        InvalidChoiceRule::IDENTIFIER_MISSING_CASE,
+                        'Explicit translation choice conditions do not cover all possible cases for number of type: int',
+                    ]],
+                ],
+                [
+                    '{1 selected',
+                    new StringType(),
+                    [[
+                        InvalidChoiceRule::IDENTIFIER_MALFORMED,
+                        'Failed to parse translation choice: "{1 selected"',
+                    ]],
+                ],
+                ['{1} selected', new MixedType(), []],
+                [
+                    '{1} selected',
+                    new UnionType([
+                        new ArrayType(new MixedType(), new MixedType()),
+                        new StringType(),
+                    ]),
+                    [[
+                        InvalidChoiceRule::IDENTIFIER_MISSING_CASE,
+                        'Explicit translation choice conditions do not cover all possible cases for number of type: int<0, max>',
+                    ]],
+                ],
+                [
+                    '{1} selected',
+                    new UnionType([new ObjectType(\Countable::class), new StringType()]),
+                    [[
+                        InvalidChoiceRule::IDENTIFIER_MISSING_CASE,
+                        'Explicit translation choice conditions do not cover all possible cases for number of type: int<0, max>',
+                    ]],
+                ],
+            ] as [$value, $numberType, $expectedErrors]
+        ) {
+            $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $value => [['en', null]],
+                ],
+                keyType: new ConstantStringType($value),
+                numberType: $numberType,
+                isChoice: true,
+            ));
+
+            $this->assertSame(
+                $expectedErrors,
+                array_map(
+                    static fn(IdentifierRuleError $error): array => [$error->getIdentifier(), $error->getMessage()],
+                    $errors,
+                ),
+                $value . ' with ' . $numberType->describe(\PHPStan\Type\VerbosityLevel::precise()),
+            );
         }
     }
 

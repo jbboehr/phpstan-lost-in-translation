@@ -71,10 +71,10 @@ that regression then participates in mutation testing.
 
 ## Reviewed baseline
 
-The complete PHP 8.4 campaign on 2026-08-14 generated 1,164 mutants. PHPUnit
-killed 965 and 199 escaped, for 100% mutation code coverage and a covered-code
-MSI of 82.90%. With 100% mutation code coverage, the overall MSI is also
-82.90%. Both 80-point gates leave 2.90 percentage points of margin. No mutants
+The complete PHP 8.4 campaign on 2026-08-14 generated 1,173 mutants. PHPUnit
+killed 974 and 199 escaped, for 100% mutation code coverage and a covered-code
+MSI of 83.03%. With 100% mutation code coverage, the overall MSI is also
+83.03%. Both 80-point gates leave 3.03 percentage points of margin. No mutants
 are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
@@ -88,8 +88,9 @@ The review added focused assertions for these observable contracts:
 - choice parsing distinguishes malformed conditions from ordinary text,
   reports multiple bad conditions, accepts multiline text, and optionally
   reports incomplete locale-specific plural forms; choice coverage also
-  normalizes counted inputs without discarding other union members and checks
-  fractional exact values and inclusive ranges against Laravel's selector;
+  normalizes counted inputs, excludes unsupported count members without
+  discarding supported union members, and checks fractional exact values and
+  inclusive ranges against Laravel's selector;
 - replacement validation checks every locale and applies Unicode-aware title
   casing;
 - namespaced and mixed-case translation helper calls follow PHP function

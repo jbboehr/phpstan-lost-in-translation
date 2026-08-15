@@ -207,10 +207,15 @@ final class InvalidChoiceRule implements CallRuleInterface
                 continue;
             }
 
-            $normalizedNumberTypes[] = $candidateType;
+            if ($candidateType->isInteger()->yes() || $candidateType->isFloat()->yes()) {
+                $normalizedNumberTypes[] = $candidateType;
+            }
         }
 
-        $numberType = TypeCombinator::union(...$normalizedNumberTypes);
+        $hasSupportedNumberType = [] !== $normalizedNumberTypes;
+        $numberType = $hasSupportedNumberType
+            ? TypeCombinator::union(...$normalizedNumberTypes)
+            : new NeverType();
 
         $segments = explode('|', $value);
         $errors = [];
@@ -434,6 +439,7 @@ final class InvalidChoiceRule implements CallRuleInterface
             && !$hasInvalidCondition
             && !$hasUniversalNumericCondition
             && $hasNumericCondition
+            && $hasSupportedNumberType
             && (
                 null === $unionType
                 || (

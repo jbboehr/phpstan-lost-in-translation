@@ -289,6 +289,9 @@ malformed conditions and invalid bounds will still be reported while `invalidCho
 Fractional exact values and ranges use Laravel's inclusive numeric comparisons. Constant float counts are checked
 precisely, and fractional ranges are projected onto inferred integer domains by rounding the lower bound up and the
 upper bound down.
+Choice coverage uses only count members that PHPStan can prove Laravel supports. Other members do not produce a
+cascading `missingCase`; PHPStan's configured argument rules remain responsible for invalid arguments. Supported members
+of a union are still checked for complete coverage.
 
 For stricter translation-quality checking, enable `requireCompletePluralForms`. This opt-in warning reports an
 unconditioned choice when it provides fewer positional forms than the locale can select. It uses the configured

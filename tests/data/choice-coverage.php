@@ -44,3 +44,7 @@ trans_choice('{1} There is one', [1, 2], [], 'en');
 /** A general Countable may be empty. */
 /** @var \Countable $countableWithoutZero */
 trans_choice('[1,*] There are :count', $countableWithoutZero, [], 'en');
+
+/** Coverage retains the supported member and omits the unsupported member. */
+/** @var int|string $partiallySupported */
+trans_choice('{1} There is one', $partiallySupported, [], 'en');

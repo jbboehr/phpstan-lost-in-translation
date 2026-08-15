@@ -667,6 +667,18 @@ Laravel's supported count domain out of coverage, rather than using `missingCase
 PHPStan's configured argument rules remain responsible for invalid arguments, supported union members are still checked,
 and choice-syntax diagnostics remain independent of the count type.
 
+### Non-constant float choice coverage
+
+**Status:** Complete as a choice-coverage follow-up.
+
+Choice coverage now evaluates non-constant `float` members against the union of parsed inclusive numeric intervals.
+Overlapping ranges that extend from negative to positive infinity therefore cover the real-number domain regardless of
+source order. Integer, array, and `Countable` members retain the integer projection, so `[*,0]` plus `[1,*]` covers an
+integer while correctly leaving a gap for `float` and `int|float`. Constant floats continue to use exact comparisons.
+Their exact values are retained when they appear beside a non-constant integer member, instead of being lost when the
+normalized union is recombined. Focused coverage checks Laravel's selector directly and exercises PHPStan-inferred
+`float`, `int|float`, and mixed constant-float unions without using the end-to-end subprocess.
+
 ### Laravel vendor translation namespaces
 
 **Status:** Complete for item 3 of GitHub issue #6.

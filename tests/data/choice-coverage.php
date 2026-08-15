@@ -48,3 +48,21 @@ trans_choice('[1,*] There are :count', $countableWithoutZero, [], 'en');
 /** Coverage retains the supported member and omits the unsupported member. */
 /** @var int|string $partiallySupported */
 trans_choice('{1} There is one', $partiallySupported, [], 'en');
+
+/** @var float $realNumber */
+trans_choice('[*,0] zero|[0,*] other', $realNumber, [], 'en');
+
+/** Adjacent integer ranges leave a gap in the real-number domain. */
+trans_choice('[*,0] zero|[1,*] other', $realNumber, [], 'en');
+
+/** @var int|float $integerOrRealNumber */
+trans_choice('[*,0] zero|[0,*] other', $integerOrRealNumber, [], 'en');
+
+/** The float member retains the gap even though the integer member is covered. */
+trans_choice('[*,0] zero|[1,*] other', $integerOrRealNumber, [], 'en');
+
+/** @var int|1.5 $integerOrCoveredFloat */
+trans_choice('[*,0] zero|[1,*] other', $integerOrCoveredFloat, [], 'en');
+
+/** @var int|0.5 $integerOrUncoveredFloat */
+trans_choice('[*,0] zero|[1,*] other', $integerOrUncoveredFloat, [], 'en');

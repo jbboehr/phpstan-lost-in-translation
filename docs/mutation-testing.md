@@ -71,10 +71,10 @@ that regression then participates in mutation testing.
 
 ## Reviewed baseline
 
-The complete PHP 8.4 campaign on 2026-08-14 generated 1,173 mutants. PHPUnit
-killed 974 and 199 escaped, for 100% mutation code coverage and a covered-code
-MSI of 83.03%. With 100% mutation code coverage, the overall MSI is also
-83.03%. Both 80-point gates leave 3.03 percentage points of margin. No mutants
+The complete PHP 8.4 campaign on 2026-08-14 generated 1,201 mutants. PHPUnit
+killed 1,002 and 199 escaped, for 100% mutation code coverage and a covered-code
+MSI of 83.43%. With 100% mutation code coverage, the overall MSI is also
+83.43%. Both 80-point gates leave 3.43 percentage points of margin. No mutants
 are hidden by source exclusions or Infection ignore rules.
 
 The review added focused assertions for these observable contracts:
@@ -89,8 +89,9 @@ The review added focused assertions for these observable contracts:
   reports multiple bad conditions, accepts multiline text, and optionally
   reports incomplete locale-specific plural forms; choice coverage also
   normalizes counted inputs, excludes unsupported count members without
-  discarding supported union members, and checks fractional exact values and
-  inclusive ranges against Laravel's selector;
+  discarding supported union members, checks fractional exact values, and
+  distinguishes discrete integer coverage from merged inclusive real-number
+  coverage for nonconstant floats against Laravel's selector;
 - replacement validation checks every locale and applies Unicode-aware title
   casing;
 - namespaced and mixed-case translation helper calls follow PHP function
@@ -110,7 +111,7 @@ gate.
 | Component | Survivors | Classification and disposition |
 | --- | ---: | --- |
 | Translation discovery and loaders | 69 | Mixed parser, path, flattening, and defensive-boundary variants. Retain for future focused loader work; do not weaken loader assertions or ignore the whole component. |
-| Call parsing and diagnostic rules | 79 | Mixed PHPStan type relationships, numeric-boundary projections, plural-policy table branches, fallback values, and multi-result control flow. Prioritize regressions tied to an observed application diagnostic. Structurally one-item return mutations are equivalent where a rule can emit at most one error. |
+| Call parsing and diagnostic rules | 79 | Mixed PHPStan type relationships, numeric-boundary projections, plural-policy table branches, fallback values, and multi-result control flow. The two explicit integer-to-float cast mutations are equivalent because PHP already promotes the numeric bounds for the float-domain comparisons. Prioritize regressions tied to an observed application diagnostic. Structurally one-item return mutations are equivalent where a rule can emit at most one error. |
 | Fuzzy implementations | 23 | Mostly alternate pruning, tie, and internal-index behavior. The `NaiveFuzzyStringSet` membership-map boolean mutations are equivalent because membership uses `isset()`. Test externally visible suggestions; do not couple tests to the optional index algorithm. |
 | JSON error formatter | 16 | Output aggregation and JSON-option variants. Exit status and pretty defaults are covered; add exact-output cases when a consumer requires a currently unasserted encoding detail. |
 | Blade marker bounds | 6 | Equivalent for Bladestan's positive compiled lines and marker-before-call layout. The valid boundary contract is covered, so these are documented rather than ignored by broad line-number mutator rules. |

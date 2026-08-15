@@ -37,6 +37,7 @@ use PHPStan\Type\ArrayType;
 use PHPStan\Type\Constant\ConstantFloatType;
 use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\Constant\ConstantStringType;
+use PHPStan\Type\FloatType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
@@ -204,6 +205,21 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 'Explicit translation choice conditions do not cover all possible cases for number of type: int',
                 50,
                 Utils::formatTipForKeyValue('en', '{1} There is one'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: float',
+                56,
+                Utils::formatTipForKeyValue('en', '[*,0] zero|[1,*] other'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: float|int',
+                62,
+                Utils::formatTipForKeyValue('en', '[*,0] zero|[1,*] other'),
+            ],
+            [
+                'Explicit translation choice conditions do not cover all possible cases for number of type: 0.5|int',
+                68,
+                Utils::formatTipForKeyValue('en', '[*,0] zero|[1,*] other'),
             ],
         ]);
     }
@@ -392,6 +408,66 @@ class InvalidChoiceRuleTest extends RuleTestCase
                 $shouldSelect ? [] : [InvalidChoiceRule::IDENTIFIER_MISSING_CASE],
                 array_map(static fn(IdentifierRuleError $error): string => $error->getIdentifier(), $errors),
                 sprintf('%s with %s', $value, $number),
+            );
+        }
+    }
+
+    public function testCompleteChoiceCoverageUsesTheRealNumberDomain(): void
+    {
+        $selector = new MessageSelector();
+        $completeValue = '[*,0] zero|[0,*] other';
+
+        foreach ([[-1.5, 'zero'], [0.0, 'zero'], [1.5, 'other']] as [$number, $expected]) {
+            /** @phpstan-ignore-next-line argument.type Laravel supports floats despite the stale method PHPDoc. */
+            $this->assertSame($expected, $selector->choose($completeValue, $number, 'en'));
+        }
+
+        foreach (
+            [
+                [$completeValue, new FloatType(), false],
+                ['[0,*] other|[*,0] zero', new FloatType(), false],
+                ['[*,1] lower|[0,*] upper', new FloatType(), false],
+                ['[*,0] lower|[1,*] upper', new FloatType(), true],
+                ['[*,0] lower|[1,*] upper', new IntegerType(), false],
+                [
+                    $completeValue,
+                    new UnionType([new IntegerType(), new FloatType()]),
+                    false,
+                ],
+                [
+                    '[*,0] lower|[1,*] upper',
+                    new UnionType([new IntegerType(), new FloatType()]),
+                    true,
+                ],
+                [
+                    '[*,0] lower|[1,*] upper',
+                    new UnionType([new IntegerType(), new ConstantFloatType(1.5)]),
+                    false,
+                ],
+                [
+                    '[*,0] lower|[1,*] upper',
+                    new UnionType([new IntegerType(), new ConstantFloatType(0.5)]),
+                    true,
+                ],
+            ] as [$value, $numberType, $expectsMissingCase]
+        ) {
+            $errors = (new InvalidChoiceRule())->processCall(new TranslationCall(
+                className: null,
+                functionName: 'trans_choice',
+                file: __FILE__,
+                line: 123,
+                possibleTranslations: [
+                    $value => [['en', null]],
+                ],
+                keyType: new ConstantStringType($value),
+                numberType: $numberType,
+                isChoice: true,
+            ));
+
+            $this->assertSame(
+                $expectsMissingCase ? [InvalidChoiceRule::IDENTIFIER_MISSING_CASE] : [],
+                array_map(static fn(IdentifierRuleError $error): string => $error->getIdentifier(), $errors),
+                $value . ' with ' . $numberType->describe(\PHPStan\Type\VerbosityLevel::precise()),
             );
         }
     }

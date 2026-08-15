@@ -288,7 +288,8 @@ are **enabled by default**. Disable only the explicit-condition warning with `re
 malformed conditions and invalid bounds will still be reported while `invalidChoices` remains enabled.
 Fractional exact values and ranges use Laravel's inclusive numeric comparisons. Constant float counts are checked
 precisely, and fractional ranges are projected onto inferred integer domains by rounding the lower bound up and the
-upper bound down.
+upper bound down. For non-constant float counts, overlapping inclusive ranges are merged across the real-number domain;
+integer-adjacent ranges such as `[*,0]` and `[1,*]` still leave a fractional gap.
 Choice coverage uses only count members that PHPStan can prove Laravel supports. Other members do not produce a
 cascading `missingCase`; PHPStan's configured argument rules remain responsible for invalid arguments. Supported members
 of a union are still checked for complete coverage.

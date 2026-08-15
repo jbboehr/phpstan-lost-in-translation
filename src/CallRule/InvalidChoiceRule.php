@@ -29,7 +29,6 @@ use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
 use PHPStan\Type\Constant\ConstantFloatType;
-use PHPStan\Type\Constant\ConstantIntegerType;
 use PHPStan\Type\IntegerRangeType;
 use PHPStan\Type\NeverType;
 use PHPStan\Type\ObjectType;
@@ -195,26 +194,51 @@ final class InvalidChoiceRule implements CallRuleInterface
         // Laravel counts arrays and Countable objects before passing the number to its message selector.
         $countableType = new ObjectType(\Countable::class);
         $normalizedNumberTypes = [];
+        $discreteNumberTypes = [];
+        /** @var list<ConstantFloatType> $constantFloatNumberTypes */
+        $constantFloatNumberTypes = [];
+        $hasGeneralFloatNumberType = false;
 
         foreach ($numberType instanceof UnionType ? $numberType->getTypes() : [$numberType] as $candidateType) {
             if ($candidateType->isArray()->yes()) {
-                $normalizedNumberTypes[] = $candidateType->getArraySize();
+                $arraySizeType = $candidateType->getArraySize();
+                $normalizedNumberTypes[] = $arraySizeType;
+                $discreteNumberTypes[] = $arraySizeType;
                 continue;
             }
 
             if ($countableType->isSuperTypeOf($candidateType)->yes()) {
-                $normalizedNumberTypes[] = IntegerRangeType::fromInterval(0, null);
+                $countType = IntegerRangeType::fromInterval(0, null);
+                $normalizedNumberTypes[] = $countType;
+                $discreteNumberTypes[] = $countType;
                 continue;
             }
 
-            if ($candidateType->isInteger()->yes() || $candidateType->isFloat()->yes()) {
+            if ($candidateType->isInteger()->yes()) {
                 $normalizedNumberTypes[] = $candidateType;
+                $discreteNumberTypes[] = $candidateType;
+                continue;
+            }
+
+            if ($candidateType->isFloat()->yes()) {
+                $normalizedNumberTypes[] = $candidateType;
+
+                if ($candidateType instanceof ConstantFloatType) {
+                    $discreteNumberTypes[] = $candidateType;
+                    $constantFloatNumberTypes[] = $candidateType;
+                } else {
+                    $hasGeneralFloatNumberType = true;
+                }
             }
         }
 
         $hasSupportedNumberType = [] !== $normalizedNumberTypes;
         $numberType = $hasSupportedNumberType
             ? TypeCombinator::union(...$normalizedNumberTypes)
+            : new NeverType();
+        $hasDiscreteNumberType = [] !== $discreteNumberTypes;
+        $discreteNumberType = $hasDiscreteNumberType
+            ? TypeCombinator::union(...$discreteNumberTypes)
             : new NeverType();
 
         $segments = explode('|', $value);
@@ -409,14 +433,7 @@ final class InvalidChoiceRule implements CallRuleInterface
         }
 
         if (!$hasInvalidCondition && [] !== $numericConditions) {
-            foreach ($numberType->getConstantScalarTypes() as $constantNumberType) {
-                if (
-                    !($constantNumberType instanceof ConstantIntegerType)
-                    && !($constantNumberType instanceof ConstantFloatType)
-                ) {
-                    continue;
-                }
-
+            foreach ($constantFloatNumberTypes as $constantNumberType) {
                 $number = $constantNumberType->getValue();
 
                 foreach ($numericConditions as [$numericFrom, $numericTo]) {
@@ -433,6 +450,45 @@ final class InvalidChoiceRule implements CallRuleInterface
             }
         }
 
+        $hasCompleteFloatCoverage = !$hasGeneralFloatNumberType;
+
+        if ($hasGeneralFloatNumberType && !$hasInvalidCondition && [] !== $numericConditions) {
+            /** @var list<array{float, float}> $floatConditions */
+            $floatConditions = [];
+
+            foreach ($numericConditions as [$numericFrom, $numericTo]) {
+                // Float coverage follows PHP's binary64 comparisons. The integer projection above
+                // retains exact integral bounds for the discrete count domain.
+                $floatFrom = null === $numericFrom ? -INF : (float) $numericFrom;
+                $floatTo = null === $numericTo ? INF : (float) $numericTo;
+                $floatConditions[] = [$floatFrom, $floatTo];
+            }
+
+            usort(
+                $floatConditions,
+                static fn (array $left, array $right): int => $left[0] <=> $right[0],
+            );
+
+            $coveredTo = -INF;
+
+            foreach ($floatConditions as [$floatFrom, $floatTo]) {
+                if ($floatFrom <= $coveredTo) {
+                    $coveredTo = max($coveredTo, $floatTo);
+                }
+            }
+
+            $hasCompleteFloatCoverage = INF === $coveredTo;
+        }
+
+        $hasIncompleteDiscreteCoverage = $hasDiscreteNumberType
+            && (
+                null === $unionType
+                || (
+                    !$unionType->accepts($discreteNumberType, true)->yes()
+                    && !(TypeCombinator::remove($discreteNumberType, $unionType) instanceof NeverType)
+                )
+            );
+
         if (
             $this->requireCompleteChoiceCoverage
             && !$hasUnconditionedSegment
@@ -440,13 +496,7 @@ final class InvalidChoiceRule implements CallRuleInterface
             && !$hasUniversalNumericCondition
             && $hasNumericCondition
             && $hasSupportedNumberType
-            && (
-                null === $unionType
-                || (
-                    !$unionType->accepts($numberType, true)->yes()
-                    && !(TypeCombinator::remove($numberType, $unionType) instanceof NeverType)
-                )
-            )
+            && ($hasIncompleteDiscreteCoverage || !$hasCompleteFloatCoverage)
         ) {
             $errors[] = RuleErrorBuilder::message(sprintf(
                 'Explicit translation choice conditions do not cover all possible cases for number of type: %s',

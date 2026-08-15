@@ -6,15 +6,30 @@
 ![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)
 <!-- agent-badge:start -->[![AI burn](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fjbboehr%2F1238801db4d132c97c1f32346be14450%2Fraw%2Fagent-badge.json&cacheSeconds=300)](https://github.com/arlegotin/agent-badge)<!-- agent-badge:end -->
 
+A PHPStan extension for statically checking Laravel translations. It finds missing and possibly unused translation
+keys, validates replacements, plural choices, locales, encodings, and translation files, and can inspect calls in Blade
+templates through Bladestan.
+
+## What it catches
+
+- missing translations, including likely omissions from the base locale;
+- translation keys that are unused or cannot be inferred statically;
+- unused replacements and replacement keys that match multiple casing variants;
+- malformed or incomplete plural choices;
+- unknown locales, locale conflicts, and invalid character encodings; and
+- invalid translation-file values and parse failures.
+
 ## Installation
 
-To use this extension, require it in [Composer](https://getcomposer.org/):
+This project has not published its first stable release. While it remains experimental, install the current development
+branch explicitly:
 
 ```bash
-composer require --dev jbboehr/phpstan-lost-in-translation
+composer require --dev jbboehr/phpstan-lost-in-translation:dev-develop
 ```
 
-If you also install [phpstan/extension-installer](https://github.com/phpstan/extension-installer) then you're all set!
+When [phpstan/extension-installer](https://github.com/phpstan/extension-installer) is installed, Composer registers the
+extension automatically.
 
 ### Manual installation
 
@@ -25,22 +40,45 @@ includes:
     - vendor/jbboehr/phpstan-lost-in-translation/extension.neon
 ```
 
-## Additional Requirements
+## Recommended integrations
 
-While there is not a strict requirement, this extension will likely not function as expected without the
-following extra PHPStan extensions installed:
+Core PHP translation-call analysis does not require either integration. They provide additional Laravel-specific
+coverage:
 
-* [Larastan](https://github.com/larastan/larastan) - Provides better type inference for Laravel applications
-* [Bladestan](https://github.com/bladestan/bladestan) - Provides static analysis of Blade templates
+- [Larastan](https://github.com/larastan/larastan) improves Laravel-aware type inference.
+- [Bladestan](https://github.com/bladestan/bladestan) enables translation analysis inside reachable Blade templates.
+
+## Compatibility
+
+The validation matrix covers PHPStan 1.12 and 2.x with these Laravel and PHP combinations:
+
+| Laravel | Tested PHP versions |
+| --- | --- |
+| 9 | 8.1–8.2 |
+| 10 | 8.1–8.3 |
+| 11 | 8.2–8.5 |
+| 12 | 8.2–8.5 |
+| 13 | 8.3–8.5 |
+
+## Supported translation APIs
+
+| Form | Support |
+| --- | --- |
+| `__('key')` | Supported |
+| `trans('key')` | Supported |
+| `trans_choice('key', $count)` | Supported |
+| `$translator->get('key')` | Supported when PHPStan infers Laravel's translator contract |
+| `$translator->choice('key', $count)` | Supported when PHPStan infers Laravel's translator contract |
+| `Lang::get('key')` | Supported |
+| `Lang::choice('key', $count)` | Supported |
+| Blade `__()` and `@lang` | Supported through Bladestan |
 
 ## Features
 
 ### Type inference
 
-Note that for most of the features below, we can only analyze any potential constant strings in the type of the
-variable passed into the translation function.
-**This takes advantage of [PHPStan](https://phpstan.org/)'s type inference.**
-For example, these should all be able to be analyzed correctly:
+Translation keys do not have to be literal strings at the call site. If PHPStan can infer a finite set of possible
+string values, Lost in Translation checks each value. For example:
 
 ```php
 $key = 'foo';
@@ -50,7 +88,6 @@ foreach (['foo', 'bar'] as $key) {
     __($key);
 }
 
-// this one seems to not be working atm :shrug:
 /** @return "foo"|"bar" */
 function getKey(): string {}
 __(getKey());
@@ -75,6 +112,9 @@ parameters:
         missingTranslationStrings: true
 ```
 
+Fuzzy suggestions are enabled by default. When a missing key resembles a known key, the diagnostic includes a
+`Did you mean ...?` tip. Set `fuzzySearch: false` if suggestion generation is too expensive for a large catalogue.
+
 <!-- akashi-example: missing-translation -->
 
 ```php
@@ -93,9 +133,7 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
  ------ -------------------------------------------------------------------------
 ```
 
-If [Larastan](https://github.com/larastan/larastan) is installed, there will be better type inference. If
-[Bladestan](https://github.com/bladestan/bladestan) is installed, it will be possible to inspect blade templates
-(you probably really want this).
+With Bladestan installed, calls in reachable Blade templates are included in the analysis.
 
 Bladestan runs compiled templates through a nested PHPStan analysis. By default,
 this extension bridges its diagnostics back through the outer analysis so error
@@ -177,9 +215,9 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v
  ------ --------------------------------------------------------------------------------------
 ```
 
-### Disallow dynamic translations strings
+### Disallow dynamic translation strings
 
-We can disallow using translations strings that are not statically known. **Disabled by default.**
+We can disallow using translation strings that are not statically known. **Disabled by default.**
 
 ```neon
 parameters:
@@ -336,7 +374,8 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
 
 ### Errors in translation files
 
-Errors in translation lines will be logged as well, including parse errors. **Enabled by default**.
+Translation-file loading and validation errors, including parse errors and unsupported values, are reported as well.
+**Enabled by default**.
 
 ```neon
 parameters:
@@ -480,14 +519,22 @@ $ phpstan analyse --configuration=e2e/phpstan-e2e.neon --no-progress -v e2e/src/
  ------ ------------------------------------------------------------------------------
 ```
 
+## Adopting the extension
+
+Start with the defaults, which enable the higher-confidence missing-key, replacement, choice, locale, encoding, and
+translation-file checks. After addressing those findings, consider enabling `unusedTranslationStrings`,
+`disallowDynamicTranslationStrings`, and `requireCompletePluralForms` one at a time. These stricter checks are disabled
+by default because existing applications often need an initial cleanup or a deliberate dynamic-key policy.
+
 ## Configuration
 
+<!-- configuration-reference:start -->
 ```neon
 parameters:
     lostInTranslation:
         # preserve translation identifiers, metadata, tips, and template locations across Bladestan's nested analysis
         bridgeBladeDiagnostics: true
-        # should translation keys with types not statically known be allowed?
+        # report translation keys whose values PHPStan cannot infer statically
         disallowDynamicTranslationStrings: false
         # strings in the base locale won't be reported as missing, unless they contain a group. May use value set in Laravel if unconfigured.
         baseLocale: null
@@ -507,17 +554,20 @@ parameters:
         invalidLocales: true
         # should we analyze translation replacements for invalid values?
         invalidReplacements: true
-        # look for similar keys? might want to disable this, a bit slow
+        # attach similar known-key suggestions to missing-translation diagnostics
         fuzzySearch: true
-        # look for missing translation strings? (main feature)
+        # report missing translation strings
         missingTranslationStrings: true
         # report translation strings in the base locale that might be missing a translation (usually in `lang/*/*.php`)
         missingTranslationStringsInBaseLocale: true
         # allow more flexible locale identifiers
         strictLocales: false
+        # report parse failures, invalid values, locale conflicts, and other translation-loader diagnostics
+        translationLoaderErrors: true
         # aggregate used translations and diff with the full locale database to detect potentially unused translations
         unusedTranslationStrings: false
 ```
+<!-- configuration-reference:end -->
 
 The translation scanner currently supports these layouts inside `langPath`:
 

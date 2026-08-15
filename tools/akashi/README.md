@@ -15,5 +15,6 @@ Run the check from the repository root with:
 nix develop .#documentation --command composer docs:check
 ```
 
-The initial corpus covers translation-call diagnostics. Blade, configuration, translation-file, console-output, and
+The corpus covers marked translation-call diagnostics and verifies that the public configuration reference has exactly
+the keys declared by both the extension schema and its defaults. Blade, translation-file, console-output, and
 type-inference examples remain in the README but are not executable PHPStan examples in this harness.

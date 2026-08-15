@@ -19,4 +19,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-[Unreleased]: https://github.com/jbboehr/phpstan-lost-in-translation/commits/master
+[Unreleased]: https://github.com/jbboehr/phpstan-lost-in-translation/compare/v0.1.0...HEAD

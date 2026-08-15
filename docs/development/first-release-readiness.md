@@ -1,51 +1,51 @@
 # First-release readiness
 
 **Audited:** 2026-08-14 (America/Los_Angeles)<br>
-**Updated:** 2026-08-15 after the default-branch cutover<br>
+**Updated:** 2026-08-15 after `v0.1.0` publication<br>
 **Initial source:** `develop` at `50e3e2e` (`Add mdBook user guide`)<br>
-**Release candidate:** `master` and `develop` at `1b0fb11` (`Refresh BookStack canary diagnostics`)<br>
+**Release:** `v0.1.0` at `41d8aa4` (`Update first release readiness`)<br>
 **Scope:** Package metadata, distributable archive, public documentation, dependency health, GitHub configuration,
 Packagist state, and release validation
 
 ## Decision summary
 
-The source release candidate is ready for the final repository-settings and publication decisions. `master` and
-`develop` now point to the same reviewed commit. Conventional CI, the exhaustive Nix matrix, Pages, and the pinned
-BookStack canary pass at that source revision; the shipped archive also passes an isolated PHPStan 1.12 consumer check,
-and the runtime dependency audit is clean.
+The first stable Composer version is published. The signed annotated `v0.1.0` tag points to `41d8aa4`, the synchronized
+`master` and `develop` tip at publication. Conventional CI, the exhaustive Nix matrix, and Pages pass at that commit;
+the pinned BookStack canary, shipped archive, isolated PHPStan 1.12 consumer, and runtime dependency audit also passed
+during release-candidate validation.
 
 The initial audit found `master` 57 commits behind `develop`, obsolete Packagist metadata, and no hosted guide. The
 default-branch cutover resolved those findings: Packagist now publishes current metadata for both development branches,
 and Pages is live. Repository metadata and protection changes were authorized on 2026-08-15, but the available GitHub
-token lacks repository-administration and workflow-write permissions. Their selected values are recorded under RR-04
-for the repository owner to apply before tagging or explicitly waive.
+token lacks repository-administration and workflow-write permissions. The release proceeded with an explicit waiver;
+the selected values remain recorded under RR-04 as deferred repository housekeeping.
 
-The selected first version is `0.1.0`. It gives Composer users a stable install while retaining the project's honest
-experimental, pre-1.0 compatibility signal. No tag or release has been created.
+Packagist indexes the tag as `v0.1.0`, normalized to `0.1.0.0`, with the current source reference, dependencies,
+description, and license. No GitHub Release object was created, by decision.
 
 ## Current state
 
 | Area | Observation | Release effect |
 | --- | --- | --- |
-| Source | `master` and `develop` both resolve to `1b0fb11`. | The reviewed default-branch cutover is complete. |
-| Tags and releases | The repository has no Git tags or GitHub releases. | The first release process has no legacy automation or numbering to preserve. |
+| Source | `master` and `develop` both resolved to `41d8aa4` at publication. | The tag points to the reviewed, synchronized branch tip. |
+| Tags and releases | Signed annotated tag `v0.1.0` points to `41d8aa4`; no GitHub Release object exists. | The first stable Composer version is published without separate GitHub release notes. |
 | Composer metadata | `composer.json` has the current description, PHP `^8.1`, PHPStan `^1.12 || ^2.0`, and `AGPL-3.0-only WITH romic-exception`. | Suitable for a pre-1.0 release. |
 | Package archive | `composer package:check` found the expected 53-file allowlisted archive and passed an isolated PHPStan 1.12 consumer. | The distributable contents and extension discovery are ready. |
 | Runtime dependencies | `composer audit --locked --no-dev` reports no advisories. | No known advisory affects the shipped dependency closure. |
 | Development dependencies | The full lock audit reports Laravel advisories and abandoned `doctrine/annotations`. Laravel 10 is present only under `require-dev` to test a supported compatibility boundary. | Do not ship these dependencies. Track supported-framework advisories without hiding them or dropping compatibility silently. |
-| Conventional CI | Run `31873777456` passed on `master` at `1b0fb11`. | Independent PHPUnit, PHPStan, php-cs-fixer, Composer validation, and runtime audit coverage is green. |
-| Nix CI | Run `31873777510` passed on `master` at `1b0fb11`, including mutation and the PHP/Laravel matrix. | Reproducible compatibility, documentation, consumer, coverage, property, and mutation checks are green. |
+| Conventional CI | Run `31875010500` passed on `master` at `41d8aa4`. | Independent PHPUnit, PHPStan, php-cs-fixer, Composer validation, and runtime audit coverage is green. |
+| Nix CI | Run `31875010484` passed on `master` at `41d8aa4`, including mutation and the PHP/Laravel matrix. | Reproducible compatibility, documentation, consumer, coverage, property, and mutation checks are green. |
 | BookStack canary | Run `31873535591` passed at `1b0fb11` under `develop` before the identical commit became `master`. A branch-specific redispatch was rejected with HTTP 403. | The release source is validated; redispatch from `master` when workflow-write credentials are available if branch-labelled evidence is required. |
-| User documentation | README and `docs/usage/` advertise `^0.1`. Pages run `31873777475` passed from `master`; the guide is live at `https://jbboehr.github.io/phpstan-lost-in-translation/`. | Hosted documentation is ready; the Composer constraint will resolve after the `0.1.0` tag is published. |
-| Packagist | `dev-master` and `dev-develop` both resolve to `1b0fb11` with the current description, dependencies, and license. | The public development branches now represent the reviewed package. |
-| GitHub metadata | The description remains the older missing-strings-only summary, no homepage is set, and `master` remains unprotected because the authorized update received HTTP 403. | Apply the selected RR-04 settings with repository-administration credentials before tagging or explicitly waive them. |
-| Changelog | `CHANGELOG.md` is the intentionally empty Keep a Changelog skeleton. | Preserve the prior decision not to add entries before the first tag. Begin normal entries after the first-tag baseline. |
+| User documentation | README and `docs/usage/` advertise the resolvable `^0.1` constraint. Pages run `31875010487` passed from `master`; the guide is live at `https://jbboehr.github.io/phpstan-lost-in-translation/`. | Hosted installation documentation matches the published version. |
+| Packagist | `v0.1.0` resolves to `41d8aa4` with the current description, dependencies, and license. | Ordinary stable Composer installations now resolve without a development stability override. |
+| GitHub metadata | The description remains the older missing-strings-only summary, no homepage is set, and `master` remains unprotected because the authorized update received HTTP 403. | RR-04 was waived for `v0.1.0`; apply the selected settings later with repository-administration credentials. |
+| Changelog | `CHANGELOG.md` retains an empty `Unreleased` section whose comparison now begins at `v0.1.0`. | The first tag is the baseline; subsequent notable changes are recorded without reconstructing pre-tag history. |
 
 ## Release blockers
 
 ### RR-01 — Reconcile `develop` with the default branch
 
-**Status:** Resolved. The authorized fast-forward aligned `master` and `develop` at `1b0fb11`.
+**Status:** Resolved. The authorized fast-forwards aligned `master` and `develop` through the released `41d8aa4` tip.
 
 `master` is the source of Packagist's default development version and the trigger for documentation deployment. Tagging
 the current `develop` commit without first updating `master` would leave the repository landing page and Packagist's
@@ -82,7 +82,7 @@ the available token received HTTP 403.
 
 ### RR-04 — Make release-critical repository settings explicit
 
-**Status:** Decision complete; application blocked by the available token's repository-administration permissions.
+**Status:** Waived for `v0.1.0`; retained as deferred repository housekeeping.
 
 The selected policy preserves the current solo direct-push workflow while preventing destructive history changes:
 
@@ -97,13 +97,13 @@ choices, locales, files, and Blade usage`. The selected homepage is
 `https://jbboehr.github.io/phpstan-lost-in-translation/`.
 
 Applying the description, homepage, protection, and branch-specific BookStack dispatch through the current token each
-received HTTP 403. The settings remain unchanged. Apply them with repository-administration credentials before tagging,
-or record an explicit decision to release without them.
+received HTTP 403. The settings remained unchanged when `v0.1.0` was published under explicit authorization. Apply them
+later with repository-administration credentials; they are no longer tracked as first-release blockers.
 
 ## Not release blockers
 
-- A dedicated release workflow is unnecessary for the first tag. A deliberate manual annotated tag and GitHub release
-  are easier to audit; automation can follow an observed repetitive process.
+- A dedicated release workflow was unnecessary for the first tag. The manually created signed annotated tag is the
+  complete release artifact; no GitHub Release object was requested or created.
 - The development-only Laravel advisories do not affect the shipped archive or runtime dependency closure. Compatibility
   locks must still be reviewed and refreshed where patched versions remain within the tested bounds.
 - GitHub's simplified license detector may not display the Romic Exception. The shipped SPDX expression and license
@@ -153,8 +153,8 @@ default-branch cutover in Slice 4.
 
 ### Slice 4 — Default-branch cutover
 
-**Status:** Source cutover and validation complete at `1b0fb11`; authorized repository settings remain blocked by token
-permissions under RR-04.
+**Status:** Complete. The branches were synchronized through the released `41d8aa4` tip; authorized repository settings
+were waived for `v0.1.0` after the available token received HTTP 403.
 
 The authorized fast-forward aligned `master` and `develop`. Conventional CI, the Nix matrix, and Pages passed from
 `master`. The BookStack canary passed at the same commit immediately before the cutover; a branch-specific repeat could
@@ -162,9 +162,9 @@ not be dispatched with the current token. Packagist now resolves both developmen
 
 ### Slice 5 — First tag and publication verification
 
-With explicit authorization, create the selected tag on the validated `master` commit and publish the GitHub release.
-Verify that Packagist discovers the tag, exposes the current dependencies and license, and accepts the documented
-Composer install command. Do not create a tag or release as an incidental part of another slice.
+**Status:** Complete. Signed annotated tag `v0.1.0` points to `41d8aa4`. Packagist indexes it as stable version `0.1.0`
+with the current source reference, description, dependencies, and license, and Composer exposes it as an installable
+version. No GitHub Release object was requested or created.
 
 ## Initial audit evidence
 
@@ -198,3 +198,15 @@ the initial evidence remains here rather than being rewritten as if those findin
 | Packagist metadata endpoint | `dev-master` and `dev-develop` resolve to `1b0fb11` with current metadata and licensing. |
 | GitHub repository API | The selected description, homepage, protection, and master-labelled BookStack dispatch were rejected with HTTP 403; settings remained unchanged. |
 | `git tag` and `gh release list` | No tags or releases exist. |
+
+## First-release publication evidence
+
+| Command or source | Result |
+| --- | --- |
+| GitHub tag API | Signed annotated tag `v0.1.0` has tag object `492ec92` and resolves to commit `41d8aa4`. |
+| GitHub conventional CI run `31875010500` | Passed from `master` at the released commit. |
+| GitHub Nix CI run `31875010484` | Passed every generated job from `master` at the released commit, including mutation. |
+| GitHub Pages run `31875010487` | Passed from `master`; the hosted guide advertises the released `^0.1` constraint. |
+| Packagist Composer metadata endpoint | Published `v0.1.0`, normalized to `0.1.0.0`, from source commit `41d8aa4`. |
+| `composer show --all jbboehr/phpstan-lost-in-translation` | Exposes `v0.1.0` with the current description and license. |
+| `gh release list` | Empty by decision; the tag is published without a GitHub Release object. |

@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Prevent invalid non-string translation values from aborting analysis when diagnostic rendering cannot JSON-encode
   them.
 - Match Laravel's falsey-locale fallback and PHP translation-array lookup semantics, including non-empty array parents
-  and exact literal dotted-key precedence.
+  and groups, exact literal dotted-key precedence, and root JSON precedence over identically named grouped items.
 - Deduplicate replacement diagnostics across constant-array variants.
 - Restrict Blade diagnostic and usage bridges to Bladestan's compiled-filename convention.
 

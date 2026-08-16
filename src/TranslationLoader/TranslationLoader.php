@@ -454,6 +454,7 @@ class TranslationLoader
         });
 
         $foundLocales = [];
+        $sourceExtensions = [];
 
         foreach ($files as $file) {
             $relativePathname = $file->getRelativePathname();
@@ -530,10 +531,16 @@ class TranslationLoader
                         ->file($file->getPathname())
                         ->line($line)
                         ->build();
+
+                    if ('json' === ($sourceExtensions[$localeKey][$namespace][$k] ?? null)) {
+                        // Laravel checks the root JSON catalogue before grouped PHP translations.
+                        continue;
+                    }
                 }
 
                 $this->data[$localeKey][$namespace][$k] = $v;
                 $this->locations[$localeKey . "\0" . $namespace . "\0" . $k] = [$filePath, $line];
+                $sourceExtensions[$localeKey][$namespace][$k] = $file->getExtension();
 
                 if (isset($resultArrayKeys[$k])) {
                     $this->arrayKeys[$localeKey][$namespace][$k] = true;

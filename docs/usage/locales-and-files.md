@@ -80,7 +80,9 @@ ultimately contain strings.
 
 Non-empty PHP array parents are valid translation lookups, matching Laravel's `Translator::get()` behavior. Using an
 array parent counts its returned string leaves as used. When a group contains both a literal dotted item and the same
-nested path, the literal item takes precedence as it does in Laravel's `Arr::get()`.
+nested path, the literal item takes precedence as it does in Laravel's `Arr::get()`. A root JSON key also takes
+precedence over an identically named grouped PHP item for an exact lookup; retrieving the whole PHP group still analyzes
+the group's returned string leaves.
 
 For example, numeric values in either format are reported at their source files:
 

@@ -82,7 +82,72 @@ final class PhpLoader
         $lineNumbers = self::dot($lineNumbers, $group);
         /** @var array<non-empty-string, int> $lineNumbers */
 
-        $raw = self::dot($raw, $group, true);
+        $validateRawValues = function (
+            array $values,
+            string $prepend,
+        ) use (
+            &$validateRawValues,
+            &$errors,
+            $file,
+            $lineNumbers,
+        ): void {
+            foreach ($values as $key => $value) {
+                $path = $prepend . '.' . $key;
+
+                if (is_array($value)) {
+                    $validateRawValues($value, $path);
+                    continue;
+                }
+
+                $line = $lineNumbers[$path] ?? -1;
+
+                if (!is_string($value)) {
+                    $encodedValue = json_encode($value);
+
+                    if (false === $encodedValue) {
+                        $encodedValue = is_float($value)
+                            ? (is_nan($value) ? 'NAN' : (0.0 > $value ? '-INF' : 'INF'))
+                            : get_debug_type($value);
+                    }
+
+                    $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", $encodedValue))
+                        ->identifier(self::IDENTIFIER)
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
+                    continue;
+                }
+
+                if ('' === $value || !$this->invalidCharacterEncodings) {
+                    continue;
+                }
+
+                if (!mb_check_encoding($path, 'UTF-8')) {
+                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for key: %s', Utils::e($path)))
+                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
+                }
+
+                if (!mb_check_encoding($value, 'UTF-8')) {
+                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for value: %s', Utils::e($value)))
+                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
+                        ->file($file->getPathname())
+                        ->line($line)
+                        ->build();
+                }
+            }
+        };
+        $validateRawValues($raw, $group);
+
+        $flattened = self::dot($raw, $group, true);
+
+        if ([] !== $raw) {
+            $flattened = [$group => $raw] + $flattened;
+        }
+
+        $raw = $flattened;
 
         /** @var array<non-empty-string, non-empty-string> $results */
         $results = [];
@@ -95,51 +160,23 @@ final class PhpLoader
 
             if (is_array($v)) {
                 $arrayKeys[] = $k;
-                $arrayValues = array_filter(
-                    self::dot($v),
-                    static fn (mixed $value): bool => is_string($value) && '' !== $value,
-                );
+                /** @var list<non-empty-string> $arrayValues */
+                $arrayValues = [];
+                array_walk_recursive($v, static function (mixed $value) use (&$arrayValues): void {
+                    if (is_string($value) && '' !== $value) {
+                        $arrayValues[] = $value;
+                    }
+                });
                 $v = [] === $arrayValues ? $k : implode("\n", $arrayValues);
             }
 
             if (!is_string($v)) {
-                $encodedValue = json_encode($v);
-
-                if (false === $encodedValue) {
-                    $encodedValue = is_float($v)
-                        ? (is_nan($v) ? 'NAN' : (0.0 > $v ? '-INF' : 'INF'))
-                        : get_debug_type($v);
-                }
-
-                $errors[] = RuleErrorBuilder::message(sprintf("Invalid value: %s", $encodedValue))
-                    ->identifier(self::IDENTIFIER)
-                    ->file($file->getPathname())
-                    ->line($line)
-                    ->build();
                 continue;
             }
 
             // discard empty keys and values
             if (strlen($v) <= 0) {
                 continue;
-            }
-
-            if ($this->invalidCharacterEncodings) {
-                if (!mb_check_encoding($k, 'UTF-8')) {
-                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for key: %s', Utils::e($k)))
-                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
-                        ->file($file->getPathname())
-                        ->line($line)
-                        ->build();
-                }
-
-                if (!mb_check_encoding($v, 'UTF-8')) {
-                    $errors[] = RuleErrorBuilder::message(sprintf('Invalid character encoding for value: %s', Utils::e($v)))
-                        ->identifier(InvalidCharacterEncodingRule::IDENTIFIER)
-                        ->file($file->getPathname())
-                        ->line($line)
-                        ->build();
-                }
             }
 
             $results[$k] = $v;

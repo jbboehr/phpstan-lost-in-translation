@@ -331,6 +331,14 @@ final class TranslationLoaderTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('Prefix sibling', $loader->searchForSimilarKeys('Prefix siblin'));
         $this->assertNull($loader->searchForSimilarKeys("Nested :nested\nTwo :name\nLabel :label"));
         $unused = $loader->diffUsed([
+            new UsedTranslationRecord('messages', 'en', __FILE__, __LINE__),
+        ]);
+        $this->assertSame([], array_filter(
+            $unused,
+            static fn (array $item): bool => 'en' === $item['locale'],
+        ));
+
+        $unused = $loader->diffUsed([
             new UsedTranslationRecord('messages.options', 'en', __FILE__, __LINE__),
         ]);
         $this->assertSame(['messages.optionsExtra'], array_column(array_filter(

@@ -5,7 +5,7 @@
 `invalidReplacements` is enabled by default. It reports replacement names absent from the selected translation value
 and names that match multiple casing variants such as `:foo` and `:FOO`.
 
-<!-- akashi-example: invalid-replacements -->
+<!-- akashi: example=invalid-replacements -->
 
 ```php
 <?php
@@ -41,7 +41,7 @@ Coverage uses only count members that PHPStan can prove Laravel supports. Unsupp
 cascading `missingCase`; PHPStan's configured argument rules remain responsible for invalid arguments. Supported
 members of a union are still checked.
 
-<!-- akashi-example: invalid-choice -->
+<!-- akashi: example=invalid-choice -->
 
 ```php
 <?php

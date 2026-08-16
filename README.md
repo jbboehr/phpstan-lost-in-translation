@@ -41,7 +41,7 @@ includes:
 
 Calls with statically inferable keys are checked against the application's translation files.
 
-<!-- akashi-example: missing-translation -->
+<!-- akashi: example=missing-translation -->
 
 ```php
 <?php

@@ -564,7 +564,8 @@ suite, with generated properties providing supplementary invariant coverage.
 ### Akashi-backed public documentation verification
 
 **Status:** Complete for public translation-call diagnostics and the configuration reference. Seven PHP examples in the
-README and `docs/usage/` are selected with invisible Akashi markers and analyzed against a dedicated language fixture.
+README and `docs/usage/` are selected with invisible canonical Akashi metadata and analyzed against a dedicated language
+fixture.
 The harness compares stable extension identifiers from an external expectation map together with their code-relative
 lines, so public snippets contain no tool-only expectation comments while diagnostic attribution remains covered. A
 separate test compares the documented configuration keys with both `parametersSchema` and the extension defaults.

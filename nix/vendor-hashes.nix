@@ -6,5 +6,5 @@
   laravel13 = "sha256-a63d/ABeJQ4DV0sgD73xxCM8MyRz1ujR1pGjdTexgg8=";
   lowest = "sha256-aJf4+b7ATaURHNhgCcqS19Qh0BpJEwyrpREE41+99qA=";
   eris = "sha256-ayU9E8tq1KsN7H+Wa1G86BY3NkL8LiQtj4vwkKv1OPM=";
-  akashi = "sha256-xMnNT2wAyDNjbVJfvXTK6rPmnxNf6NPjadfHVv09uqo=";
+  akashi = "sha256-uolYlahsSaTcd26rjViB8Zx1rNpzy25XnKlKWn/qyvY=";
 }

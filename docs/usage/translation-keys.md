@@ -30,7 +30,7 @@ The check classifies a string as a grouped key when its group and every dot-sepa
 `validation.custom.email.required`, and `package::group.nested.translation-key`. Full-sentence source strings are left
 alone. Calls without an explicit locale include the configured base locale even when it has no translation file.
 
-<!-- akashi-example: missing-base-translation -->
+<!-- akashi: example=missing-base-translation -->
 
 ```php
 <?php
@@ -82,7 +82,7 @@ parameters:
         disallowDynamicTranslationStrings: true
 ```
 
-<!-- akashi-example: dynamic-translation -->
+<!-- akashi: example=dynamic-translation -->
 
 ```php
 <?php

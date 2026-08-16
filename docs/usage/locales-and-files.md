@@ -26,7 +26,7 @@ parameters:
         strictLocales: true
 ```
 
-<!-- akashi-example: invalid-locale -->
+<!-- akashi: example=invalid-locale -->
 
 ```php
 <?php
@@ -56,7 +56,7 @@ whether they come from a call or a translation file.
 ];
 ```
 
-<!-- akashi-example: invalid-character-encoding-call -->
+<!-- akashi: example=invalid-character-encoding-call -->
 
 ```php
 <?php

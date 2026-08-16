@@ -102,7 +102,6 @@ final class DocumentationExamplesTest extends RuleTestCase
         $corpus = MarkdownSource::forProject($projectRoot)
             ->includeFile('README.md')
             ->includeDirectory('docs/usage')
-            ->withMarkerName('akashi-example')
             ->load();
         $temporaryDirectory = sys_get_temp_dir()
             . '/phpstan-lost-in-translation-akashi-'

@@ -18,12 +18,6 @@
 {
   description = "jbboehr/phpstan-lost-in-translation";
   inputs = {
-    akashi = {
-      url = "github:jbboehr/akashi.php/225cc33f61d5779791112fb6c3b0f473e9c8e5ae";
-      inputs.flake-utils.follows = "flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pre-commit-hooks.follows = "git-hooks";
-    };
     agent-badge = {
       url = "github:jbboehr/agent-badge.ts/4e8f892f443245cf9a32583034d3a155e9fdcb48";
       inputs.flake-utils.follows = "flake-utils";
@@ -58,7 +52,6 @@
   outputs =
     {
       self,
-      akashi,
       agent-badge,
       nixpkgs,
       systems,

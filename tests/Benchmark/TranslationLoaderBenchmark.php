@@ -34,7 +34,9 @@ final class TranslationLoaderBenchmark
 
     private const LOCALES = ['en', 'ja', 'zh'];
 
-    private string $fixturePath;
+    private string $fixturePath = '';
+
+    private string $phpFixturePath = '';
 
     private TranslationLoader $loader;
 
@@ -67,19 +69,59 @@ final class TranslationLoaderBenchmark
                 throw new \RuntimeException(sprintf('Failed to write the %s benchmark fixture', $locale));
             }
         }
+
+        $phpTemporaryPath = tempnam(sys_get_temp_dir(), 'lost-in-translation-php-benchmark-');
+        if (!is_string($phpTemporaryPath) || !unlink($phpTemporaryPath) || !mkdir($phpTemporaryPath . '/en', recursive: true)) {
+            throw new \RuntimeException('Failed to create the PHP benchmark fixture directory');
+        }
+
+        $this->phpFixturePath = $phpTemporaryPath;
+        $phpTranslations = [];
+
+        for ($index = 0; $index < self::ENTRY_COUNT; $index++) {
+            $phpTranslations[sprintf('section_%04d', $index)] = [
+                'label' => sprintf('Section label %04d', $index),
+                'nested' => [
+                    'value' => sprintf('Nested value %04d', $index),
+                ],
+            ];
+        }
+
+        $phpContents = "<?php\n\nreturn " . var_export($phpTranslations, true) . ";\n";
+        if (false === file_put_contents($this->phpFixturePath . '/en/messages.php', $phpContents)) {
+            throw new \RuntimeException('Failed to write the PHP benchmark fixture');
+        }
     }
 
     public function __destruct()
     {
-        foreach (self::LOCALES as $locale) {
-            $path = $this->fixturePath . '/' . $locale . '.json';
-            if (is_file($path)) {
-                unlink($path);
+        if ('' !== $this->fixturePath) {
+            foreach (self::LOCALES as $locale) {
+                $path = $this->fixturePath . '/' . $locale . '.json';
+                if (is_file($path)) {
+                    unlink($path);
+                }
+            }
+
+            if (is_dir($this->fixturePath)) {
+                rmdir($this->fixturePath);
             }
         }
 
-        if (is_dir($this->fixturePath)) {
-            rmdir($this->fixturePath);
+        if ('' !== $this->phpFixturePath) {
+            $phpTranslationFile = $this->phpFixturePath . '/en/messages.php';
+            if (is_file($phpTranslationFile)) {
+                unlink($phpTranslationFile);
+            }
+
+            $phpLocalePath = $this->phpFixturePath . '/en';
+            if (is_dir($phpLocalePath)) {
+                rmdir($phpLocalePath);
+            }
+
+            if (is_dir($this->phpFixturePath)) {
+                rmdir($this->phpFixturePath);
+            }
         }
     }
 
@@ -94,6 +136,20 @@ final class TranslationLoaderBenchmark
 
         if ('Benchmark value 0999' !== $loader->get('ja', 'benchmark sentence 0999')) {
             throw new \RuntimeException('The benchmark catalogue was not loaded completely');
+        }
+    }
+
+    #[Iterations(5)]
+    #[Revs(1)]
+    public function benchNestedPhpCatalogueScan(): void
+    {
+        $loader = new TranslationLoader(
+            langPath: $this->phpFixturePath,
+            baseLocale: 'en',
+        );
+
+        if ('Nested value 0999' !== $loader->get('en', 'messages.section_0999.nested.value')) {
+            throw new \RuntimeException('The nested PHP benchmark catalogue was not loaded completely');
         }
     }
 

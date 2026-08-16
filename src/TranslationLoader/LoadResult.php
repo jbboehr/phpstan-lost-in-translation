@@ -27,7 +27,7 @@ use PHPStan\Rules\IdentifierRuleError;
 final class LoadResult
 {
     /**
-     * @param array<non-empty-string, non-empty-string> $translations
+     * @param array<array-key, non-empty-string> $translations
      * @param array<non-empty-string, int> $locations
      * @param list<IdentifierRuleError> $errors
      * @param list<non-empty-string> $arrayKeys

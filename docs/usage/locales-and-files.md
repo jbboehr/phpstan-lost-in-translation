@@ -79,10 +79,11 @@ other errors encountered while loading translation files. Translation values mus
 ultimately contain strings.
 
 Non-empty PHP array parents are valid translation lookups, matching Laravel's `Translator::get()` behavior. Using an
-array parent counts its returned string leaves as used. When a group contains both a literal dotted item and the same
-nested path, the literal item takes precedence as it does in Laravel's `Arr::get()`. A root JSON key also takes
-precedence over an identically named grouped PHP item for an exact lookup; retrieving the whole PHP group still analyzes
-the group's returned string leaves.
+array parent counts its returned string leaves as used. When the root of a group contains both a literal dotted item and
+the same nested path, the literal item takes precedence as it does in Laravel's `Arr::get()`. Dotted keys below the group
+root remain part of a returned parent array but do not override Laravel's segment-by-segment lookup. A root JSON key
+also takes precedence over an identically named grouped PHP item for an exact lookup; retrieving the whole PHP group
+still analyzes the group's returned string leaves.
 
 For example, numeric values in either format are reported at their source files:
 

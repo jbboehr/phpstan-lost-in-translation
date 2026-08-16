@@ -57,6 +57,7 @@ final class PhpLoader
             $traverser->addVisitor($visitor);
             $traverser->traverse($stmts);
             $lineNumbers = $visitor->getLineNumbers();
+            $rawLineNumbers = $visitor->getLineNumbers(raw: true);
         } catch (Error $e) {
             $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse file with error: %s', $e->getMessage()))
                 ->identifier(self::IDENTIFIER)
@@ -85,21 +86,23 @@ final class PhpLoader
         $validateRawValues = function (
             array $values,
             string $prepend,
+            array $rawPath,
         ) use (
             &$validateRawValues,
             &$errors,
             $file,
-            $lineNumbers,
+            $rawLineNumbers,
         ): void {
             foreach ($values as $key => $value) {
                 $path = $prepend . '.' . $key;
+                $currentRawPath = [...$rawPath, $key];
 
                 if (is_array($value)) {
-                    $validateRawValues($value, $path);
+                    $validateRawValues($value, $path, $currentRawPath);
                     continue;
                 }
 
-                $line = $lineNumbers[$path] ?? -1;
+                $line = $rawLineNumbers[serialize($currentRawPath)] ?? -1;
 
                 if (!is_string($value)) {
                     $encodedValue = json_encode($value);
@@ -139,7 +142,7 @@ final class PhpLoader
                 }
             }
         };
-        $validateRawValues($raw, $group);
+        $validateRawValues($raw, $group, []);
 
         $flattened = self::dot($raw, $group, true);
 
@@ -149,13 +152,14 @@ final class PhpLoader
 
         $raw = $flattened;
 
-        /** @var array<non-empty-string, non-empty-string> $results */
+        /** @var array<array-key, non-empty-string> $results */
         $results = [];
         /** @var list<non-empty-string> $arrayKeys */
         $arrayKeys = [];
 
         foreach ($raw as $k => $v) {
-            assert(is_string($k) && '' !== $k);
+            $k = (string) $k;
+            assert('' !== $k);
             $line = $lineNumbers[$k] ?? -1;
 
             if (is_array($v)) {
@@ -204,11 +208,27 @@ final class PhpLoader
     /**
      * @param array<array-key, mixed> $array
      * @return array<array-key, mixed>
-     * @see \Illuminate\Support\Arr::dot()
+     * @see \Illuminate\Support\Arr::get()
      */
-    public static function dot(array $array, string $prepend = '', bool $includeArrays = false): array
-    {
+    public static function dot(
+        array $array,
+        string $prepend = '',
+        bool $includeArrays = false,
+        bool $root = true,
+    ): array {
         $results = [];
+        $exactRootPaths = [];
+
+        if ($root) {
+            foreach ($array as $key => $_value) {
+                if (!is_string($key) || !str_contains($key, '.')) {
+                    continue;
+                }
+
+                $path = '' === $prepend ? $key : $prepend . '.' . $key;
+                $exactRootPaths[$path] = true;
+            }
+        }
 
         foreach ($array as $key => $value) {
             if ('' === $prepend) {
@@ -219,25 +239,37 @@ final class PhpLoader
                 $path = $prepend . '.' . $key;
             }
 
+            $literalDottedKey = is_string($key) && str_contains($key, '.');
+
+            // Arr::get() checks an exact dotted key only in the group root, then traverses one segment at a time.
+            if (!$root && $literalDottedKey) {
+                continue;
+            }
+
             if (is_array($value)) {
                 // Empty arrays are structural placeholders in Laravel lang files and must not become invalid leaves.
                 if ([] === $value) {
                     continue;
                 }
 
-                if ($includeArrays && !array_key_exists($path, $results)) {
+                if ($includeArrays && ($literalDottedKey || !array_key_exists($path, $results))) {
                     $results[$path] = $value;
                 }
 
-                foreach (self::dot($value, $path, $includeArrays) as $k2 => $v2) {
-                    // Laravel's Arr::get() gives an exact dotted key precedence over traversal.
-                    if (!array_key_exists($k2, $results)) {
+                // Children of a literal dotted root key are not reachable by adding further dotted segments.
+                if ($literalDottedKey) {
+                    continue;
+                }
+
+                foreach (self::dot($value, $path, $includeArrays, false) as $k2 => $v2) {
+                    if (!isset($exactRootPaths[$k2]) && !array_key_exists($k2, $results)) {
                         $results[$k2] = $v2;
                     }
                 }
             } else {
-                // A literal dotted item remains authoritative regardless of declaration order.
-                $results[$path] = $value;
+                if ($literalDottedKey || (!isset($exactRootPaths[$path]) && !array_key_exists($path, $results))) {
+                    $results[$path] = $value;
+                }
             }
         }
 

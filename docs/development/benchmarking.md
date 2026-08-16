@@ -9,7 +9,8 @@ application subprocess as project work. It is diagnostic evidence, not a cross-m
 | --- | --- | --- |
 | Fuzzy suggestions | 1,000 and 10,000 candidate keys | uncached lookup and memoized hit |
 | Missing-key rule | 10,000 loaded catalogue entries | initial fuzzy lookup and memoized repeat |
-| Catalogue loading | three JSON locales with 1,000 entries each | scan and parse |
+| JSON catalogue loading | three locales with 1,000 entries each | scan and parse |
+| Nested PHP catalogue loading | 1,000 array parents with nested string leaves | scan, parse, validate, and flatten |
 | Unused-key analysis | 3,000 catalogue entries and 500 wildcard uses | preloaded catalogue |
 
 Assertions inside each subject confirm that the measured call still returns the intended result. The suite does not

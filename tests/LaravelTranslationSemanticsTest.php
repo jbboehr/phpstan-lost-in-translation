@@ -25,6 +25,8 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
 use Illuminate\Translation\Translator;
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
+use jbboehr\PHPStanLostInTranslation\TranslationLoader\PhpLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 
 final class LaravelTranslationSemanticsTest extends \PHPUnit\Framework\TestCase
@@ -93,10 +95,6 @@ final class LaravelTranslationSemanticsTest extends \PHPUnit\Framework\TestCase
         yield 'JSON exact key precedes grouped item' => [$precedencePath, [], 'en', 'messages.collision'];
         yield 'ordinary grouped item beside JSON collision' => [$precedencePath, [], 'en', 'messages.grouped'];
         yield 'whole group retains JSON-shadowed PHP item' => [$precedencePath, [], 'en', 'messages'];
-
-        $phpCollisionPath = __DIR__ . '/lang-laravel-php-collision';
-
-        yield 'PHP group item overrides dotted PHP group collision' => [$phpCollisionPath, [], 'en', 'a.b'];
     }
 
     public function testJsonAndGroupedCollisionRetainsDiagnostic(): void
@@ -109,6 +107,245 @@ final class LaravelTranslationSemanticsTest extends \PHPUnit\Framework\TestCase
 
         $this->assertCount(1, $loader->getErrors());
         $this->assertSame(TranslationLoader::IDENTIFIER_CONFLICT, $loader->getErrors()[0]->getIdentifier());
+    }
+
+    /**
+     * @dataProvider provideGeneratedPhpCatalogues
+     * @param array<array-key, mixed> $catalogue
+     * @param list<non-empty-string> $keys
+     * @param list<non-empty-string> $expectedErrorIdentifiers
+     */
+    public function testGeneratedPhpCatalogueMatchesLaravel(
+        array $catalogue,
+        array $keys,
+        array $expectedErrorIdentifiers,
+    ): void {
+        $langPath = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $localePath = $langPath . '/en';
+        $translationFile = $localePath . '/messages.php';
+
+        $this->assertTrue(mkdir($localePath, recursive: true));
+
+        try {
+            $this->assertNotFalse(file_put_contents(
+                $translationFile,
+                "<?php\n\nreturn " . var_export($catalogue, true) . ";\n",
+            ));
+
+            $extensionLoader = new TranslationLoader(
+                langPath: $langPath,
+                baseLocale: 'en',
+                fuzzySearch: false,
+            );
+            $translator = new Translator(new FileLoader(new Filesystem(), $langPath), 'en');
+
+            foreach ($keys as $key) {
+                $runtimeValue = $translator->get($key, [], 'en', false);
+
+                $this->assertNotSame($key, $runtimeValue, 'The generated Laravel fixture must define ' . $key);
+                $this->assertSame(
+                    $this->normalizeRuntimeValue($runtimeValue),
+                    $extensionLoader->get('en', $key),
+                    $key,
+                );
+            }
+
+            $this->assertSame(
+                $expectedErrorIdentifiers,
+                array_map(static fn ($error): string => $error->getIdentifier(), $extensionLoader->getErrors()),
+            );
+        } finally {
+            unlink($translationFile);
+            rmdir($localePath);
+            rmdir($langPath);
+        }
+    }
+
+    /**
+     * @return iterable<string, array{array<array-key, mixed>, list<non-empty-string>, list<non-empty-string>}>
+     */
+    public static function provideGeneratedPhpCatalogues(): iterable
+    {
+        foreach (
+            [
+                'plain segments' => ['alpha', 'beta'],
+                'punctuated segments' => ['snake_key', 'kebab-key'],
+                'numeric segments' => [0, 1],
+            ] as $name => [$parent, $leaf]
+        ) {
+            $parentKey = (string) $parent;
+            $leafKey = (string) $leaf;
+            $literalKey = $parentKey . '.' . $leafKey;
+            $keys = ['messages', 'messages.' . $parentKey, 'messages.' . $literalKey];
+
+            yield $name . ', literal scalar first' => [
+                [
+                    $literalKey => 'Literal dotted scalar',
+                    $parent => [$leaf => 'Traversed scalar'],
+                ],
+                $keys,
+                [],
+            ];
+            yield $name . ', traversed scalar first' => [
+                [
+                    $parent => [$leaf => 'Traversed scalar'],
+                    $literalKey => 'Literal dotted scalar',
+                ],
+                $keys,
+                [],
+            ];
+            yield $name . ', literal array first' => [
+                [
+                    $literalKey => ['literal' => 'Literal dotted array'],
+                    $parent => [$leaf => ['traversed' => 'Traversed array']],
+                ],
+                [...$keys, 'messages.' . $literalKey . '.traversed'],
+                [],
+            ];
+            yield $name . ', traversed array first' => [
+                [
+                    $parent => [$leaf => ['traversed' => 'Traversed array']],
+                    $literalKey => ['literal' => 'Literal dotted array'],
+                ],
+                [...$keys, 'messages.' . $literalKey . '.traversed'],
+                [],
+            ];
+            yield $name . ', nested dotted scalar is not exact' => [
+                [
+                    $parent => [
+                        $leaf => ['tail' => 'Traversed nested scalar'],
+                        $leafKey . '.tail' => 'Nested dotted scalar',
+                    ],
+                ],
+                ['messages', 'messages.' . $parentKey, 'messages.' . $literalKey . '.tail'],
+                [],
+            ];
+            yield $name . ', nested dotted array is not exact' => [
+                [
+                    $parent => [
+                        $leafKey . '.tail' => ['literal' => 'Nested dotted array'],
+                        $leaf => ['tail' => 'Traversed nested array'],
+                    ],
+                ],
+                ['messages', 'messages.' . $parentKey, 'messages.' . $literalKey . '.tail'],
+                [],
+            ];
+        }
+
+        yield 'mixed values and invalid bytes' => [
+            [
+                'valid' => 'Valid scalar',
+                'invalid' => 42,
+                'parent' => [
+                    'bad' => "\xff",
+                    'good' => 'Valid nested scalar',
+                    'empty' => [],
+                ],
+            ],
+            ['messages', 'messages.valid', 'messages.parent', 'messages.parent.bad', 'messages.parent.good'],
+            [PhpLoader::IDENTIFIER, InvalidCharacterEncodingRule::IDENTIFIER],
+        ];
+    }
+
+    /**
+     * @dataProvider provideGeneratedPhpGroupCollisions
+     * @param array<array-key, array<array-key, mixed>> $groups
+     * @param list<non-empty-string> $keys
+     */
+    public function testGeneratedPhpGroupCollisionMatchesLaravel(
+        array $groups,
+        array $keys,
+        ?string $namespace,
+    ): void {
+        $langPath = sys_get_temp_dir() . '/phpstan-lost-in-translation-' . bin2hex(random_bytes(8));
+        $localePath = null === $namespace
+            ? $langPath . '/en'
+            : $langPath . '/vendor/' . $namespace . '/en';
+
+        $this->assertTrue(mkdir($localePath, recursive: true));
+
+        try {
+            foreach ($groups as $group => $catalogue) {
+                $this->assertNotFalse(file_put_contents(
+                    $localePath . '/' . $group . '.php',
+                    "<?php\n\nreturn " . var_export($catalogue, true) . ";\n",
+                ));
+            }
+
+            $extensionLoader = new TranslationLoader(
+                langPath: $langPath,
+                baseLocale: 'en',
+                fuzzySearch: false,
+            );
+            $laravelLoader = new FileLoader(new Filesystem(), $langPath);
+
+            if (null !== $namespace) {
+                $laravelLoader->addNamespace($namespace, $langPath . '/package-' . $namespace);
+            }
+
+            $translator = new Translator($laravelLoader, 'en');
+
+            foreach ($keys as $key) {
+                $runtimeValue = $translator->get($key, [], 'en', false);
+
+                $this->assertNotSame($key, $runtimeValue, 'The generated Laravel fixture must define ' . $key);
+                $this->assertSame(
+                    $this->normalizeRuntimeValue($runtimeValue),
+                    $extensionLoader->get('en', $key),
+                    $key,
+                );
+            }
+
+            $this->assertSame(
+                [TranslationLoader::IDENTIFIER_CONFLICT, TranslationLoader::IDENTIFIER_CONFLICT],
+                array_map(static fn ($error): string => $error->getIdentifier(), $extensionLoader->getErrors()),
+            );
+        } finally {
+            foreach (array_keys($groups) as $group) {
+                unlink($localePath . '/' . $group . '.php');
+            }
+
+            rmdir($localePath);
+
+            if (null !== $namespace) {
+                rmdir(dirname($localePath));
+                rmdir(dirname($localePath, 2));
+            }
+
+            rmdir($langPath);
+        }
+    }
+
+    /**
+     * @return iterable<string, array{
+     *     array<array-key, array<array-key, mixed>>,
+     *     list<non-empty-string>,
+     *     ?non-empty-string
+     * }>
+     */
+    public static function provideGeneratedPhpGroupCollisions(): iterable
+    {
+        foreach (
+            [
+                'plain segments' => ['alpha', 'beta'],
+                'punctuated segments' => ['snake_key', 'kebab-key'],
+                'numeric segments' => ['0', '1'],
+            ] as $name => [$group, $item]
+        ) {
+            foreach (['plain' => null, 'namespaced' => 'acme'] as $layout => $namespace) {
+                $externalPrefix = null === $namespace ? '' : $namespace . '::';
+                $key = $externalPrefix . $group . '.' . $item;
+
+                yield $layout . ', ' . $name => [
+                    [
+                        $group . '.' . $item => ['tail' => 'Dotted group value'],
+                        $group => [$item => ['tail' => 'Laravel group value']],
+                    ],
+                    [$key, $key . '.tail'],
+                    $namespace,
+                ];
+            }
+        }
     }
 
     private function normalizeRuntimeValue(mixed $value): string

@@ -202,6 +202,37 @@ final class PhpLoaderTest extends TestCase
         $this->assertSame('Traversed', PhpLoader::dot($translations, includeArrays: true)['parent.child.leaf']);
     }
 
+    public function testNestedDottedKeyKeepsDistinctLookupAndRawSourceLines(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'phpstan-lost-in-translation-');
+        $this->assertIsString($path);
+
+        try {
+            $this->assertNotFalse(file_put_contents($path, <<<'PHP'
+                <?php
+                return [
+                    'parent' => [
+                        'child.leaf' => "\xff",
+                        'child' => [
+                            'leaf' => 'Traversed',
+                        ],
+                    ],
+                ];
+                PHP));
+
+            $result = (new PhpLoader())->load(new SplFileInfo($path, '', basename($path)));
+            $group = basename($path);
+
+            $this->assertSame('Traversed', $result->translations[$group . '.parent.child.leaf']);
+            $this->assertSame(6, $result->locations[$group . '.parent.child.leaf']);
+            $this->assertCount(1, $result->errors);
+            $this->assertInstanceOf(LineRuleError::class, $result->errors[0]);
+            $this->assertSame(4, $result->errors[0]->getLine());
+        } finally {
+            unlink($path);
+        }
+    }
+
     public function testLoadDeclaresItsConcreteReturnType(): void
     {
         $returnType = (new \ReflectionMethod(PhpLoader::class, 'load'))->getReturnType();

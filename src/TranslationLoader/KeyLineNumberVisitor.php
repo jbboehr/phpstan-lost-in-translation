@@ -34,6 +34,9 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /** @var array<non-empty-string, int> */
     private array $lineNumberDepths = [];
 
+    /** @var array<non-empty-string, int> */
+    private array $rawLineNumbers = [];
+
     /** @var list<int|string> */
     private array $stack = [];
 
@@ -62,8 +65,26 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
         if ($node instanceof Node\Expr\ArrayItem) {
             $path = join('.', $this->stack);
             $depth = count($this->stack);
+            $rawPath = serialize($this->stack);
+            assert('' !== $rawPath);
+            $this->rawLineNumbers[$rawPath] = $node->getStartLine();
 
-            if (strlen($path) > 0 && (!isset($this->lineNumberDepths[$path]) || $depth <= $this->lineNumberDepths[$path])) {
+            $addressable = true;
+
+            if (1 < $depth) {
+                foreach ($this->stack as $key) {
+                    if (is_string($key) && str_contains($key, '.')) {
+                        $addressable = false;
+                        break;
+                    }
+                }
+            }
+
+            if (
+                $addressable
+                && strlen($path) > 0
+                && (!isset($this->lineNumberDepths[$path]) || $depth <= $this->lineNumberDepths[$path])
+            ) {
                 $this->lineNumbers[$path] = $node->getStartLine();
                 $this->lineNumberDepths[$path] = $depth;
             }
@@ -76,9 +97,9 @@ final class KeyLineNumberVisitor extends NodeVisitorAbstract
     /**
      * @return array<non-empty-string, int>
      */
-    public function getLineNumbers(): array
+    public function getLineNumbers(bool $raw = false): array
     {
-        return $this->lineNumbers;
+        return $raw ? $this->rawLineNumbers : $this->lineNumbers;
     }
 
     private static function getScalarKeyValue(Scalar $key): int|string|null

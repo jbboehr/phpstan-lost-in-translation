@@ -51,10 +51,10 @@ class TranslationLoader
 
     private readonly ?string $langPath;
 
-    /** @var array<string, array<non-empty-string, array<non-empty-string, non-empty-string>>> */
+    /** @var array<string, array<non-empty-string, array<array-key, non-empty-string>>> */
     private array $data = [];
 
-    /** @var array<string, array<non-empty-string, array<non-empty-string, true>>> */
+    /** @var array<string, array<non-empty-string, array<array-key, true>>> */
     private array $arrayKeys = [];
 
     /** @var list<IdentifierRuleError> */
@@ -326,6 +326,9 @@ class TranslationLoader
                 }
 
                 foreach ($this->data[$targetLocale][$namespace] ?? [] as $candidateKey => $_value) {
+                    $candidateKey = (string) $candidateKey;
+                    assert('' !== $candidateKey);
+
                     if ($candidateKey !== $normalizedKey && !str_starts_with($candidateKey, $normalizedKey . '.')) {
                         continue;
                     }
@@ -341,6 +344,9 @@ class TranslationLoader
         foreach ($this->data as $locale => $localeData) {
             foreach ($localeData as $namespace => $namespaceData) {
                 foreach ($namespaceData as $item => $value) {
+                    $item = (string) $item;
+                    assert('' !== $item);
+
                     if (isset($this->arrayKeys[$locale][$namespace][$item])) {
                         continue;
                     }
@@ -523,6 +529,7 @@ class TranslationLoader
             $resultArrayKeys = array_fill_keys($result->arrayKeys, true);
 
             foreach ($result->translations as $k => $v) {
+                $k = (string) $k;
                 $line = ($result->locations[$k] ?? -1);
 
                 if (isset($this->data[$localeKey][$namespace][$k])) {
@@ -570,6 +577,8 @@ class TranslationLoader
         foreach ($this->data as $locale => $localeItems) {
             foreach ($localeItems as $namespace => $namespaceItems) {
                 foreach ($namespaceItems as $key => $value) {
+                    $key = (string) $key;
+                    assert('' !== $key);
                     $searchKey = '*' === $namespace ? $key : $namespace . '::' . $key;
                     $arr[$searchKey] = true;
 

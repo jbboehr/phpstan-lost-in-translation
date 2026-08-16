@@ -64,6 +64,30 @@ final class KeyLineNumberVisitorTest extends TestCase
         );
     }
 
+    public function testUsesRootOnlyDottedKeyPrecedence(): void
+    {
+        $this->assertSame(
+            [
+                'parent.child' => 3,
+                'parent.child.leaf' => 8,
+                'parent' => 6,
+            ],
+            self::lineNumbers(<<<'PHP'
+                <?php
+                return [
+                    'parent.child' => [
+                        'leaf' => 'Literal descendant',
+                    ],
+                    'parent' => [
+                        'child' => [
+                            'leaf' => 'Traversed',
+                        ],
+                    ],
+                ];
+                PHP),
+        );
+    }
+
     /**
      * @return array<non-empty-string, int>
      */

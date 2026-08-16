@@ -9,8 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Add repeatable PHPBench coverage for fuzzy lookup, missing-key diagnostics, catalogue loading, and unused-key
-  analysis, with optional Perfidious software and hardware counters through Nix.
+- Add repeatable PHPBench coverage for fuzzy lookup, missing-key diagnostics, JSON and nested PHP catalogue loading,
+  and unused-key analysis, with optional Perfidious software and hardware counters through Nix.
 
 ### Changed
 
@@ -23,7 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Prevent invalid non-string translation values from aborting analysis when diagnostic rendering cannot JSON-encode
   them.
 - Match Laravel's falsey-locale fallback and PHP translation-array lookup semantics, including non-empty array parents
-  and groups, exact literal dotted-key precedence, and root JSON precedence over identically named grouped items.
+  and groups, exact dotted-key precedence at the group root, nested segment traversal, and root JSON precedence over
+  identically named grouped items.
 - Deduplicate replacement diagnostics across constant-array variants.
 - Restrict Blade diagnostic and usage bridges to Bladestan's compiled-filename convention.
 

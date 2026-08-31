@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Tests\CallRule;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidChoiceRule;
 use PHPStan\DependencyInjection\Container;
 use PHPStan\DependencyInjection\ParameterNotFoundException;
 use PHPUnit\Framework\TestCase;
@@ -48,5 +49,74 @@ class CallRuleCollectionTest extends TestCase
 
         $collection = new CallRuleCollection($mock);
         $this->assertCount(0, $collection);
+    }
+
+    /**
+     * @dataProvider choiceFlagCombinations
+     * @param array<string, bool> $flags
+     */
+    public function testChoiceRuleSelectionUsesTheUnionOfIndependentFlags(array $flags, bool $expected): void
+    {
+        $rule = new InvalidChoiceRule();
+        $mock = $this->createMock(Container::class);
+        $mock->method('getParameter')
+            ->willReturn($flags);
+        $mock->method('getByType')
+            ->with(InvalidChoiceRule::class)
+            ->willReturn($rule);
+
+        $collection = new CallRuleCollection($mock);
+
+        $this->assertSame(
+            $expected ? [$rule] : [],
+            array_values(iterator_to_array($collection)),
+        );
+    }
+
+    /**
+     * @return iterable<string, array{array<string, bool>, bool}>
+     */
+    public static function choiceFlagCombinations(): iterable
+    {
+        yield 'all disabled' => [[
+            'invalidChoices' => false,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => false,
+        ], false];
+        yield 'syntax only' => [[
+            'invalidChoices' => true,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => false,
+        ], true];
+        yield 'coverage only' => [[
+            'invalidChoices' => false,
+            'requireCompleteChoiceCoverage' => true,
+            'requireCompletePluralForms' => false,
+        ], true];
+        yield 'plural only' => [[
+            'invalidChoices' => false,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => true,
+        ], true];
+        yield 'syntax and coverage' => [[
+            'invalidChoices' => true,
+            'requireCompleteChoiceCoverage' => true,
+            'requireCompletePluralForms' => false,
+        ], true];
+        yield 'syntax and plural' => [[
+            'invalidChoices' => true,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => true,
+        ], true];
+        yield 'coverage and plural' => [[
+            'invalidChoices' => false,
+            'requireCompleteChoiceCoverage' => true,
+            'requireCompletePluralForms' => true,
+        ], true];
+        yield 'all enabled' => [[
+            'invalidChoices' => true,
+            'requireCompleteChoiceCoverage' => true,
+            'requireCompletePluralForms' => true,
+        ], true];
     }
 }

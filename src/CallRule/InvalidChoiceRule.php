@@ -155,6 +155,7 @@ final class InvalidChoiceRule implements CallRuleInterface
         private readonly bool $requireCompleteChoiceCoverage = true,
         private readonly bool $requireCompletePluralForms = false,
         private readonly ?TranslationLoader $translationLoader = null,
+        private readonly bool $invalidChoices = true,
     ) {
     }
 
@@ -271,13 +272,16 @@ final class InvalidChoiceRule implements CallRuleInterface
                     continue;
                 }
 
-                $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
-                    ->identifier(self::IDENTIFIER_MALFORMED)
-                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
+                if ($this->invalidChoices) {
+                    $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
+                        ->identifier(self::IDENTIFIER_MALFORMED)
+                        ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
+                        ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
+                }
+
                 $hasInvalidCondition = true;
                 continue;
             }
@@ -333,14 +337,17 @@ final class InvalidChoiceRule implements CallRuleInterface
                     }
                 }
 
-                $errors[] = RuleErrorBuilder::message($message)
-                    // Preserve the identifier emitted for this syntax before the message was made more specific.
-                    ->identifier(self::IDENTIFIER_NON_NUMERIC)
-                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
+                if ($this->invalidChoices) {
+                    $errors[] = RuleErrorBuilder::message($message)
+                        // Preserve the identifier emitted for this syntax before the message was made more specific.
+                        ->identifier(self::IDENTIFIER_NON_NUMERIC)
+                        ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
+                        ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
+                }
+
                 $hasInvalidCondition = true;
                 continue;
             }
@@ -354,23 +361,29 @@ final class InvalidChoiceRule implements CallRuleInterface
             }
 
             if (!is_numeric($from) && $from !== '*') {
-                $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($from)))
-                    ->identifier(self::IDENTIFIER_NON_NUMERIC)
-                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
+                if ($this->invalidChoices) {
+                    $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($from)))
+                        ->identifier(self::IDENTIFIER_NON_NUMERIC)
+                        ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
+                        ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
+                }
+
                 $hasInvalidCondition = true;
                 continue;
             } elseif (!is_numeric($to) && $to !== '*') {
-                $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($to)))
-                    ->identifier(self::IDENTIFIER_NON_NUMERIC)
-                    ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
-                    ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
-                    ->line($call->line)
-                    ->file($call->file)
-                    ->build();
+                if ($this->invalidChoices) {
+                    $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($to)))
+                        ->identifier(self::IDENTIFIER_NON_NUMERIC)
+                        ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
+                        ->addTip(Utils::formatTipForKeyValue($locale, $key, $value))
+                        ->line($call->line)
+                        ->file($call->file)
+                        ->build();
+                }
+
                 $hasInvalidCondition = true;
                 continue;
             }

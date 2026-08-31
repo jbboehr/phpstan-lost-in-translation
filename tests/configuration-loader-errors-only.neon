@@ -1,0 +1,18 @@
+includes:
+    - ../extension.neon
+
+parameters:
+    lostInTranslation:
+        baseLocale: en
+        langPath: tests/Rule/lang-warn
+        disallowDynamicTranslationStrings: false
+        invalidCharacterEncodings: false
+        invalidChoices: false
+        invalidLocales: false
+        invalidReplacements: false
+        missingTranslationStringsInBaseLocale: false
+        missingTranslationStrings: false
+        requireCompleteChoiceCoverage: false
+        requireCompletePluralForms: false
+        translationLoaderErrors: true
+        unusedTranslationStrings: false

@@ -3,7 +3,8 @@
 ## Locale validation
 
 `invalidLocales` is enabled by default. It reports locale identifiers unknown to Symfony Intl and locales with no
-available translation strings.
+available translation strings. It validates both locale arguments and translation-path locale names independently of
+`translationLoaderErrors`.
 
 By default, validation and lookup treat forms such as `PT_br`, `pt-br`, and `pt_BR` as the same locale. Script subtags
 are normalized separately, so `ZH-hANS` and `zh_Hans` also resolve to the same locale. Set `strictLocales: true` to
@@ -76,7 +77,8 @@ Invalid character encoding for value "\xf0(\x8c\xbc" in locale "ja"
 
 `translationLoaderErrors` is enabled by default. It reports parse failures, unsupported values, locale collisions, and
 other errors encountered while loading translation files. Translation values must be strings or nested arrays that
-ultimately contain strings.
+ultimately contain strings. Disabling it does not disable translation-path locale validation while `invalidLocales`
+remains enabled.
 
 Non-empty PHP array parents are valid translation lookups, matching Laravel's `Translator::get()` behavior. Using an
 array parent counts its returned string leaves as used. When the root of a group contains both a literal dotted item and

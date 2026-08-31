@@ -1,0 +1,9 @@
+includes:
+    - ../extension.neon
+
+parameters:
+    lostInTranslation:
+        bridgeBladeDiagnostics: false
+        invalidLocales: false
+        translationLoaderErrors: false
+        unusedTranslationStrings: false

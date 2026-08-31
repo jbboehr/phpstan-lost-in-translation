@@ -33,13 +33,17 @@ use Traversable;
 final class CallRuleCollection implements IteratorAggregate, \Countable
 {
     private const FLAG_MAP = [
-        'disallowDynamicTranslationStrings' => DynamicTranslationStringRule::class,
-        'invalidCharacterEncodings' => InvalidCharacterEncodingRule::class,
-        'invalidChoices' => InvalidChoiceRule::class,
-        'invalidLocales' => InvalidLocaleRule::class,
-        'invalidReplacements' => InvalidReplacementRule::class,
-        'missingTranslationStringsInBaseLocale' => MissingTranslationStringInBaseLocaleRule::class,
-        'missingTranslationStrings' => MissingTranslationStringRule::class,
+        DynamicTranslationStringRule::class => ['disallowDynamicTranslationStrings'],
+        InvalidCharacterEncodingRule::class => ['invalidCharacterEncodings'],
+        InvalidChoiceRule::class => [
+            'invalidChoices',
+            'requireCompleteChoiceCoverage',
+            'requireCompletePluralForms',
+        ],
+        InvalidLocaleRule::class => ['invalidLocales'],
+        InvalidReplacementRule::class => ['invalidReplacements'],
+        MissingTranslationStringInBaseLocaleRule::class => ['missingTranslationStringsInBaseLocale'],
+        MissingTranslationStringRule::class => ['missingTranslationStrings'],
     ];
 
     /**
@@ -77,9 +81,12 @@ final class CallRuleCollection implements IteratorAggregate, \Countable
 
         $rules = [];
 
-        foreach ($flags as $key => $_) {
-            if (false !== $_ && isset(self::FLAG_MAP[$key])) {
-                $rules[] = $container->getByType(self::FLAG_MAP[$key]);
+        foreach (self::FLAG_MAP as $ruleClass => $ruleFlags) {
+            foreach ($ruleFlags as $ruleFlag) {
+                if (false !== ($flags[$ruleFlag] ?? false)) {
+                    $rules[] = $container->getByType($ruleClass);
+                    continue 2;
+                }
             }
         }
 

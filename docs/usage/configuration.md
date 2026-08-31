@@ -19,13 +19,13 @@ parameters:
         localeAliases: []
         # report invalid character encodings
         invalidCharacterEncodings: true
-        # analyze plural choices for invalid values
+        # report malformed choice conditions and invalid bounds
         invalidChoices: true
         # require explicit choice conditions to cover every possible value of the inferred number type
         requireCompleteChoiceCoverage: true
         # require unconditioned choices to provide every positional plural form the locale can select
         requireCompletePluralForms: false
-        # report locales with no translation strings or invalid locale identifiers
+        # report invalid locale identifiers in calls and translation paths, or locales with no translation strings
         invalidLocales: true
         # analyze translation replacements for invalid values
         invalidReplacements: true
@@ -37,7 +37,7 @@ parameters:
         missingTranslationStringsInBaseLocale: true
         # require locale identifiers to match exactly
         strictLocales: false
-        # report parse failures, invalid values, locale conflicts, and other loader diagnostics
+        # report parse failures, invalid values, locale conflicts, and other non-locale loader diagnostics
         translationLoaderErrors: true
         # compare statically used translations with the complete catalogue
         unusedTranslationStrings: false

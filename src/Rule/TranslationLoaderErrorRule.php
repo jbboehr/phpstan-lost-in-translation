@@ -40,6 +40,7 @@ final class TranslationLoaderErrorRule implements Rule
     public function __construct(
         private readonly TranslationLoader $loader,
         private readonly bool $invalidLocales = true,
+        private readonly bool $translationLoaderErrors = true,
     ) {
     }
 
@@ -51,7 +52,7 @@ final class TranslationLoaderErrorRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
-            $errors = $this->loader->getErrors();
+            $errors = $this->translationLoaderErrors ? $this->loader->getErrors() : [];
 
             if ($this->invalidLocales) {
                 foreach ($this->loader->getLocaleFiles() as $locale => $localeFiles) {

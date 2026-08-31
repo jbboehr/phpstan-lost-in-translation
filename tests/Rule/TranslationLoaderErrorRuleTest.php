@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace Rule;
 
 use Illuminate\Foundation\Bootstrap\HandleExceptions;
+use jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule;
 use jbboehr\PHPStanLostInTranslation\Rule\TranslationLoaderErrorRule;
 use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
@@ -125,6 +126,50 @@ class TranslationLoaderErrorRuleTest extends RuleTestCase
         $this->analyse([
             __DIR__ . '/data/translation-loader-error.php',
         ], []);
+    }
+
+    public function testLoaderErrorsCanBeEnabledWithoutLocaleValidation(): void
+    {
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([], false);
+        $rule = new TranslationLoaderErrorRule(
+            $this->createTranslationLoader(),
+            invalidLocales: false,
+            translationLoaderErrors: true,
+        );
+
+        $errors = $rule->processNode($node, $this->createStub(Scope::class));
+
+        $this->assertCount(7, $errors);
+        $this->assertNotContains(
+            InvalidLocaleRule::IDENTIFIER_UNKNOWN_LOCALE,
+            array_map(static fn ($error): string => $error->getIdentifier(), $errors),
+        );
+    }
+
+    public function testDisablingBothLoaderChecksSuppressesParseValueAndConflictDiagnostics(): void
+    {
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([], false);
+
+        foreach (
+            [
+                $this->createTranslationLoader(),
+                new TranslationLoader(
+                    langPath: __DIR__ . '/../lang-laravel-semantics',
+                    baseLocale: 'en',
+                    fuzzySearch: false,
+                ),
+            ] as $loader
+        ) {
+            $rule = new TranslationLoaderErrorRule(
+                $loader,
+                invalidLocales: false,
+                translationLoaderErrors: false,
+            );
+
+            $this->assertSame([], $rule->processNode($node, $this->createStub(Scope::class)));
+        }
     }
 
     public function getCollectors(): array

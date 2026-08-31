@@ -1,0 +1,12 @@
+includes:
+    - ../extension.neon
+
+parameters:
+    lostInTranslation:
+        baseLocale: en
+        langPath: tests/Rule/lang-warn
+        invalidChoices: false
+        requireCompleteChoiceCoverage: false
+        requireCompletePluralForms: true
+        invalidLocales: true
+        translationLoaderErrors: false

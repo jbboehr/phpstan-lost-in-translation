@@ -35,8 +35,14 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class UnusedTranslationStringRule implements Rule
 {
+    /**
+     * @param list<string> $analysedPaths
+     * @param list<string> $analysedPathsFromConfig
+     */
     public function __construct(
         private readonly TranslationLoader $loader,
+        private readonly array $analysedPaths,
+        private readonly array $analysedPathsFromConfig,
     ) {
     }
 
@@ -48,6 +54,15 @@ final class UnusedTranslationStringRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         try {
+            $analysedPaths = array_values(array_unique($this->analysedPaths));
+            $analysedPathsFromConfig = array_values(array_unique($this->analysedPathsFromConfig));
+            sort($analysedPaths);
+            sort($analysedPathsFromConfig);
+
+            if ([] === $analysedPathsFromConfig || $analysedPaths !== $analysedPathsFromConfig) {
+                return [];
+            }
+
             /** @var array<string, list<list<array<string, string>|UsedTranslationRecord>>> $data */
             $data = $node->get(UnusedTranslationStringCollector::class);
 

@@ -47,7 +47,8 @@ Likely missing translation string "foo.bar" for base locale: en
 
 `unusedTranslationStrings` compares all statically discovered uses with the complete translation catalogue. It is
 disabled by default because dynamic construction and application-specific lookup mechanisms can make a used key appear
-unused.
+unused. The comparison runs only when the analyzed file set matches PHPStan's configured project paths, so CLI file and
+subdirectory subsets do not produce catalogue-wide unused diagnostics.
 
 ```neon
 parameters:

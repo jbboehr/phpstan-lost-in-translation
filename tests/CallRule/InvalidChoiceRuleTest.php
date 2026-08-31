@@ -247,6 +247,67 @@ class InvalidChoiceRuleTest extends RuleTestCase
         ]);
     }
 
+    public function testCompleteChoiceCoverageCanBeEnabledWithoutSyntaxValidation(): void
+    {
+        $value = '{1} selected';
+        $errors = (new InvalidChoiceRule(
+            requireCompleteChoiceCoverage: true,
+            invalidChoices: false,
+        ))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $value => [['en', null]],
+            ],
+            keyType: new ConstantStringType($value),
+            numberType: new IntegerType(),
+            isChoice: true,
+        ));
+
+        $this->assertCount(1, $errors);
+        $this->assertSame(InvalidChoiceRule::IDENTIFIER_MISSING_CASE, $errors[0]->getIdentifier());
+    }
+
+    /**
+     * @dataProvider invalidChoicesThatWouldOtherwiseCascade
+     */
+    public function testDisabledSyntaxValidationSuppressesInvalidChoicesWithoutCompletenessCascades(
+        string $locale,
+        string $value,
+    ): void {
+        $errors = (new InvalidChoiceRule(
+            requireCompleteChoiceCoverage: true,
+            requireCompletePluralForms: true,
+            invalidChoices: false,
+        ))->processCall(new TranslationCall(
+            className: null,
+            functionName: 'trans_choice',
+            file: __FILE__,
+            line: 123,
+            possibleTranslations: [
+                $value => [[$locale, null]],
+            ],
+            keyType: new ConstantStringType($value),
+            numberType: new IntegerType(),
+            isChoice: true,
+        ));
+
+        $this->assertSame([], $errors);
+    }
+
+    /**
+     * @return iterable<string, array{non-empty-string, non-empty-string}>
+     */
+    public static function invalidChoicesThatWouldOtherwiseCascade(): iterable
+    {
+        yield 'malformed condition blocks coverage' => ['en', '{1} selected|{2 malformed'];
+        yield 'non-numeric condition blocks coverage' => ['en', '{1} selected|{a} invalid'];
+        yield 'oversized range blocks coverage' => ['en', '{1} selected|{2,3,4} invalid'];
+        yield 'malformed condition blocks plural forms' => ['ru', '{1 malformed|Other'];
+    }
+
     public function testCountableNormalizationPreservesOtherUnionMembers(): void
     {
         $value = '{0} There are none|[1,*] There are :count';

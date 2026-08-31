@@ -22,9 +22,13 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Tests;
 
+use jbboehr\PHPStanLostInTranslation\CollectedDataNodeTriggerCollector;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringCollector;
 use jbboehr\PHPStanLostInTranslation\UnusedTranslationStringRule;
+use PHPStan\Analyser\Scope;
+use PHPStan\Collectors\CollectedData;
+use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
 
 /**
@@ -36,6 +40,8 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
     {
         return new UnusedTranslationStringRule(
             $this->getTranslationLoader(),
+            [__DIR__ . '/data'],
+            [__DIR__ . '/data'],
         );
     }
 
@@ -51,6 +57,7 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
     {
         $this->analyse([
             __DIR__ . '/data/unused-translation-string.php',
+            __DIR__ . '/data/configuration-independent-checks.php',
         ], [
             [
                 'Possibly unused translation string "unused_in_en" for locale: en',
@@ -68,10 +75,58 @@ class UnusedTranslationStringRuleTest extends RuleTestCase
         ]);
     }
 
+    public function testPartialDirectoryAnalysisSkipsCatalogueWideUnusedDiagnostics(): void
+    {
+        $file = __DIR__ . '/data/unused-translation-string.php';
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $triggerData = new CollectedData(true, $file, CollectedDataNodeTriggerCollector::class);
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([
+            $triggerData,
+        ], false);
+        $rule = new UnusedTranslationStringRule(
+            $this->getTranslationLoader(),
+            [__DIR__ . '/data'],
+            [__DIR__],
+        );
+        $errors = $rule->processNode($node, $this->createStub(Scope::class));
+
+        self::assertSame([], $errors);
+    }
+
+    public function testExplicitFileSubsetSkipsCatalogueWideUnusedDiagnostics(): void
+    {
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([], true);
+        $rule = new UnusedTranslationStringRule(
+            $this->getTranslationLoader(),
+            [__DIR__ . '/data/unused-translation-string.php'],
+            [__DIR__ . '/data'],
+        );
+        $errors = $rule->processNode($node, $this->createStub(Scope::class));
+
+        self::assertSame([], $errors);
+    }
+
+    public function testEquivalentProjectPathSetsRunCatalogueWideUnusedDiagnostics(): void
+    {
+        /** @phpstan-ignore-next-line phpstanApi.constructor */
+        $node = new CollectedDataNode([], false);
+        $rule = new UnusedTranslationStringRule(
+            $this->getTranslationLoader(),
+            [__DIR__ . '/Rule/data', __DIR__ . '/data', __DIR__ . '/data'],
+            [__DIR__ . '/data', __DIR__ . '/Rule/data'],
+        );
+        $errors = $rule->processNode($node, $this->createStub(Scope::class));
+
+        self::assertCount(10, $errors);
+    }
+
     public function getCollectors(): array
     {
         return [
             new UnusedTranslationStringCollector($this->getLostInTranslationHelper()),
+            new CollectedDataNodeTriggerCollector(false, false, true),
         ];
     }
 }

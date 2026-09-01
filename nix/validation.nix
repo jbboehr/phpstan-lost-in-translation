@@ -63,12 +63,12 @@ let
       filter =
         path: type:
         let
-          relativePath = lib.removePrefix "${toString repositoryRoot}/" (toString path);
+          pathString = toString path;
         in
         type == "directory"
-        || relativePath == "composer.json"
-        || relativePath == "tools/${tool}/composer.json"
-        || relativePath == "tools/${tool}/composer.lock";
+        # Nested cleanSourceWith filters receive paths from the outer source, not repositoryRoot's store path.
+        || lib.hasSuffix "/tools/${tool}/composer.json" pathString
+        || lib.hasSuffix "/tools/${tool}/composer.lock" pathString;
     };
 
   mkComposerRepository =

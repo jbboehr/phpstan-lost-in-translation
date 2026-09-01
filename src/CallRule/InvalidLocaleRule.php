@@ -27,6 +27,9 @@ use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
+/**
+ * @internal
+ */
 final class InvalidLocaleRule implements CallRuleInterface
 {
     public const IDENTIFIER_NO_TRANSLATIONS = 'lostInTranslation.invalidLocale.noTranslations';

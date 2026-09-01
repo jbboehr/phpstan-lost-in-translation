@@ -26,6 +26,9 @@ use JsonStreamingParser\Parser;
 use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * @internal
+ */
 final class JsonLoader
 {
     public const IDENTIFIER = 'lostInTranslation.translationLoaderError';

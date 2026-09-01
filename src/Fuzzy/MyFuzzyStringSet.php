@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 
 /**
+ * @internal
  * @note sadly, turns out this is worse than a naive search
  */
 final class MyFuzzyStringSet implements FuzzyStringSetInterface

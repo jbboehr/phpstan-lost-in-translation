@@ -22,6 +22,9 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\Fuzzy;
 
+/**
+ * @internal
+ */
 final class MemoizingFuzzyStringSet implements FuzzyStringSetInterface
 {
     /**

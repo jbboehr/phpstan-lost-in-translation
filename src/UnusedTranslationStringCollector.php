@@ -28,6 +28,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Collectors\Collector;
 
 /**
+ * @internal
  * @implements Collector<Node\Expr\CallLike, list<UsedTranslationRecord|array<string,string>>>
  */
 final class UnusedTranslationStringCollector implements Collector

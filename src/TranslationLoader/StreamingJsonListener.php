@@ -25,6 +25,9 @@ namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 use JsonStreamingParser\Listener\ListenerInterface;
 use JsonStreamingParser\Listener\PositionAwareInterface;
 
+/**
+ * @internal
+ */
 class StreamingJsonListener implements ListenerInterface, PositionAwareInterface
 {
     private int $lineNumber = -1;

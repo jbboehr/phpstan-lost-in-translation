@@ -29,6 +29,9 @@ use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\ShouldNotHappenException as PHPStanShouldNotHappenException;
 use function sort;
 
+/**
+ * @internal
+ */
 final class InvalidReplacementRule implements CallRuleInterface
 {
     public const IDENTIFIER_UNUSED = 'lostInTranslation.invalidReplacement.unused';

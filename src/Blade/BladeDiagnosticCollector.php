@@ -30,6 +30,7 @@ use PHPStan\Rules\MetadataRuleError;
 use PHPStan\Rules\TipRuleError;
 
 /**
+ * @internal
  * @phpstan-type QueuedDiagnostic array{
  *     message: string,
  *     identifier: string,

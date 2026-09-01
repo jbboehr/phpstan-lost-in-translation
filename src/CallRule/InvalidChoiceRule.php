@@ -36,6 +36,9 @@ use PHPStan\Type\TypeCombinator;
 use PHPStan\Type\UnionType;
 use PHPStan\Type\VerbosityLevel;
 
+/**
+ * @internal
+ */
 final class InvalidChoiceRule implements CallRuleInterface
 {
     public const IDENTIFIER_MALFORMED = 'lostInTranslation.invalidChoice.malformed';

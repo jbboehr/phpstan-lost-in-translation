@@ -31,6 +31,9 @@ use PhpParser\ParserFactory;
 use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * @internal
+ */
 final class PhpLoader
 {
     public const IDENTIFIER = 'lostInTranslation.translationLoaderError';

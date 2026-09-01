@@ -26,6 +26,9 @@ use PhpParser\Node;
 use PhpParser\Node\Scalar;
 use PhpParser\NodeVisitorAbstract;
 
+/**
+ * @internal
+ */
 final class KeyLineNumberVisitor extends NodeVisitorAbstract
 {
     /** @var array<non-empty-string, int> */

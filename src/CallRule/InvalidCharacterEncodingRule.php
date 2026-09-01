@@ -26,6 +26,9 @@ use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\RuleErrorBuilder;
 
+/**
+ * @internal
+ */
 final class InvalidCharacterEncodingRule implements CallRuleInterface
 {
     public const IDENTIFIER = 'lostInTranslation.invalidCharacterEncoding';

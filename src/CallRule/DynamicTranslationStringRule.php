@@ -26,6 +26,9 @@ use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
 
+/**
+ * @internal
+ */
 final class DynamicTranslationStringRule implements CallRuleInterface
 {
     public const IDENTIFIER = 'lostInTranslation.dynamicTranslationString';

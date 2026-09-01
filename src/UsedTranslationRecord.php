@@ -22,6 +22,9 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation;
 
+/**
+ * @internal
+ */
 final class UsedTranslationRecord implements \JsonSerializable
 {
     /**

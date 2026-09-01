@@ -28,6 +28,7 @@ use PHPStan\DependencyInjection\ParameterNotFoundException;
 use Traversable;
 
 /**
+ * @internal
  * @implements IteratorAggregate<int, CallRuleInterface>
  */
 final class CallRuleCollection implements IteratorAggregate, \Countable

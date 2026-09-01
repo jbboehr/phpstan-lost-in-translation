@@ -105,6 +105,7 @@ parameters:
 ```
 
 See the [configuration reference](docs/usage/configuration.md) for every option and default.
+It also defines the supported integration surface and the translation-file-shaped `lostInTranslationJson` error format.
 
 ## Documentation
 

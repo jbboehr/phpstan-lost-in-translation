@@ -24,6 +24,9 @@ namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use PHPStan\Rules\IdentifierRuleError;
 
+/**
+ * @internal
+ */
 final class LoadResult
 {
     /**

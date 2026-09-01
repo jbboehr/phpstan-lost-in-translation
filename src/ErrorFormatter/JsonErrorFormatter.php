@@ -33,6 +33,7 @@ use PHPStan\Command\ErrorFormatter\ErrorFormatter;
 use PHPStan\Command\Output;
 
 /**
+ * @internal
  * @phpstan-type MissingType array<string, array<string, null>>
  * @phpstan-import-type MetadataType from Identifier
  */

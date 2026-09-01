@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation;
 
 /**
+ * @api
  * @note can't use constants here AFAIK
  * @phpstan-type MetadataType array<string, mixed>&array{
  *   "lostInTranslation::key"?: string,

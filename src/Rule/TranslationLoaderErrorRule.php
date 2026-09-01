@@ -33,6 +33,7 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
+ * @internal
  * @implements Rule<CollectedDataNode>
  */
 final class TranslationLoaderErrorRule implements Rule

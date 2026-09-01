@@ -26,6 +26,9 @@ use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PHPStan\Rules\IdentifierRuleError;
 use PHPStan\ShouldNotHappenException;
 
+/**
+ * @internal
+ */
 interface CallRuleInterface
 {
     /**

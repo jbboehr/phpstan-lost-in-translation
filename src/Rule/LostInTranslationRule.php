@@ -31,6 +31,7 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
 
 /**
+ * @internal
  * @implements Rule<Node\Expr\CallLike>
  */
 final class LostInTranslationRule implements Rule

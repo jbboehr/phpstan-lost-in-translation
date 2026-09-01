@@ -34,6 +34,7 @@ use function sort;
 
 /**
  * @final
+ * @internal
  * @phpstan-type PossibleTranslationRecord array{string, ?string}
  * @phpstan-type PossibleTranslationRecordCollection array<string, list<PossibleTranslationRecord>>
  */

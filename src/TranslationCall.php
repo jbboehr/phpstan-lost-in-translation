@@ -25,6 +25,7 @@ namespace jbboehr\PHPStanLostInTranslation;
 use PHPStan\Type\Type;
 
 /**
+ * @internal
  * @phpstan-import-type PossibleTranslationRecordCollection from LostInTranslationHelper
  */
 final class TranslationCall implements \JsonSerializable

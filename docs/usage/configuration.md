@@ -45,3 +45,20 @@ parameters:
 <!-- configuration-reference:end -->
 
 See the task-oriented chapters for the behavior and adoption trade-offs behind these options.
+
+## Integration contract
+
+The supported integration surface consists of the `lostInTranslation` configuration schema, diagnostic identifiers and
+metadata, and registered error-format names and output. The metadata-key constants on
+`jbboehr\PHPStanLostInTranslation\Identifier` are the package's supported PHP API. Other PHP types are marked
+`@internal`; their constructors, methods, and serialized forms are process plumbing and may change between releases.
+
+The `lostInTranslationJson` error format remains available for tools that consume missing-key output:
+
+```console
+vendor/bin/phpstan analyse --error-format=lostInTranslationJson
+```
+
+Its missing-translation sections are grouped by diagnostic identifier and locale, with translation keys mapped to
+`null` so each locale section resembles a Laravel JSON translation file. Other diagnostic sections remain lists of
+affected keys. This format is separate from PHPStan's built-in `json` error format.

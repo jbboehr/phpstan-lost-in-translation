@@ -165,4 +165,19 @@ final class UtilsTest extends TestCase
             Application::setInstance($original);
         }
     }
+
+    public function testDetectBaseLocaleWithFlushedApplication(): void
+    {
+        $original = Application::getInstance();
+
+        try {
+            $app = new Application();
+            $app->boot();
+            $app->flush();
+
+            $this->assertSame('en', Utils::detectBaseLocale());
+        } finally {
+            Application::setInstance($original);
+        }
+    }
 }

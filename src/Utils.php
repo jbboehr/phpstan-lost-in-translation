@@ -126,7 +126,7 @@ final class Utils
         $r = new \ReflectionProperty($applicationClass, 'instance');
         $app = $r->getValue(null);
 
-        if (!($app instanceof Application) || !$app->isBooted()) {
+        if (!($app instanceof Application) || !$app->isBooted() || !$app->bound('config')) {
             return 'en';
         }
 

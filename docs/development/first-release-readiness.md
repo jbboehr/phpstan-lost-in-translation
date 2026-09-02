@@ -1,7 +1,7 @@
 # First-release readiness
 
 **Audited:** 2026-08-14 (America/Los_Angeles)<br>
-**Updated:** 2026-08-15 after `v0.1.0` publication<br>
+**Updated:** 2026-09-01 after the repository-settings audit<br>
 **Initial source:** `develop` at `50e3e2e` (`Add mdBook user guide`)<br>
 **Release:** `v0.1.0` at `41d8aa4` (`Update first release readiness`)<br>
 **Scope:** Package metadata, distributable archive, public documentation, dependency health, GitHub configuration,
@@ -16,9 +16,9 @@ during release-candidate validation.
 
 The initial audit found `master` 57 commits behind `develop`, obsolete Packagist metadata, and no hosted guide. The
 default-branch cutover resolved those findings: Packagist now publishes current metadata for both development branches,
-and Pages is live. Repository metadata and protection changes were authorized on 2026-08-15, but the available GitHub
-token lacks repository-administration and workflow-write permissions. The release proceeded with an explicit waiver;
-the selected values remain recorded under RR-04 as deferred repository housekeeping.
+and Pages is live. The repository description and homepage were applied after publication. Ruleset `20885570` now
+targets the default branch and applies the selected deletion, non-fast-forward, and linear-history rules to `master`
+without an administrator bypass, completing RR-04.
 
 Packagist indexes the tag as `v0.1.0`, normalized to `0.1.0.0`, with the current source reference, dependencies,
 description, and license. No GitHub Release object was created, by decision.
@@ -38,7 +38,7 @@ description, and license. No GitHub Release object was created, by decision.
 | BookStack canary | Run `31873535591` passed at `1b0fb11` under `develop` before the identical commit became `master`. A branch-specific redispatch was rejected with HTTP 403. | The release source is validated; redispatch from `master` when workflow-write credentials are available if branch-labelled evidence is required. |
 | User documentation | README and `docs/usage/` advertise the resolvable `^0.1` constraint. Pages run `31875010487` passed from `master`; the guide is live at `https://jbboehr.github.io/phpstan-lost-in-translation/`. | Hosted installation documentation matches the published version. |
 | Packagist | `v0.1.0` resolves to `41d8aa4` with the current description, dependencies, and license. | Ordinary stable Composer installations now resolve without a development stability override. |
-| GitHub metadata | The description remains the older missing-strings-only summary, no homepage is set, and `master` remains unprotected because the authorized update received HTTP 403. | RR-04 was waived for `v0.1.0`; apply the selected settings later with repository-administration credentials. |
+| GitHub metadata | The selected description and homepage are live. Ruleset `20885570` targets the default branch and GitHub reports deletion, non-fast-forward, and linear-history rules applied to `master`, with no bypass actors. | RR-04 is complete while ordinary direct pushes remain allowed. |
 | Changelog | `CHANGELOG.md` retains an empty `Unreleased` section whose comparison now begins at `v0.1.0`. | The first tag is the baseline; subsequent notable changes are recorded without reconstructing pre-tag history. |
 
 ## Release blockers
@@ -82,7 +82,7 @@ the available token received HTTP 403.
 
 ### RR-04 — Make release-critical repository settings explicit
 
-**Status:** Waived for `v0.1.0`; retained as deferred repository housekeeping.
+**Status:** Waived for `v0.1.0` and resolved afterward.
 
 The selected policy preserves the current solo direct-push workflow while preventing destructive history changes:
 
@@ -96,9 +96,12 @@ The selected repository description is `PHPStan extension for validating Laravel
 choices, locales, files, and Blade usage`. The selected homepage is
 `https://jbboehr.github.io/phpstan-lost-in-translation/`.
 
-Applying the description, homepage, protection, and branch-specific BookStack dispatch through the current token each
-received HTTP 403. The settings remained unchanged when `v0.1.0` was published under explicit authorization. Apply them
-later with repository-administration credentials; they are no longer tracked as first-release blockers.
+The description and homepage now match these selected values. Ruleset `20885570` was initially created with the three
+selected rules and no administrator bypass, but an empty ref selector left it ineffective. The 2026-09-01 audit caught
+that configuration after GitHub's applied-rules endpoint returned no rules for `master`; the available automation token
+could not correct it. The ruleset now targets `~DEFAULT_BRANCH`, and the same endpoint reports `deletion`,
+`non_fast_forward`, and `required_linear_history` for `master`. No pull-request or required-status-check rule was added,
+so the selected direct-push workflow remains available.
 
 ## Not release blockers
 

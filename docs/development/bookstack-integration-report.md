@@ -4,13 +4,13 @@
 **Extension:** `phpstan-lost-in-translation` at `a03812b` (`Deduplicate replacement placeholder variants`)<br>
 **Application:** BookStack `v26.05.3` at `e1cd3229966d939a75a74a2224ff0643d8af337b`<br>
 **Scope:** Real-application validation of translation loading and call analysis, including compiled Blade templates through BladeStan<br>
-**Status:** Investigation complete; no BookStack or extension source changes were retained from the experiment
+**Status:** Initial investigation complete; subsequent extension fixes and canary automation are recorded below
 
 ## Executive summary
 
 BookStack is a useful real-world canary for this extension. Its application-only PHPStan baseline was clean, its translation corpus is large and varied, and enabling this extension exposed both concrete package defects and likely defects in BookStack's translations.
 
-The main findings are:
+At the tested extension revision, the main findings were:
 
 1. The PHP translation loader reports every conventional empty array as an invalid translation value. BookStack's `validation.attributes` array produces 53 false positives, one per locale.
 2. Choice-string validation is narrower than Laravel's actual `MessageSelector` behavior. Valid one-form and locale-specific three-form strings are reported as malformed.
@@ -19,7 +19,8 @@ The main findings are:
 5. The run found four high-confidence BookStack translation defects: an Indonesian placeholder typo, an empty Portuguese translation, malformed Slovak range syntax, and a likely missing Icelandic choice delimiter.
 6. Fuzzy search did not materially affect the application-only run time. The earlier concern that fuzzy matching would be too slow was not reproduced on this corpus with the current implementation.
 
-The recommended order is to fix empty-array loading first, then align choice validation with Laravel. Once those two sources of false positives are addressed, BookStack would be a strong candidate for a repeatable, optional integration smoke test.
+Those two false-positive sources were fixed in follow-up work, after which BookStack became the pinned optional canary
+described below.
 
 ## Follow-up automation
 
@@ -463,17 +464,27 @@ This workaround belongs in a BookStack-specific PHPStan bootstrap or a more gene
 
 ### 1. Fix empty-array loading
 
+**Status:** Complete. Empty structural arrays are accepted, unsupported non-string leaves still produce loader
+diagnostics, and focused loader tests plus the BookStack canary guard both behaviors.
+
 This is small, clearly incorrect, and responsible for the entire 53-error loader flood. Add focused unit coverage and repeat the BookStack application-only run with loader diagnostics enabled.
 
 **Acceptance criterion:** BookStack's conventional empty `validation.attributes` arrays produce no diagnostics, while unsupported non-string leaves still do.
 
 ### 2. Align choice analysis with Laravel
 
+**Status:** Complete. Runtime-compatible one-, two-, and locale-specific multi-form choices are accepted. Malformed
+conditions remain separate from the opt-in plural-completeness diagnostic, with focused and canary coverage.
+
 Build tests directly from `Illuminate\Translation\MessageSelector` behavior, including locale-specific plural indexes. Preserve the genuine Slovak and Icelandic cases as negative fixtures.
 
 **Acceptance criterion:** Valid one-, two-, and three-form BookStack strings are accepted; malformed conditions and missing delimiters remain detectable.
 
 ### 3. Improve Blade diagnostic attribution
+
+**Status:** Complete through the Bladestan compatibility bridge. Rebuilt diagnostics retain identifier, key/locale
+metadata, tips, and template path/line metadata while preserving the outer view-call location required by Bladestan's
+formatter.
 
 Create a minimal BladeStan integration fixture before changing production code. Determine what metadata survives nested analysis and whether a supported interface exists for preserving both template location and this extension's structured fields.
 
@@ -491,6 +502,9 @@ diagnostics are now removed by the bridge; findings attached to distinct outer v
 BookStack canary covers `de_informal: de_DE` for both locale validation and the opt-in plural-completeness policy.
 
 ### 6. Add an optional real-application canary
+
+**Status:** Complete. `composer bookstack:canary` runs the pinned, networked application and Blade analyses from an
+extracted package archive and enforces dependency, diagnostic, metadata, count, and known-regression contracts.
 
 Once the high-noise false positives are fixed, automate a pinned BookStack run outside the normal fast unit suite. A script or manually dispatched workflow is preferable initially because it depends on an external repository and a BookStack-specific bootstrap adjustment.
 
@@ -545,6 +559,9 @@ Exact Composer operations should be performed in an isolated clone because addin
 
 ## Final assessment
 
-The integration was successful in the sense that the extension installed, ran quickly, analyzed real application and Blade translation calls, and found credible defects. It also showed that two core diagnostics need correctness work before the output is suitable as a CI gate on a multilingual Laravel application.
+The integration installed cleanly, ran quickly, analyzed real application and Blade translation calls, and found
+credible defects. Follow-up work fixed the empty-array and choice-semantics false positives, restored structured Blade
+diagnostics, added locale aliases, and automated the pinned reproduction.
 
-BookStack should remain an external canary rather than a required test dependency for now. After empty arrays and Laravel-compatible choice parsing are fixed, repeating this run will provide a much clearer signal and a practical basis for deciding whether to automate it.
+BookStack remains an external canary rather than a required test dependency because it is networked, application-specific,
+and substantially heavier than the normal compatibility matrix.

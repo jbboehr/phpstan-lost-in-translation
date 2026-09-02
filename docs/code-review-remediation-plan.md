@@ -518,13 +518,14 @@ Ongoing policy:
 
 ### Mutation testing baseline
 
-**Status:** Complete. The reviewed PHP 8.4 campaign generates 1,011 covered
-mutants, kills 834, and records a covered-code MSI of 82.49%. CI now enforces
-80-point overall and covered-code minimums. Focused tests cover the observable
+**Status:** Complete. The reviewed PHP 8.4 campaign generates 1,289 covered
+mutants, kills 1,085, records two fatal errors and 202 survivors, and reaches an
+overall and covered-code MSI of 84.33%. CI enforces 80-point overall and
+covered-code minimums. Focused tests cover the observable
 Blade queue, loader metadata, choice and replacement edge cases, memoization,
 formatter exit status, and utility boundaries added during triage.
 
-The 177 survivors are classified by component in
+The 202 survivors are classified by component in
 `docs/mutation-testing.md`. Equivalent mutants are documented rather than
 hidden with broad ignore rules; remaining behavioral variants provide a
 prioritized input for future work tied to real diagnostics.
@@ -829,7 +830,7 @@ so validation and storage cannot diverge again.
 6. Add runtime-only Composer auditing to CI. **Complete:** conventional CI runs
    `composer audit --locked --no-dev` without weakening the offline Nix checks.
 7. Triage the advisory Infection baseline and establish a covered-code MSI
-   threshold. **Complete:** the reviewed 82.49% baseline now has an enforced
+   threshold. **Complete:** the reviewed 84.33% baseline now has an enforced
    80% overall and covered-code floor.
 8. Evaluate targeted Eris properties after locale canonicalization is stable.
    **Complete:** an isolated PHP 8.1/PHPUnit 10 job checks four deterministic

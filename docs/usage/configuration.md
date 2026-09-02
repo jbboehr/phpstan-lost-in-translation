@@ -49,9 +49,11 @@ See the task-oriented chapters for the behavior and adoption trade-offs behind t
 ## Integration contract
 
 The supported integration surface consists of the `lostInTranslation` configuration schema, diagnostic identifiers and
-metadata, and registered error-format names and output. The metadata-key constants on
+metadata, and registered error-format names and output. The diagnostic and metadata-key constants on
 `jbboehr\PHPStanLostInTranslation\Identifier` are the package's supported PHP API. Other PHP types are marked
 `@internal`; their constructors, methods, and serialized forms are process plumbing and may change between releases.
+For example, PHP integrations can refer to the missing-key diagnostic as `Identifier::MISSING_TRANSLATION_STRING`
+instead of repeating its string value.
 
 The `lostInTranslationJson` error format remains available for tools that consume missing-key output:
 

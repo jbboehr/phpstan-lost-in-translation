@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -32,8 +33,8 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class InvalidLocaleRule implements CallRuleInterface
 {
-    public const IDENTIFIER_NO_TRANSLATIONS = 'lostInTranslation.invalidLocale.noTranslations';
-    public const IDENTIFIER_UNKNOWN_LOCALE = 'lostInTranslation.invalidLocale.unknown';
+    public const IDENTIFIER_NO_TRANSLATIONS = Identifier::INVALID_LOCALE_NO_TRANSLATIONS;
+    public const IDENTIFIER_UNKNOWN_LOCALE = Identifier::INVALID_LOCALE_UNKNOWN;
 
     public function __construct(
         private readonly TranslationLoader $loader,

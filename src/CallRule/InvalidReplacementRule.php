@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -34,8 +35,8 @@ use function sort;
  */
 final class InvalidReplacementRule implements CallRuleInterface
 {
-    public const IDENTIFIER_UNUSED = 'lostInTranslation.invalidReplacement.unused';
-    public const IDENTIFIER_MULTIPLE_VARIANTS = 'lostInTranslation.invalidReplacement.multipleVariants';
+    public const IDENTIFIER_UNUSED = Identifier::INVALID_REPLACEMENT_UNUSED;
+    public const IDENTIFIER_MULTIPLE_VARIANTS = Identifier::INVALID_REPLACEMENT_MULTIPLE_VARIANTS;
 
     public function processCall(TranslationCall $call): array
     {

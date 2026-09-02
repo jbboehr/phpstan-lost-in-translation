@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Define configuration, diagnostic identifiers and metadata, registered error formats, and the `Identifier` metadata
-  constants as the supported integration surface; other PHP types are now explicitly internal.
+- Define configuration, diagnostic identifiers and metadata, registered error formats, and the `Identifier` diagnostic
+  and metadata constants as the supported integration surface; other PHP types are now explicitly internal.
 
 ### Deprecated
 

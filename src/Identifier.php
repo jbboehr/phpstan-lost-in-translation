@@ -35,6 +35,23 @@ namespace jbboehr\PHPStanLostInTranslation;
  */
 final class Identifier
 {
+    public const DYNAMIC_TRANSLATION_STRING = 'lostInTranslation.dynamicTranslationString';
+    public const INVALID_CHARACTER_ENCODING = 'lostInTranslation.invalidCharacterEncoding';
+    public const INVALID_CHOICE_MALFORMED = 'lostInTranslation.invalidChoice.malformed';
+    public const INVALID_CHOICE_MISSING_CASE = 'lostInTranslation.invalidChoice.missingCase';
+    public const INVALID_CHOICE_MISSING_PLURAL_FORM = 'lostInTranslation.invalidChoice.missingPluralForm';
+    public const INVALID_CHOICE_NON_NUMERIC = 'lostInTranslation.invalidChoice.nonNumeric';
+    public const INVALID_LOCALE_NO_TRANSLATIONS = 'lostInTranslation.invalidLocale.noTranslations';
+    public const INVALID_LOCALE_UNKNOWN = 'lostInTranslation.invalidLocale.unknown';
+    public const INVALID_REPLACEMENT_MULTIPLE_VARIANTS = 'lostInTranslation.invalidReplacement.multipleVariants';
+    public const INVALID_REPLACEMENT_UNUSED = 'lostInTranslation.invalidReplacement.unused';
+    public const MISSING_BASE_LOCALE_TRANSLATION_STRING = 'lostInTranslation.missingBaseLocaleTranslationString';
+    public const MISSING_TRANSLATION_STRING = 'lostInTranslation.missingTranslationString';
+    public const POSSIBLY_UNUSED_TRANSLATION_STRING = 'lostInTranslation.possiblyUnusedTranslationString';
+    public const TRANSLATION_LOADER_ERROR = 'lostInTranslation.translationLoaderError';
+    public const TRANSLATION_LOADER_ERROR_CONFLICTING_KEY = 'lostInTranslation.translationLoaderError.conflictingKey';
+    public const TRANSLATION_LOADER_ERROR_CONFLICTING_LOCALE = 'lostInTranslation.translationLoaderError.conflictingLocale';
+
     public const METADATA_KEY = 'lostInTranslation::key';
     public const METADATA_LOCALE = 'lostInTranslation::locale';
     public const METADATA_VALUE = 'lostInTranslation::value';

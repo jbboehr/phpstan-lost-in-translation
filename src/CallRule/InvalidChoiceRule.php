@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -41,10 +42,10 @@ use PHPStan\Type\VerbosityLevel;
  */
 final class InvalidChoiceRule implements CallRuleInterface
 {
-    public const IDENTIFIER_MALFORMED = 'lostInTranslation.invalidChoice.malformed';
-    public const IDENTIFIER_MISSING_CASE = 'lostInTranslation.invalidChoice.missingCase';
-    public const IDENTIFIER_MISSING_PLURAL_FORM = 'lostInTranslation.invalidChoice.missingPluralForm';
-    public const IDENTIFIER_NON_NUMERIC = 'lostInTranslation.invalidChoice.nonNumeric';
+    public const IDENTIFIER_MALFORMED = Identifier::INVALID_CHOICE_MALFORMED;
+    public const IDENTIFIER_MISSING_CASE = Identifier::INVALID_CHOICE_MISSING_CASE;
+    public const IDENTIFIER_MISSING_PLURAL_FORM = Identifier::INVALID_CHOICE_MISSING_PLURAL_FORM;
+    public const IDENTIFIER_NON_NUMERIC = Identifier::INVALID_CHOICE_NON_NUMERIC;
 
     /**
      * Positional form counts and exact region suffixes recognized by Laravel's selector; unlisted locales use one.

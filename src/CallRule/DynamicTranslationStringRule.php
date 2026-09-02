@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\VerbosityLevel;
@@ -31,7 +32,7 @@ use PHPStan\Type\VerbosityLevel;
  */
 final class DynamicTranslationStringRule implements CallRuleInterface
 {
-    public const IDENTIFIER = 'lostInTranslation.dynamicTranslationString';
+    public const IDENTIFIER = Identifier::DYNAMIC_TRANSLATION_STRING;
 
     public function processCall(TranslationCall $call): array
     {

@@ -92,7 +92,7 @@ final class UnusedTranslationStringRule implements Rule
                     Utils::e($item['key']),
                     join(', ', [$item['locale']]),
                 ))
-                    ->identifier('lostInTranslation.possiblyUnusedTranslationString')
+                    ->identifier(Identifier::POSSIBLY_UNUSED_TRANSLATION_STRING)
                     ->file($item['file'])
                     ->line($item['line']);
 

@@ -30,6 +30,34 @@ final class PublicApiContractTest extends \PHPUnit\Framework\TestCase
         Identifier::class,
     ];
 
+    public function testIdentifierExposesTheStableDiagnosticCatalogue(): void
+    {
+        $constants = (new \ReflectionClass(Identifier::class))->getConstants();
+        $diagnosticIdentifiers = array_filter(
+            $constants,
+            static fn (mixed $value): bool => is_string($value) && str_starts_with($value, 'lostInTranslation.'),
+        );
+
+        self::assertSame([
+            'DYNAMIC_TRANSLATION_STRING' => 'lostInTranslation.dynamicTranslationString',
+            'INVALID_CHARACTER_ENCODING' => 'lostInTranslation.invalidCharacterEncoding',
+            'INVALID_CHOICE_MALFORMED' => 'lostInTranslation.invalidChoice.malformed',
+            'INVALID_CHOICE_MISSING_CASE' => 'lostInTranslation.invalidChoice.missingCase',
+            'INVALID_CHOICE_MISSING_PLURAL_FORM' => 'lostInTranslation.invalidChoice.missingPluralForm',
+            'INVALID_CHOICE_NON_NUMERIC' => 'lostInTranslation.invalidChoice.nonNumeric',
+            'INVALID_LOCALE_NO_TRANSLATIONS' => 'lostInTranslation.invalidLocale.noTranslations',
+            'INVALID_LOCALE_UNKNOWN' => 'lostInTranslation.invalidLocale.unknown',
+            'INVALID_REPLACEMENT_MULTIPLE_VARIANTS' => 'lostInTranslation.invalidReplacement.multipleVariants',
+            'INVALID_REPLACEMENT_UNUSED' => 'lostInTranslation.invalidReplacement.unused',
+            'MISSING_BASE_LOCALE_TRANSLATION_STRING' => 'lostInTranslation.missingBaseLocaleTranslationString',
+            'MISSING_TRANSLATION_STRING' => 'lostInTranslation.missingTranslationString',
+            'POSSIBLY_UNUSED_TRANSLATION_STRING' => 'lostInTranslation.possiblyUnusedTranslationString',
+            'TRANSLATION_LOADER_ERROR' => 'lostInTranslation.translationLoaderError',
+            'TRANSLATION_LOADER_ERROR_CONFLICTING_KEY' => 'lostInTranslation.translationLoaderError.conflictingKey',
+            'TRANSLATION_LOADER_ERROR_CONFLICTING_LOCALE' => 'lostInTranslation.translationLoaderError.conflictingLocale',
+        ], $diagnosticIdentifiers);
+    }
+
     public function testEverySourceTypeDeclaresItsCompatibilityStatus(): void
     {
         $sourceDirectory = new \RecursiveDirectoryIterator(__DIR__ . '/../src');

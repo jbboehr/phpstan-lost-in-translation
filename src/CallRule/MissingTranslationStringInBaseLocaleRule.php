@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\CallRule;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\TranslationCall;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use jbboehr\PHPStanLostInTranslation\Utils;
@@ -32,7 +33,7 @@ use PHPStan\Rules\RuleErrorBuilder;
  */
 final class MissingTranslationStringInBaseLocaleRule implements CallRuleInterface
 {
-    public const IDENTIFIER = 'lostInTranslation.missingBaseLocaleTranslationString';
+    public const IDENTIFIER = Identifier::MISSING_BASE_LOCALE_TRANSLATION_STRING;
 
     public function __construct(
         private readonly TranslationLoader $loader,

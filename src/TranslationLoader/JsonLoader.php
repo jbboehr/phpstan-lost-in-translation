@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use JsonStreamingParser\Parser;
 use PHPStan\Rules\RuleErrorBuilder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -31,7 +32,7 @@ use Symfony\Component\Finder\SplFileInfo;
  */
 final class JsonLoader
 {
-    public const IDENTIFIER = 'lostInTranslation.translationLoaderError';
+    public const IDENTIFIER = Identifier::TRANSLATION_LOADER_ERROR;
 
     public function load(SplFileInfo $file): LoadResult
     {

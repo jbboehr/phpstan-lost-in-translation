@@ -23,6 +23,7 @@ declare(strict_types=1);
 namespace jbboehr\PHPStanLostInTranslation\TranslationLoader;
 
 use jbboehr\PHPStanLostInTranslation\CallRule\InvalidCharacterEncodingRule;
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
@@ -36,7 +37,7 @@ use Symfony\Component\Finder\SplFileInfo;
  */
 final class PhpLoader
 {
-    public const IDENTIFIER = 'lostInTranslation.translationLoaderError';
+    public const IDENTIFIER = Identifier::TRANSLATION_LOADER_ERROR;
 
     public function __construct(
         private readonly ?ParserFactory $parserFactory = null,

@@ -26,6 +26,7 @@ use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
+use jbboehr\PHPStanLostInTranslation\Identifier;
 use jbboehr\PHPStanLostInTranslation\UsedTranslationRecord;
 use jbboehr\PHPStanLostInTranslation\Utils;
 use PHPStan\Rules\IdentifierRuleError;
@@ -46,8 +47,8 @@ use function usort;
  */
 class TranslationLoader
 {
-    public const IDENTIFIER_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingKey';
-    public const IDENTIFIER_LOCALE_CONFLICT = 'lostInTranslation.translationLoaderError.conflictingLocale';
+    public const IDENTIFIER_CONFLICT = Identifier::TRANSLATION_LOADER_ERROR_CONFLICTING_KEY;
+    public const IDENTIFIER_LOCALE_CONFLICT = Identifier::TRANSLATION_LOADER_ERROR_CONFLICTING_LOCALE;
 
     private readonly ?string $langPath;
 

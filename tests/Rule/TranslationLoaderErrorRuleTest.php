@@ -29,7 +29,6 @@ use jbboehr\PHPStanLostInTranslation\ShouldNotHappenException;
 use jbboehr\PHPStanLostInTranslation\Tests\RuleTestCase;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
 use PhpParser\Node;
-use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\CollectedDataNode;
 use PHPStan\Rules\Rule;
@@ -191,10 +190,6 @@ class TranslationLoaderErrorRuleTest extends RuleTestCase
 
     public function testExceptionConversion(): void
     {
-        if (!class_exists(FuncCall::class)) {
-            $this->markTestIncomplete('This seems to fail when you filter, probably PHPStan autoload does not get initialized');
-        }
-
         $ex = new \RuntimeException(self::class);
         /** @phpstan-ignore-next-line phpstanApi.constructor */
         $node = new CollectedDataNode([], false);

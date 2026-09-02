@@ -100,10 +100,6 @@ final class UnusedTranslationStringFakeCollectorRuleTest extends \PHPUnit\Framew
 
     public function testExceptionConversion(): void
     {
-        if (!class_exists(FuncCall::class)) {
-            $this->markTestIncomplete('This seems to fail when you filter, probably PHPStan autoload does not get initialized');
-        }
-
         $ex = new \RuntimeException(self::class);
         $node = $this->createStub(FuncCall::class);
 

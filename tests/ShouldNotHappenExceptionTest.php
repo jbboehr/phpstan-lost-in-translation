@@ -49,10 +49,6 @@ final class ShouldNotHappenExceptionTest extends \PHPUnit\Framework\TestCase
 
     public function testExceptionConversion(): void
     {
-        if (!class_exists(FuncCall::class)) {
-            $this->markTestIncomplete('This seems to fail when you filter, probably PHPStan autoload does not get initialized');
-        }
-
         $ex = new \RuntimeException(self::class);
         $mock = $this->createMock(LostInTranslationHelper::class);
         $mock->method('parseCallLike')

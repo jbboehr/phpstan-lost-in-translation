@@ -72,7 +72,15 @@ jobs:
               run: composer install --prefer-dist --no-progress
 
             - name: Run PHPUnit
-              run: composer test -- --colors=never
+              run: composer test -- --colors=never --log-junit "$RUNNER_TEMP/phpunit.xml"
+
+            - name: Upload PHPUnit report
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@v7
+              with:
+                  name: phpunit-junit-php84
+                  path: ${{ runner.temp }}/phpunit.xml
+                  if-no-files-found: error
 
     phpstan:
         runs-on: ubuntu-latest

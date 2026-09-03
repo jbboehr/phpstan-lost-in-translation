@@ -315,6 +315,10 @@ let
     }
   ];
 
+  # Seed 11 exposed a real Laravel global-state leak. Keep the Nix matrix
+  # reproducible while continuing to exercise a non-default test order.
+  phpunitRandomOrderArgs = "--order-by=random --random-order-seed=11";
+
   phpunitChecks = lib.listToAttrs (
     map (
       entry:
@@ -323,7 +327,7 @@ let
         inherit (entry) composerLock repository;
         php = php.${entry.phpName};
         command = ''
-          php ./vendor/bin/phpunit --no-coverage --colors=never
+          php ./vendor/bin/phpunit --no-coverage --colors=never ${phpunitRandomOrderArgs}
         '';
       })
     ) phpunitMatrix
@@ -434,7 +438,7 @@ in
       repository = repositories.lowest;
       composerLock = ./composer/lowest.lock;
       command = ''
-        php ./vendor/bin/phpunit --no-coverage --colors=never
+        php ./vendor/bin/phpunit --no-coverage --colors=never ${phpunitRandomOrderArgs}
       '';
     };
 

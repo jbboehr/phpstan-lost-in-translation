@@ -25,6 +25,7 @@ namespace jbboehr\PHPStanLostInTranslation\Tests;
 use jbboehr\PHPStanLostInTranslation\CallRule\CallRuleCollection;
 use jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringRule;
 use jbboehr\PHPStanLostInTranslation\Rule\LostInTranslationRule;
+use Orchestra\Testbench\Foundation\Application;
 use PHPStan\Rules\Rule;
 
 /**
@@ -51,6 +52,16 @@ class LarastanTest extends RuleTestCase
         if (!\Composer\InstalledVersions::isInstalled('larastan/larastan')) {
             self::markTestSkipped('Requires larastan to be installed');
         }
+    }
+
+    public function tearDown(): void
+    {
+        if (class_exists(Application::class)) {
+            /** @phpstan-ignore argument.type */
+            Application::flushState($this);
+        }
+
+        parent::tearDown();
     }
 
     public function testLarastanInference(): void

@@ -428,6 +428,11 @@ winning index after sorting instead of resolving it twice. Result-based tests
 cover empty sets, close and distant searches for the custom and naive
 implementations, null behavior, and the memoizing wrapper.
 
+The custom implementation and its dedicated tests were later removed after
+benchmarks showed that native `levenshtein()` search was both faster and more
+memory-efficient. The production `NaiveFuzzyStringSet` and memoizing wrapper
+retain the covered behavior.
+
 ### CR-11: JSON line-number parsing leaks a file handle
 
 **Status:** Implementation and regression coverage complete. Streaming handles

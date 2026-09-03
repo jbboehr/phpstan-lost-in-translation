@@ -25,41 +25,29 @@ namespace jbboehr\PHPStanLostInTranslation\Tests\Fuzzy;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetFactory;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\FuzzyStringSetInterface;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\MyFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NullFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\AbstractFuzzyStringSetBenchmark;
-use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\MyFuzzyStringSetBenchmark;
 use jbboehr\PHPStanLostInTranslation\Tests\Benchmark\NaiveFuzzyStringSetBenchmark;
 use PHPUnit\Framework\TestCase;
 
 final class FuzzyStringSetTest extends TestCase
 {
-    /**
-     * @dataProvider benchmarkProvider
-     * @param class-string<AbstractFuzzyStringSetBenchmark> $className
-     */
-    public function testDataSet1(string $className): void
+    public function testDataSet1(): void
     {
         self::expectNotToPerformAssertions();
 
-        /** @var AbstractFuzzyStringSetBenchmark $benchmark */
-        $benchmark = new $className();
+        $benchmark = new NaiveFuzzyStringSetBenchmark();
 
         $benchmark->setupDataSet1();
         $benchmark->benchDataSet1Cold();
     }
 
-    /**
-     * @dataProvider benchmarkProvider
-     * @param class-string<AbstractFuzzyStringSetBenchmark> $className
-     */
-    public function testDataSet1Memoized(string $className): void
+    public function testDataSet1Memoized(): void
     {
         self::expectNotToPerformAssertions();
 
-        /** @var AbstractFuzzyStringSetBenchmark $benchmark */
-        $benchmark = new $className();
+        $benchmark = new NaiveFuzzyStringSetBenchmark();
 
         $benchmark->setupDataSet1Memoized();
 
@@ -68,16 +56,11 @@ final class FuzzyStringSetTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider benchmarkProvider
-     * @param class-string<AbstractFuzzyStringSetBenchmark> $className
-     */
-    public function testDataSet2(string $className): void
+    public function testDataSet2(): void
     {
         self::expectNotToPerformAssertions();
 
-        /** @var AbstractFuzzyStringSetBenchmark $benchmark */
-        $benchmark = new $className();
+        $benchmark = new NaiveFuzzyStringSetBenchmark();
 
         $benchmark->setupDataSet2();
         $benchmark->benchDataSet2Cold();
@@ -92,37 +75,25 @@ final class FuzzyStringSetTest extends TestCase
         $this->assertNull($set->search('tezt'));
     }
 
-    /**
-     * @dataProvider implementationProvider
-     * @param class-string<FuzzyStringSetInterface> $className
-     */
-    public function testEmptySetReturnsNull(string $className): void
+    public function testEmptySetReturnsNull(): void
     {
-        $set = new $className();
+        $set = new NaiveFuzzyStringSet();
 
         $this->assertNull($set->search('test'));
     }
 
-    /**
-     * @dataProvider implementationProvider
-     * @param class-string<FuzzyStringSetInterface> $className
-     */
-    public function testSearchReturnsTheClosestCandidateOrNull(string $className): void
+    public function testSearchReturnsTheClosestCandidateOrNull(): void
     {
-        $set = new $className();
+        $set = new NaiveFuzzyStringSet();
         $set->addMany(['test', 'toast']);
 
         $this->assertSame('test', $set->search('tezt'));
         $this->assertNull($set->search('zzzz'));
     }
 
-    /**
-     * @dataProvider implementationProvider
-     * @param class-string<FuzzyStringSetInterface> $className
-     */
-    public function testNumericStringCandidatesRemainStrings(string $className): void
+    public function testNumericStringCandidatesRemainStrings(): void
     {
-        $set = new $className(['1234']);
+        $set = new NaiveFuzzyStringSet(['1234']);
 
         $this->assertSame('1234', $set->search('1235'));
     }
@@ -163,34 +134,12 @@ final class FuzzyStringSetTest extends TestCase
 
     public function testFactoryMemoizesByDefaultAndCanReturnTheSelectedImplementationDirectly(): void
     {
-        $memoized = (new FuzzyStringSetFactory(MyFuzzyStringSet::class))->createFuzzyStringSet(['test']);
-        $direct = (new FuzzyStringSetFactory(MyFuzzyStringSet::class, false))->createFuzzyStringSet(['test']);
+        $memoized = (new FuzzyStringSetFactory())->createFuzzyStringSet(['test']);
+        $direct = (new FuzzyStringSetFactory(NaiveFuzzyStringSet::class, false))->createFuzzyStringSet(['test']);
 
         $this->assertInstanceOf(MemoizingFuzzyStringSet::class, $memoized);
         $this->assertSame('test', $memoized->search('tezt'));
-        $this->assertInstanceOf(MyFuzzyStringSet::class, $direct);
+        $this->assertInstanceOf(NaiveFuzzyStringSet::class, $direct);
         $this->assertSame('test', $direct->search('tezt'));
-    }
-
-    /**
-     * @return list<array{class-string<AbstractFuzzyStringSetBenchmark>}>
-     */
-    public static function benchmarkProvider(): array
-    {
-        return [
-            [MyFuzzyStringSetBenchmark::class],
-            [NaiveFuzzyStringSetBenchmark::class],
-        ];
-    }
-
-    /**
-     * @return list<array{class-string<FuzzyStringSetInterface>}>
-     */
-    public static function implementationProvider(): array
-    {
-        return [
-            [MyFuzzyStringSet::class],
-            [NaiveFuzzyStringSet::class],
-        ];
     }
 }

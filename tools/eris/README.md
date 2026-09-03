@@ -17,8 +17,8 @@ ERIS_SEED=123456789 composer eris:test
 ```
 
 Focused example tests remain the primary regression suite. These properties supplement them by checking invariants over
-many locale spellings and translation-key combinations, differential fuzzy-search results, memoized operation sequences,
-generated JSON catalogues, and arbitrary diagnostic bytes.
+many locale spellings and translation-key combinations, memoized fuzzy-search operation sequences, generated JSON
+catalogues, and arbitrary diagnostic bytes.
 
 Every property invokes package code in the PHPUnit process. The suite does not
 delegate assertions to the PHPStan end-to-end subprocess. Infection does not

@@ -26,7 +26,6 @@ use Eris\Generator;
 use Eris\Generators;
 use Eris\TestTrait;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\MemoizingFuzzyStringSet;
-use jbboehr\PHPStanLostInTranslation\Fuzzy\MyFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\Fuzzy\NaiveFuzzyStringSet;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\JsonLoader;
 use jbboehr\PHPStanLostInTranslation\TranslationLoader\TranslationLoader;
@@ -97,23 +96,6 @@ final class TranslationPropertiesTest extends TestCase
                 self::assertSame('Plain translation', $namespacedFirst->get('en', $plainKey));
                 self::assertSame('Namespaced translation', $namespacedFirst->get('en', $namespacedKey));
             });
-    }
-
-    public function testIndexedFuzzySearchFindsSameNearestDistanceAsNaiveReference(): void
-    {
-        $this
-            ->forAll(
-                self::nonEmptyAsciiStringListGenerator(),
-                self::nonEmptyAsciiStringGenerator(),
-            )
-            ->then(static function (array $candidates, string $query): void {
-                self::assertEquivalentFuzzySearchResult($candidates, $query);
-            });
-    }
-
-    public function testIndexedFuzzySearchAllowsEquivalentTieBreaking(): void
-    {
-        self::assertEquivalentFuzzySearchResult(['xbcd', 'abcx'], 'abcd');
     }
 
     public function testMemoizingFuzzySearchMatchesUncachedReference(): void
@@ -274,17 +256,6 @@ final class TranslationPropertiesTest extends TestCase
         );
     }
 
-    private static function nonEmptyAsciiStringListGenerator(): Generator
-    {
-        return Generators::bind(
-            Generators::choose(0, 12),
-            static fn(int $length): Generator => Generators::vector(
-                $length,
-                self::nonEmptyAsciiStringGenerator(),
-            ),
-        );
-    }
-
     private static function fuzzyOperationSequenceGenerator(): Generator
     {
         return Generators::vector(
@@ -327,25 +298,6 @@ final class TranslationPropertiesTest extends TestCase
             static fn(array $bytes): string => implode('', array_map('chr', $bytes)),
             Generators::seq(Generators::byte()),
         );
-    }
-
-    /**
-     * @param list<non-empty-string> $candidates
-     * @param non-empty-string $query
-     */
-    private static function assertEquivalentFuzzySearchResult(array $candidates, string $query): void
-    {
-        $referenceResult = (new NaiveFuzzyStringSet($candidates))->search($query);
-        $indexedResult = (new MyFuzzyStringSet($candidates))->search($query);
-
-        if (null === $referenceResult) {
-            self::assertNull($indexedResult);
-            return;
-        }
-
-        self::assertNotNull($indexedResult);
-        self::assertTrue(in_array($indexedResult, $candidates, true));
-        self::assertSame(levenshtein($query, $referenceResult), levenshtein($query, $indexedResult));
     }
 
     private static function createTranslationLoader(): TranslationLoader

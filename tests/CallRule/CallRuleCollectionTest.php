@@ -88,6 +88,17 @@ class CallRuleCollectionTest extends TestCase
             'requireCompleteChoiceCoverage' => false,
             'requireCompletePluralForms' => false,
         ], true];
+        yield 'canonical syntax only' => [[
+            'validateChoiceSyntax' => true,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => false,
+        ], true];
+        yield 'legacy syntax switch can disable the canonical switch' => [[
+            'invalidChoices' => false,
+            'validateChoiceSyntax' => true,
+            'requireCompleteChoiceCoverage' => false,
+            'requireCompletePluralForms' => false,
+        ], false];
         yield 'coverage only' => [[
             'invalidChoices' => false,
             'requireCompleteChoiceCoverage' => true,

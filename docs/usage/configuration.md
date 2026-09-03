@@ -19,7 +19,7 @@ parameters:
         localeAliases: []
         # report invalid character encodings
         invalidCharacterEncodings: true
-        # report malformed choice conditions and invalid bounds
+        # deprecated compatibility alias for validateChoiceSyntax; false disables syntax diagnostics
         invalidChoices: true
         # require explicit choice conditions to cover every possible value of the inferred number type
         requireCompleteChoiceCoverage: true
@@ -41,10 +41,16 @@ parameters:
         translationLoaderErrors: true
         # compare statically used translations with the complete catalogue
         unusedTranslationStrings: false
+        # report malformed choice conditions and invalid bounds
+        validateChoiceSyntax: true
 ```
 <!-- configuration-reference:end -->
 
 See the task-oriented chapters for the behavior and adoption trade-offs behind these options.
+
+`invalidChoices` is the legacy name for `validateChoiceSyntax`. Existing configurations remain supported. When both
+keys are present, setting either one to `false` disables choice-syntax diagnostics, while choice-coverage and plural-form
+checks remain independently configurable.
 
 ## Integration contract
 

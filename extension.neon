@@ -41,6 +41,7 @@ services:
       requireCompleteChoiceCoverage: %lostInTranslation.requireCompleteChoiceCoverage%
       requireCompletePluralForms: %lostInTranslation.requireCompletePluralForms%
       invalidChoices: %lostInTranslation.invalidChoices%
+      validateChoiceSyntax: %lostInTranslation.validateChoiceSyntax%
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidLocaleRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\InvalidReplacementRule
   - class: jbboehr\PHPStanLostInTranslation\CallRule\MissingTranslationStringInBaseLocaleRule
@@ -89,7 +90,8 @@ parametersSchema:
         requireCompletePluralForms: bool(),
         strictLocales: bool(),
         translationLoaderErrors: bool(),
-        unusedTranslationStrings: bool()
+        unusedTranslationStrings: bool(),
+        validateChoiceSyntax: bool()
     ])
 
 parameters:
@@ -111,3 +113,4 @@ parameters:
         strictLocales: false
         translationLoaderErrors: true
         unusedTranslationStrings: false
+        validateChoiceSyntax: true

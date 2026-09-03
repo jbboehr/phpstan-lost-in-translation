@@ -27,11 +27,14 @@ Replacement string matches multiple variants: "foo"
 
 ## Choice syntax and coverage
 
-`invalidChoices` and `requireCompleteChoiceCoverage` are enabled by default. They validate Laravel choice conditions and
-report explicit conditions that do not cover every value PHPStan can infer for the count. The choice switches are
-independent: disabling `invalidChoices` suppresses malformed-condition and invalid-bound diagnostics without disabling
-an enabled coverage or plural-form check. Malformed conditions still prevent cascading completeness diagnostics because
-their coverage cannot be determined safely.
+`validateChoiceSyntax` and `requireCompleteChoiceCoverage` are enabled by default. They validate Laravel choice
+conditions and report explicit conditions that do not cover every value PHPStan can infer for the count. The choice
+switches are independent: disabling `validateChoiceSyntax` suppresses malformed-condition and invalid-bound diagnostics
+without disabling an enabled coverage or plural-form check. Malformed conditions still prevent cascading completeness
+diagnostics because their coverage cannot be determined safely.
+
+The legacy `invalidChoices` key remains supported. Setting either it or `validateChoiceSyntax` to `false` disables
+choice-syntax diagnostics.
 
 Fractional exact values and ranges use Laravel's inclusive numeric comparisons. Constant float counts are checked
 precisely, and fractional ranges are projected onto inferred integer domains by rounding the lower bound up and the

@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Add repeatable PHPBench coverage for fuzzy lookup, missing-key diagnostics, JSON and nested PHP catalogue loading,
   and unused-key analysis, with optional Perfidious software and hardware counters through Nix.
+- Add `validateChoiceSyntax` as the clear configuration name for malformed choice conditions and invalid bounds.
 
 ### Changed
 
@@ -18,6 +19,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   and metadata constants as the supported integration surface; other PHP types are now explicitly internal.
 
 ### Deprecated
+
+- Deprecate the ambiguous `invalidChoices` configuration name in favor of `validateChoiceSyntax`; the legacy key remains
+  supported, and setting either key to `false` disables syntax diagnostics.
 
 ### Removed
 

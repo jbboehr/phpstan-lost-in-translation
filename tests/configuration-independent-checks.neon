@@ -5,7 +5,7 @@ parameters:
     lostInTranslation:
         baseLocale: en
         langPath: tests/Rule/lang-warn
-        invalidChoices: false
+        validateChoiceSyntax: false
         requireCompleteChoiceCoverage: false
         requireCompletePluralForms: true
         invalidLocales: true

@@ -47,6 +47,8 @@ final class InvalidChoiceRule implements CallRuleInterface
     public const IDENTIFIER_MISSING_PLURAL_FORM = Identifier::INVALID_CHOICE_MISSING_PLURAL_FORM;
     public const IDENTIFIER_NON_NUMERIC = Identifier::INVALID_CHOICE_NON_NUMERIC;
 
+    private readonly bool $validateChoiceSyntax;
+
     /**
      * Positional form counts and exact region suffixes recognized by Laravel's selector; unlisted locales use one.
      *
@@ -159,8 +161,10 @@ final class InvalidChoiceRule implements CallRuleInterface
         private readonly bool $requireCompleteChoiceCoverage = true,
         private readonly bool $requireCompletePluralForms = false,
         private readonly ?TranslationLoader $translationLoader = null,
-        private readonly bool $invalidChoices = true,
+        bool $invalidChoices = true,
+        bool $validateChoiceSyntax = true,
     ) {
+        $this->validateChoiceSyntax = $invalidChoices && $validateChoiceSyntax;
     }
 
     public function processCall(TranslationCall $call): array
@@ -276,7 +280,7 @@ final class InvalidChoiceRule implements CallRuleInterface
                     continue;
                 }
 
-                if ($this->invalidChoices) {
+                if ($this->validateChoiceSyntax) {
                     $errors[] = RuleErrorBuilder::message(sprintf('Failed to parse translation choice: %s', Utils::e($segment)))
                         ->identifier(self::IDENTIFIER_MALFORMED)
                         ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
@@ -341,7 +345,7 @@ final class InvalidChoiceRule implements CallRuleInterface
                     }
                 }
 
-                if ($this->invalidChoices) {
+                if ($this->validateChoiceSyntax) {
                     $errors[] = RuleErrorBuilder::message($message)
                         // Preserve the identifier emitted for this syntax before the message was made more specific.
                         ->identifier(self::IDENTIFIER_NON_NUMERIC)
@@ -365,7 +369,7 @@ final class InvalidChoiceRule implements CallRuleInterface
             }
 
             if (!is_numeric($from) && $from !== '*') {
-                if ($this->invalidChoices) {
+                if ($this->validateChoiceSyntax) {
                     $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($from)))
                         ->identifier(self::IDENTIFIER_NON_NUMERIC)
                         ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))
@@ -378,7 +382,7 @@ final class InvalidChoiceRule implements CallRuleInterface
                 $hasInvalidCondition = true;
                 continue;
             } elseif (!is_numeric($to) && $to !== '*') {
-                if ($this->invalidChoices) {
+                if ($this->validateChoiceSyntax) {
                     $errors[] = RuleErrorBuilder::message(sprintf('Translation choice has non-numeric value: %s', Utils::e($to)))
                         ->identifier(self::IDENTIFIER_NON_NUMERIC)
                         ->metadata(Utils::metadata(key: $key, locale: $locale, value: $value))

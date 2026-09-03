@@ -37,7 +37,7 @@ final class CallRuleCollection implements IteratorAggregate, \Countable
         DynamicTranslationStringRule::class => ['disallowDynamicTranslationStrings'],
         InvalidCharacterEncodingRule::class => ['invalidCharacterEncodings'],
         InvalidChoiceRule::class => [
-            'invalidChoices',
+            'validateChoiceSyntax',
             'requireCompleteChoiceCoverage',
             'requireCompletePluralForms',
         ],
@@ -79,6 +79,9 @@ final class CallRuleCollection implements IteratorAggregate, \Countable
         if (!is_array($flags)) {
             return;
         }
+
+        $flags['validateChoiceSyntax'] = true === ($flags['validateChoiceSyntax'] ?? true)
+            && true === ($flags['invalidChoices'] ?? true);
 
         $rules = [];
 

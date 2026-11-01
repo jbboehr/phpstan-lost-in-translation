@@ -20,7 +20,7 @@
         "php": "^8.2",
         "jbboehr/akashi": "dev-master",
         "jbboehr/phpstan-lost-in-translation": "dev-documentation-tests",
-        "laravel/framework": "^12",
+        "laravel/framework": "^13",
         "phpstan/phpstan": "^2.2",
         "phpunit/phpunit": "^11.5"
     },
